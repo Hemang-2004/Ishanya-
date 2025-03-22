@@ -3,9 +3,11 @@ import { Text, View, ActivityIndicator, StyleSheet } from 'react-native';
 import * as Font from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Toast from 'react-native-toast-message';
-import HomeScreen from "./screens/HomeScreen";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import HomeScreen from './screens/HomeScreen';
+import RegistrationForm from './screens/RegistrationForm';
 import { LanguageProvider } from './components/LanguageContext';
 
 const Stack = createNativeStackNavigator();
@@ -14,7 +16,7 @@ function RootStack() {
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} />
-      
+      <Stack.Screen name="RegistrationForm" component={RegistrationForm} />
     </Stack.Navigator>
   );
 }
@@ -47,15 +49,16 @@ export default function App() {
   }
 
   return (
-    
-    <LanguageProvider>
-      <SafeAreaProvider>
-        <NavigationContainer>
-          <RootStack />
-        </NavigationContainer>
-        <Toast />
-      </SafeAreaProvider>
-    </LanguageProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <LanguageProvider>
+        <SafeAreaProvider>
+          <NavigationContainer>
+            <RootStack />
+          </NavigationContainer>
+          <Toast />
+        </SafeAreaProvider>
+      </LanguageProvider>
+    </GestureHandlerRootView>
   );
 }
 

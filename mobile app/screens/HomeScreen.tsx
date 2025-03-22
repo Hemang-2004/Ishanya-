@@ -3,18 +3,33 @@ import {
   View, Text, StyleSheet, ScrollView, TouchableOpacity, 
   Image, ImageBackground, Animated, Dimensions, Linking
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLanguage } from '../components/LanguageContext';
 import { translations } from '../constants/translations';
 import ContactForm from '../components/ContactForm';
 import { Picker } from '@react-native-picker/picker';
 import MapView, { Marker } from 'react-native-maps';
+// import { LogBox } from 'react-native';
+
+// LogBox.ignoreAllLogs(); // Optional - to ignore unwanted warnings
+
+
+
+
+// // import { useNavigation } fromconst YourComponent = () => {
+//   const YourComponent = () => {
+//     const navigation = useNavigation();
+//   }
+
+
 
 // Animation component wrapper
 const AnimatedItem = ({ children, index = 0, scrollY }) => {
   const animatedValue = useRef(new Animated.Value(0)).current;
   const [hasAnimated, setHasAnimated] = useState(false);
   
+
   useEffect(() => {
     const listenerId = scrollY.addListener(({ value }) => {
       // Trigger animation when component is about to enter viewport
@@ -115,6 +130,8 @@ const ActionButton = ({ icon, title, onPress, style }) => (
 );
 
 export default function HomeScreen() {
+  const navigation = useNavigation(); // ✅ Add it here, just after export default
+
   const { language, setLanguage } = useLanguage();
   const t = translations[language];
   const [expanded, setExpanded] = useState(false);
@@ -184,22 +201,23 @@ export default function HomeScreen() {
     {
       id: 1,
       title: t.donate,
-      icon: "https://api.a0.dev/assets/image?text=💰&width=100&height=100",
-      onPress: () => console.log("Donate pressed")
+      // icon: require('../assets/images/donate.png'), // Use require() here
+      onPress: () => console.log("Donate pressed"),
     },
     {
       id: 2,
       title: t.volunteer,
-      icon: "https://api.a0.dev/assets/image?text=🤝&width=100&height=100",
-      onPress: () => console.log("Volunteer pressed")
+      // icon: require('../assets/images/volun.png'), // Use require() here
+      onPress: () => console.log("Volunteer pressed"),
     },
     {
       id: 3,
       title: t.intern,
-      icon: "https://api.a0.dev/assets/image?text=👋&width=100&height=100",
-      onPress: () => console.log("Intern pressed")
-    }
+      // icon: require('../assets/images/intern.png'), // Use require() here
+      onPress: () => console.log("Intern pressed"),
+    },
   ];
+  
   
   const openMap = () => {
     Linking.openURL('https://www.google.com/maps?ll=12.913538,77.594656&z=15&t=m&hl=en-GB&gl=US&mapclient=embed&cid=10838468200464020233');
@@ -207,9 +225,7 @@ export default function HomeScreen() {
 
   return (
     <ImageBackground
-      source={{
-        uri: 'https://api.a0.dev/assets/image?text=abstract%20geometric%20pattern%20with%20light%20triangles%20white%20background&aspect=9:16',
-      }}
+    source={require('../assets/images/1.png')} 
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
@@ -236,17 +252,19 @@ export default function HomeScreen() {
 
           {/* Header */}
           <AnimatedItem scrollY={scrollY} index={1}>
-            <View style={styles.header}>
-              <Image
-                source={{
-                  uri: 'https://api.a0.dev/assets/image?text=ishanya%20foundation%20logo%20minimalist%20design&aspect=1:1',
-                }}
-                style={styles.logo}
-              />
-              <Text style={[styles.foundationName, { fontFamily: 'JosefinSans-Regular', fontSize: 50 }]}>
-                {t.foundation_name}
-              </Text>
-            </View>
+          <View style={styles.header}>
+  <View style={styles.logoContainer}>
+    <Image
+      source={require('../assets/images/logo.png')}
+      style={styles.logo}
+    />
+  </View>
+  <Text style={[styles.foundationName, { fontFamily: 'JosefinSans-Regular', fontSize: 50 }]}>
+    {t.foundation_name}
+  </Text>
+</View>
+
+
           </AnimatedItem>
 
           {/* Quote Section */}
@@ -311,9 +329,7 @@ export default function HomeScreen() {
                   />
                   {/* Bubbles Image */}
                   <Image
-                    source={{
-                      uri: 'https://api.a0.dev/assets/image?text=colorful%20abstract%20circles%20bubbles%20pattern&aspect=1:1',
-                    }}
+                    source={require('../assets/images/img1.png')} 
                     style={{
                       width: 100,
                       height: 100,
@@ -335,11 +351,14 @@ export default function HomeScreen() {
                   {t.browse_programs}
                 </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.secondaryButton]}>
-                <Text style={[styles.buttonText, { fontFamily: 'JosefinSans-Bold', fontSize: 21 }]}>
-                  {t.schedule_appointment}
-                </Text>
-              </TouchableOpacity>
+              <TouchableOpacity
+          style={[styles.button, styles.secondaryButton]}
+          onPress={() => navigation.navigate('RegistrationForm')} // ✅ Correct usage here
+        >
+          <Text style={[styles.buttonText, { fontFamily: 'JosefinSans-Bold', fontSize: 21 }]}>
+            {t.schedule_appointment}
+          </Text>
+        </TouchableOpacity>
               <TouchableOpacity style={styles.once}>
                 <Text style={[styles.buttonText, { fontFamily: 'JosefinSans-Bold', fontSize: 21 }]}>
                   {t.parent_login}
@@ -393,7 +412,7 @@ export default function HomeScreen() {
                 <ActionButton
                 
                   key={button.id}
-                  icon={button.icon}
+                  // icon={button.icon}
                   title={button.title}
                   onPress={button.onPress}
                 />
@@ -493,16 +512,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 25,
   },
-  logo: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    elevation: 5,
+  logoContainer: {
+    width: 190, // Container width
+    height: 160, // Container height
+    borderRadius: 80, // Half of width/height for circular shape
+    backgroundColor: '#fff', // Optional background
+    justifyContent: 'center',
+    alignItems: 'center',
+    // elevation: 5,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 3 },
-    shadowOpacity: 0.2,
+    // shadowOpacity: 0.2,
     shadowRadius: 5,
   },
+  logo: {
+    width: 190, // Smaller size of logo
+    height: 140,
+    borderRadius: 60, // Circular shape
+  },
+  
   foundationName: {
     fontSize: 28,
     fontWeight: '600',
@@ -550,17 +578,19 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   actionButton: {
+    height:85,
+    fontSize:30,
     backgroundColor: '#403c3c',
     borderWidth: 1,
     borderColor: '#FFB800',
     borderRadius: 8,
-    padding: 15,
+    // padding: 15,
     alignItems: 'center',
     justifyContent: 'center',
-    width: width / 3.5,
+    width: width / 3.6,
     elevation: 3,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.2,
     shadowRadius: 3,
   },
