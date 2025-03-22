@@ -21,6 +21,7 @@ CREATE TABLE Educators (
     EmergencyContactName VARCHAR(30),
     EmergencyContactNumber CHAR(10),
     BloodGroup VARCHAR(3),
+    Password TEXT,  -- Encrypted password
     FOREIGN KEY (ProgramID) REFERENCES Program(ProgramID)
 );
 
@@ -61,6 +62,7 @@ CREATE TABLE Students (
     PreferredCommunicationStyle TEXT CHECK(PreferredCommunicationStyle IN ('verbal', 'nonverbal', 'sign', 'picture-based', 'written', 'other')),
     IsRegistered BOOLEAN,
     ParentAnnualIncome INTEGER,
+    Password TEXT,  -- Encrypted password
     FOREIGN KEY (ProgramID) REFERENCES Program(ProgramID),
     FOREIGN KEY (PrimaryEducatorID) REFERENCES Educators(EducatorID),
     FOREIGN KEY (SecondaryEducatorID) REFERENCES Educators(EducatorID)
