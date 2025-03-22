@@ -13,9 +13,10 @@ class Program(db.Model):
     students = db.relationship('Student', backref='program', lazy=True)
     assessments = db.relationship('Assessment', backref='suggested_program', lazy=True)
 
+
 class Educator(UserMixin, db.Model):
     __tablename__ = 'educator'
-    EducatorID = db.Column(db.String(6), primary_key=True)
+    EducatorID = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Auto-incremented primary key
     Name = db.Column(db.String(30), nullable=False)
     Photo = db.Column(db.String(100))
     Designation = db.Column(db.String(30))
@@ -51,7 +52,7 @@ class Educator(UserMixin, db.Model):
 
 class Student(UserMixin, db.Model):
     __tablename__ = 'student'
-    StudentID = db.Column(db.Integer, primary_key=True)
+    StudentID = db.Column(db.Integer, primary_key=True, autoincrement=True)  # Auto-incremented primary key
     FirstName = db.Column(db.String(30), nullable=False)
     LastName = db.Column(db.String(30), nullable=False)
     DateOfBirth = db.Column(db.Date)
@@ -63,13 +64,13 @@ class Student(UserMixin, db.Model):
     Enrollment = db.Column(db.Integer)
     Status = db.Column(db.String(20))
     IntegrationType = db.Column(db.String(30))
-    EmailID = db.Column(db.String(20), unique=True, nullable=False)
+    EmailID = db.Column(db.String(50), unique=True, nullable=False)  # Increased length for better email support
     ProgramID = db.Column(db.Integer, db.ForeignKey('program.ProgramID'))
     CurrentLevel = db.Column(db.String(20))
     Attendance = db.Column(db.Integer)
     DaysOfWeek = db.Column(db.Text)
-    PrimaryEducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'))
-    SecondaryEducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'))
+    PrimaryEducatorID = db.Column(db.Integer, db.ForeignKey('educator.EducatorID'))  # Foreign key now references new auto-incremented ID
+    SecondaryEducatorID = db.Column(db.Integer, db.ForeignKey('educator.EducatorID'))
     FathersName = db.Column(db.String(30))
     MothersName = db.Column(db.String(30))
     BloodGroup = db.Column(db.String(3))

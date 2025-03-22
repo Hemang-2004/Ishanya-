@@ -5,7 +5,6 @@ from models import Educator
 with app.app_context():
     # Create a test educator
     test_educator = Educator(
-        EducatorID="E0001",
         Name="John Doe",
         Email="john@example.com",
         Phone="1234567890",
