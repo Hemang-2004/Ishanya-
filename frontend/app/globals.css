@@ -1,0 +1,202 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Updated color palette to match Ishanya's website */
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+
+    /* Primary color changed to Ishanya's gold/yellow */
+    --primary: 47 77% 63%;
+    --primary-foreground: 240 5.9% 10%;
+
+    /* Secondary color changed to Ishanya's green */
+    --secondary: 142 71% 29%;
+    --secondary-foreground: 0 0% 98%;
+
+    /* Accent color for highlights */
+    --accent: 47 77% 90%;
+    --accent-foreground: 240 5.9% 10%;
+
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 47 77% 63%;
+
+    --radius: 0.5rem;
+
+    /* Success color for positive feedback */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    /* Warning color for alerts */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    /* Sidebar colors */
+    --sidebar-background: 47 77% 95%;
+    --sidebar-foreground: 240 10% 3.9%;
+    --sidebar-primary: 142 71% 29%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 47 77% 90%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 47 77% 85%;
+    --sidebar-ring: 47 77% 63%;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 47 77% 63%;
+    --primary-foreground: 240 5.9% 10%;
+
+    --secondary: 142 71% 29%;
+    --secondary-foreground: 0 0% 98%;
+
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 47 77% 63%;
+
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+
+    --sidebar-background: 240 10% 8%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 142 71% 29%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 47 77% 63%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom styles for Ishanya theme */
+.ishanya-pattern-bg {
+  background-color: #f8f9fa;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23e5c85b' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+.ishanya-header {
+  background-color: #e5c85b;
+}
+
+.ishanya-nav {
+  background-color: #3d8c40;
+}
+
+.hero-gradient {
+  background: linear-gradient(135deg, hsl(var(--primary) / 0.8) 0%, hsl(var(--primary)) 100%);
+}
+
+.card-hover-effect {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card-hover-effect:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar-success {
+  @apply bg-[hsl(var(--success))];
+}
+
+.progress-bar-warning {
+  @apply bg-[hsl(var(--warning))];
+}
+
+/* Document upload styles */
+.upload-dropzone {
+  @apply border-2 border-dashed border-primary/30 rounded-lg p-8 text-center transition-colors hover:border-primary/70 hover:bg-primary/5;
+}
+
+.upload-dropzone.active {
+  @apply border-primary bg-primary/10;
+}
+
+/* Chat styles */
+.chat-container {
+  @apply flex flex-col h-full;
+}
+
+.chat-messages {
+  @apply flex-1 overflow-y-auto p-4 space-y-4;
+}
+
+.chat-message {
+  @apply flex rounded-lg p-3;
+  max-width: 80%;
+}
+
+.chat-message-sent {
+  @apply ml-auto bg-primary text-primary-foreground;
+}
+
+.chat-message-received {
+  @apply bg-muted;
+}
+
+.chat-input {
+  @apply border-t p-4 flex gap-2;
+}
+
+/* Logo animation */
+@keyframes leaf-sway {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(5deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+
+.logo-leaf {
+  animation: leaf-sway 3s ease-in-out infinite;
+  transform-origin: bottom center;
+}
+
