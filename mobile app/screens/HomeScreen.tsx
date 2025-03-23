@@ -225,7 +225,7 @@ export default function HomeScreen() {
 
   return (
     <ImageBackground
-    source={require('../assets/images/1.png')} 
+    source={require('../assets/images/1.jpg')} 
       style={styles.background}
     >
       <SafeAreaView style={styles.container}>
@@ -359,9 +359,20 @@ export default function HomeScreen() {
             {t.schedule_appointment}
           </Text>
         </TouchableOpacity>
-              <TouchableOpacity style={styles.once}>
+              <TouchableOpacity style={styles.once}
+              onPress={() => navigation.navigate('Login')}
+              >
                 <Text style={[styles.buttonText, { fontFamily: 'JosefinSans-Bold', fontSize: 21 }]}>
                   {t.parent_login}
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity style={styles.once}
+              onPress={() => navigation.navigate("Tabs")
+            }
+              >
+                <Text style={[styles.buttonText, { fontFamily: 'JosefinSans-Bold', fontSize: 21 }]}>
+                  Dashboard
                 </Text>
               </TouchableOpacity>
             </View>

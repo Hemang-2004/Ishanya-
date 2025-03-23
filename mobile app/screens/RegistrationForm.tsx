@@ -226,7 +226,7 @@ export default function RegistrationForm() {
 
   return (
     <ImageBackground
-      source={require('../assets/images/1.png')}
+      source={require('../assets/images/1.jpg')}
       style={styles.background}
       resizeMode="cover"
     >
@@ -628,7 +628,18 @@ export default function RegistrationForm() {
             </TouchableOpacity>
             {errors.appointmentTime && <Text style={[styles.errorText, { fontFamily: 'JosefinSans-Regular', fontSize: 15 }]}>{errors.appointmentTime}</Text>}
           </View>
+          {/* <View style={styles.loginContainer}>
+      <Text style={[styles.loginText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
+        {t.alreadyHaveAccount || "Already have an account?"}
+      </Text>
+      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+        <Text style={[styles.loginLink, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
+          {t.goToLogin || "Go to Login"}
+        </Text>
+      </TouchableOpacity>
+    </View> */}
         </View>
+        
 
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
@@ -680,6 +691,7 @@ export default function RegistrationForm() {
             }}
           />
         )}
+        
       </ScrollView>
     </ImageBackground>
   );

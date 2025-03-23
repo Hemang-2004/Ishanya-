@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    
     "extra": {
       "fonts": {
         "Josefin Bold": "./assets/fonts/JosefinSans-Bold.ttf",
