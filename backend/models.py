@@ -34,6 +34,8 @@ class Educator(UserMixin, db.Model):
     EmergencyContactNumber = db.Column(db.String(10))
     BloodGroup = db.Column(db.String(3))
     Password = db.Column(db.Text, nullable=False)
+    CVFilePath = db.Column(db.String(255), nullable=True)  # Path to CV file
+
     IsRegistered = db.Column(db.Boolean)
 
     students_primary = db.relationship('Student', backref='primary_educator', lazy=True, foreign_keys='Student.PrimaryEducatorID')

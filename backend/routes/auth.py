@@ -1,6 +1,10 @@
 from flask import Blueprint, request, jsonify
 from models import db, Educator, Student, Admin
 from flask_jwt_extended import create_access_token
+from werkzeug.utils import secure_filename
+import os
+from ocr import parse_aadhar, parse_cv
+
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -121,3 +125,63 @@ def register_student():
     except Exception as e:
         return jsonify({"error": "An error occurred. Please try again."}), 500
 
+
+UPLOAD_FOLDER = "uploads/"
+ALLOWED_EXTENSIONS_CV = {"pdf", "jpg", "jpeg", "png"}
+ALLOWED_EXTENSIONS_AADHAR = {"jpg", "jpeg", "png"}
+
+
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
+
+def allowed_file_CV(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_CV
+
+def allowed_file_aadhar(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_AADHAR
+
+@auth_bp.route("/parse_aadhar", methods=["POST"])
+def parse_aadhar_api():
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file_aadhar(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        try:
+            parsed_data = parse_aadhar(file_path)
+            parsed_data["filename"] = filename
+            return jsonify(parsed_data), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Invalid file type"}), 400
+
+@auth_bp.route("/parse_resume", methods=["POST"])
+def parse_resume_api():
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file_CV(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        try:
+            parsed_data = parse_cv(file_path)
+            parsed_data["filename"] = filename
+            return jsonify(parsed_data), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Invalid file type"}), 400
