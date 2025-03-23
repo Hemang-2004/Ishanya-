@@ -200,7 +200,7 @@ def approve_and_assign_student():
 
         # Approve student and assign program + educators 
         student.IsRegistered = True
-        student.Enrollment = datetime.now(timezone.utc)
+        student.DateOfJoining = datetime.now(timezone.utc)
         student.ProgramID = program_id
         student.PrimaryEducatorID = primary_educator_id
 
@@ -211,3 +211,100 @@ def approve_and_assign_student():
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
     
+
+def get_students_with_improvement_metric(educator_id=None, program_id=None, status=None, top_n=None):
+    try:
+        # Filter students based on primary educator or program
+        query = Student.query.join(Educator, Student.PrimaryEducatorID == Educator.EducatorID) \
+                             .join(Program, Educator.ProgramID == Program.ProgramID) \
+                             .add_columns(
+                                 Student.StudentID, 
+                                 Student.FirstName, 
+                                 Student.LastName, 
+                                 Student.Status,
+                                 Educator.Name.label("primary_educator_name"),
+                                 Educator.ProgramID.label("program_id"),
+                                 Program.ProgramName.label("program_name"),
+                                 Student.SecondaryEducatorID
+                             )
+
+        if educator_id:
+            query = query.filter(Student.PrimaryEducatorID == educator_id)
+        if program_id:
+            query = query.filter(Educator.ProgramID == program_id)
+        if status:
+            query = query.filter(Student.Status.ilike(status))
+        
+        students = query.all()
+        if not students:
+            return {"message": "No students found"}, 404
+
+        result = []
+        for student in students:
+            student_id = student.StudentID
+            latest_feedback = db.session.execute(text("""
+                SELECT *, 
+                    (TPS + Attendance + OrganizationPlanning + TimeManagement + 
+                    TaskInitiationCompletion + SelfCareIndependence + PeerInteraction + 
+                    EmpathyPerspectiveTaking + FocusAttention + CuriosityInquiry + 
+                    PersistenceProblemSolving + CommunicationSkills + ArtisticExpression + 
+                    MovementPlay) AS total_score
+                FROM feedback WHERE StudentID = :student_id 
+                ORDER BY Date DESC LIMIT 1
+            """), {"student_id": student_id}).fetchone()
+
+            previous_feedback = db.session.execute(text("""
+                SELECT *, 
+                    (TPS + Attendance + OrganizationPlanning + TimeManagement + 
+                    TaskInitiationCompletion + SelfCareIndependence + PeerInteraction + 
+                    EmpathyPerspectiveTaking + FocusAttention + CuriosityInquiry + 
+                    PersistenceProblemSolving + CommunicationSkills + ArtisticExpression + 
+                    MovementPlay) AS total_score
+                FROM feedback WHERE StudentID = :student_id 
+                ORDER BY Date DESC LIMIT 1 OFFSET 1
+            """), {"student_id": student_id}).fetchone()
+
+            latest_score = latest_feedback.total_score if latest_feedback else 0
+            previous_score = previous_feedback.total_score if previous_feedback else 0
+            improvement_metric = latest_score - previous_score
+
+            # Fetch secondary educator details
+            secondary_educator = Educator.query.filter_by(EducatorID=student.SecondaryEducatorID).first()
+            secondary_educator_name = secondary_educator.Name if secondary_educator else None
+
+            result.append({
+                "student_id": student_id,
+                "name": f"{student.FirstName} {student.LastName}",
+                "latest_score": latest_score,
+                "previous_score": previous_score,
+                "improvement_metric": improvement_metric,
+                "program_id": student.program_id,
+                "program_name": student.program_name,
+                "primary_educator_name": student.primary_educator_name,
+                "secondary_educator_name": secondary_educator_name
+            })
+
+        # If fetching top performers, return only top N
+        if top_n:
+            result = sorted(result, key=lambda x: x["improvement_metric"], reverse=True)[:top_n]
+
+        return {"students": result}, 200
+
+    except Exception as e:
+        return {"error": str(e)}, 500
+
+# Get Current Students of a primary Educator
+@admin_bp.route('/current-students/<int:educator_id>', methods=['GET'])
+def get_current_students(educator_id):
+    response, status = get_students_with_improvement_metric(educator_id=educator_id, status="Active")
+    response["educator_id"] = educator_id
+    return jsonify(response), status
+
+# Get Top Performers in a Program
+@admin_bp.route('/top-performers/<int:program_id>', methods=['GET'])
+def get_top_performers(program_id):
+    response, status = get_students_with_improvement_metric(program_id=program_id, status="Active", top_n=10)
+    response["program_id"] = program_id
+    return jsonify(response), status
+
+
