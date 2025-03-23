@@ -2,8 +2,28 @@ from datetime import datetime, timezone
 from sqlalchemy import text
 from flask import Blueprint, request, jsonify
 from models import Educator, Program, Student, db, Admin
+from utils import *
 
 admin_bp = Blueprint("admin", __name__)
+
+@admin_bp.route('/dashboard', methods=['GET'])
+def dashboard():
+    return jsonify({
+        "num_registered_students": num_registered_students(),
+        "num_dropouts": num_dropouts(),
+        "students_enrolled_programwise": [
+            {"program": name, "count": count} for name, count in students_enrolled_programwise()
+        ],
+        "students_graduated_programwise": [
+            {"program": name, "count": count} for name, count in students_graduated_programwise()
+        ],
+        "num_educators_programwise": [
+            {"program": name, "count": count} for name, count in num_educators_programwise()
+        ],
+        "students_per_educator": num_students_per_educator(),
+        "top_performing_students": top_performers(),
+        "top_educators": top_educators()
+    })
 
 
 @admin_bp.route('/registration-requests', methods=['GET'])
@@ -190,3 +210,4 @@ def approve_and_assign_student():
     except Exception as e:
         db.session.rollback()
         return jsonify({"success": False, "message": str(e)}), 500
+    
