@@ -2,14 +2,55 @@ import type React from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import Link from "next/link"
-import { ArrowRight, Heart, Users, BarChart3, Award, HandHeart, GraduationCap } from "lucide-react"
+import { ArrowRight, Users, BarChart3, Award, HandHeart, GraduationCap } from "lucide-react"
+import { IshanyaLogo } from "@/components/ishanya-logo"
 
 export default function Home() {
   return (
-    <div className="min-h-screen ngo-pattern-bg">
+    <div className="min-h-screen geometric-pattern">
+      {/* Top header bar */}
+      <div className="ishanya-top-header flex justify-between items-center">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+            </svg>
+            <span>+91 73496 76668</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+              <polyline points="22,6 12,13 2,6"></polyline>
+            </svg>
+            <span>info@ishanyaindia.org</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Main navigation */}
       <header className="container mx-auto py-6 px-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <Heart className="h-8 w-8 text-primary" />
+          <IshanyaLogo className="h-12 w-12" />
           <h1 className="text-2xl font-bold text-primary">Ishanya Connect</h1>
         </div>
         <div className="flex gap-4">
@@ -119,72 +160,72 @@ export default function Home() {
         </section>
       </main>
 
-      <footer className="bg-muted py-12">
+      <footer className="bg-[#333] text-white py-12">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <div className="flex items-center gap-2 mb-4">
-                <Heart className="h-6 w-6 text-primary" />
+                <IshanyaLogo className="h-8 w-8" showTagline={false} />
                 <h3 className="text-lg font-bold text-primary">Ishanya Connect</h3>
               </div>
-              <p className="text-muted-foreground mb-4">
+              <p className="text-gray-300 mb-4">
                 Empowering communities through education and sustainable development.
               </p>
             </div>
             <div>
-              <h4 className="font-medium mb-4">Quick Links</h4>
+              <h4 className="font-medium mb-4 text-white">Quick Links</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/about" className="text-muted-foreground hover:text-primary">
+                  <Link href="/about" className="text-gray-300 hover:text-primary">
                     About Us
                   </Link>
                 </li>
                 <li>
-                  <Link href="/programs" className="text-muted-foreground hover:text-primary">
+                  <Link href="/programs" className="text-gray-300 hover:text-primary">
                     Programs
                   </Link>
                 </li>
                 <li>
-                  <Link href="/contact" className="text-muted-foreground hover:text-primary">
+                  <Link href="/contact" className="text-gray-300 hover:text-primary">
                     Contact
                   </Link>
                 </li>
                 <li>
-                  <Link href="/donate" className="text-muted-foreground hover:text-primary">
+                  <Link href="/donate" className="text-gray-300 hover:text-primary">
                     Donate
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-4">Resources</h4>
+              <h4 className="font-medium mb-4 text-white">Resources</h4>
               <ul className="space-y-2">
                 <li>
-                  <Link href="/blog" className="text-muted-foreground hover:text-primary">
+                  <Link href="/blog" className="text-gray-300 hover:text-primary">
                     Blog
                   </Link>
                 </li>
                 <li>
-                  <Link href="/events" className="text-muted-foreground hover:text-primary">
+                  <Link href="/events" className="text-gray-300 hover:text-primary">
                     Events
                   </Link>
                 </li>
                 <li>
-                  <Link href="/faq" className="text-muted-foreground hover:text-primary">
+                  <Link href="/faq" className="text-gray-300 hover:text-primary">
                     FAQ
                   </Link>
                 </li>
                 <li>
-                  <Link href="/privacy" className="text-muted-foreground hover:text-primary">
+                  <Link href="/privacy" className="text-gray-300 hover:text-primary">
                     Privacy Policy
                   </Link>
                 </li>
               </ul>
             </div>
             <div>
-              <h4 className="font-medium mb-4">Connect With Us</h4>
+              <h4 className="font-medium mb-4 text-white">Connect With Us</h4>
               <div className="flex space-x-4 mb-4">
-                <a href="#" className="text-muted-foreground hover:text-primary">
+                <a href="#" className="text-gray-300 hover:text-primary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -201,7 +242,7 @@ export default function Home() {
                   </svg>
                   <span className="sr-only">Facebook</span>
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-primary">
+                <a href="#" className="text-gray-300 hover:text-primary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -218,7 +259,7 @@ export default function Home() {
                   </svg>
                   <span className="sr-only">Twitter</span>
                 </a>
-                <a href="#" className="text-muted-foreground hover:text-primary">
+                <a href="#" className="text-gray-300 hover:text-primary">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="24"
@@ -238,14 +279,14 @@ export default function Home() {
                   <span className="sr-only">Instagram</span>
                 </a>
               </div>
-              <p className="text-muted-foreground">
+              <p className="text-gray-300">
                 Email: info@ishanya.org
                 <br />
                 Phone: +91 123 456 7890
               </p>
             </div>
           </div>
-          <div className="border-t border-border pt-8 text-center text-muted-foreground">
+          <div className="border-t border-gray-700 pt-8 text-center text-gray-300">
             <p>© {new Date().getFullYear()} Ishanya India Foundation. All rights reserved.</p>
           </div>
         </div>

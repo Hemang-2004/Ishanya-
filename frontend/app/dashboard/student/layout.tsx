@@ -91,7 +91,7 @@ export default function StudentDashboardLayout({
             Student
           </Badge>
         </div>
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 p-4 geometric-pattern">
           {navigation.map((item) => (
             <NavLink key={item.name} item={item} />
           ))}
@@ -112,12 +112,6 @@ export default function StudentDashboardLayout({
 
       {/* Mobile Sidebar */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-        <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
         <SheetTrigger asChild className="md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu className="h-5 w-5" />
@@ -143,7 +137,7 @@ export default function StudentDashboardLayout({
               Student
             </Badge>
           </div>
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-1 p-4 geometric-pattern">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -184,7 +178,12 @@ export default function StudentDashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
-          
+          <div className="md:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
 
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form>
@@ -241,7 +240,7 @@ export default function StudentDashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 geometric-pattern">{children}</main>
       </div>
     </div>
   )

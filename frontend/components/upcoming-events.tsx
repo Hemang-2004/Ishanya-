@@ -72,3 +72,5 @@ export function UpcomingEvents() {
   )
 }
 
+export default UpcomingEvents
+

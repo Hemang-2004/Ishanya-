@@ -1,13 +1,7 @@
 "use client"
-import {
-  Chart,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendItem,
-} from "@/components/ui/chart"
-import { AreaChart, Area, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { ChartTooltip } from "@/components/ui/chart"
 
 const data = [
   {
@@ -50,76 +44,30 @@ const data = [
 
 export function DashboardChart() {
   return (
-    <ChartContainer>
-      <ChartLegend className="mb-4">
-        <ChartLegendItem name="Students" color="hsl(var(--primary))" />
-        <ChartLegendItem name="Volunteers" color="hsl(var(--secondary))" />
-        <ChartLegendItem name="Staff" color="hsl(var(--muted))" />
-      </ChartLegend>
-      <Chart className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart
-            data={data}
-            margin={{
-              top: 10,
-              right: 10,
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-sm text-muted-foreground" />
-            <YAxis className="text-sm text-muted-foreground" />
-            <ChartTooltip
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <ChartTooltipContent
-                      className="border-none shadow-md"
-                      label={`${label}`}
-                      content={
-                        <div className="flex flex-col gap-2">
-                          {payload.map((entry) => (
-                            <div key={entry.name} className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-sm text-muted-foreground">
-                                {entry.name}: {entry.value}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      }
-                    />
-                  )
-                }
-                return null
-              }}
-            />
-            <Area
-              type="monotone"
-              dataKey="students"
-              stroke="hsl(var(--primary))"
-              fill="hsl(var(--primary) / 0.2)"
-              strokeWidth={2}
-            />
-            <Area
-              type="monotone"
-              dataKey="volunteers"
-              stroke="hsl(var(--secondary))"
-              fill="hsl(var(--secondary) / 0.2)"
-              strokeWidth={2}
-            />
-            <Area
-              type="monotone"
-              dataKey="staff"
-              stroke="hsl(var(--muted))"
-              fill="hsl(var(--muted) / 0.2)"
-              strokeWidth={2}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </Chart>
-    </ChartContainer>
+    <div className="h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <BarChart
+          data={data}
+          margin={{
+            top: 20,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis />
+          <Tooltip content={<ChartTooltip />} />
+          <Legend />
+          <Bar dataKey="students" fill="#8884d8" name="Students" />
+          <Bar dataKey="volunteers" fill="#82ca9d" name="Volunteers" />
+          <Bar dataKey="staff" fill="#ffc658" name="Staff" />
+        </BarChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
+
+export default DashboardChart
 
