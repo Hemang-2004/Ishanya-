@@ -10,7 +10,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   BarChart3,
   Users,
-  Award,
   Settings,
   LogOut,
   Menu,
@@ -20,7 +19,8 @@ import {
   UserCheck,
   UserPlus,
   Layers,
-  MessageSquare,
+  DollarSign,
+  PieChart,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -34,6 +34,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { IshanyaLogo } from "@/components/ishanya-logo"
+import { useLanguage } from "@/components/language-provider"
 
 export default function AdminDashboardLayout({
   children,
@@ -42,17 +43,18 @@ export default function AdminDashboardLayout({
 }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard/admin", icon: Home },
-    { name: "Stakeholders", href: "/dashboard/admin/stakeholders", icon: Users },
-    { name: "Journey Tracker", href: "/dashboard/admin/journey", icon: Award },
-    { name: "Reports", href: "/dashboard/admin/reports", icon: BarChart3 },
-    { name: "Registration Requests", href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
-    { name: "Programs", href: "/dashboard/admin/programs", icon: Layers },
-    { name: "Staff Management", href: "/dashboard/admin/staff", icon: UserCheck },
-    { name: "Messages", href: "/dashboard/admin/messages", icon: MessageSquare, badge: 3 },
-    { name: "Settings", href: "/dashboard/admin/settings", icon: Settings },
+    { name: t("dashboard"), href: "/dashboard/admin", icon: Home },
+    { name: t("students"), href: "/dashboard/admin/students", icon: Users },
+    { name: t("staff"), href: "/dashboard/admin/staff", icon: UserCheck },
+    { name: t("programs"), href: "/dashboard/admin/programs", icon: Layers },
+    { name: t("analytics"), href: "/dashboard/admin/analytics", icon: PieChart },
+    { name: t("reports"), href: "/dashboard/admin/reports", icon: BarChart3 },
+    { name: t("funds"), href: "/dashboard/admin/funds", icon: DollarSign },
+    { name: t("registrationRequests"), href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
+    { name: t("settings"), href: "/dashboard/admin/settings", icon: Settings },
   ]
 
   const NavLink = ({ item }: { item: (typeof navigation)[0] }) => {
@@ -83,7 +85,7 @@ export default function AdminDashboardLayout({
       <aside className="hidden md:flex w-64 flex-col border-r">
         <div className="flex h-16 items-center border-b px-4 bg-primary">
           <Link href="/dashboard/admin" className="flex items-center gap-2">
-            <IshanyaLogo className="h-10 w-10" />
+            <IshanyaLogo className="h-10 w-10" showTagline={false} />
             <div>
               <span className="font-bold text-primary-foreground block leading-tight">Ishanya Connect</span>
               <span className="text-xs text-primary-foreground/80">Admin Portal</span>
@@ -92,10 +94,10 @@ export default function AdminDashboardLayout({
         </div>
         <div className="flex items-center px-4 py-2 bg-muted/50">
           <Badge variant="outline" className="w-full justify-center py-1 border-secondary text-secondary">
-            Administrator
+            {t("administrator")}
           </Badge>
         </div>
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 p-4 geometric-pattern">
           {navigation.map((item) => (
             <NavLink key={item.name} item={item} />
           ))}
@@ -116,12 +118,6 @@ export default function AdminDashboardLayout({
 
       {/* Mobile Sidebar */}
       <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
-      <SheetTrigger asChild className="md:hidden">
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle menu</span>
-            </Button>
-          </SheetTrigger>
         <SheetTrigger asChild className="md:hidden">
           <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
             <Menu className="h-5 w-5" />
@@ -135,7 +131,7 @@ export default function AdminDashboardLayout({
               className="flex items-center gap-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <IshanyaLogo className="h-10 w-10" />
+              <IshanyaLogo className="h-10 w-10" showTagline={false} />
               <div>
                 <span className="font-bold text-primary-foreground block leading-tight">Ishanya Connect</span>
                 <span className="text-xs text-primary-foreground/80">Admin Portal</span>
@@ -144,10 +140,10 @@ export default function AdminDashboardLayout({
           </div>
           <div className="flex items-center px-4 py-2 bg-muted/50">
             <Badge variant="outline" className="w-full justify-center py-1 border-secondary text-secondary">
-              Administrator
+              {t("administrator")}
             </Badge>
           </div>
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-1 p-4 geometric-pattern">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -188,7 +184,12 @@ export default function AdminDashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
-          
+          <div className="md:hidden">
+            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
+              <Menu className="h-5 w-5" />
+              <span className="sr-only">Toggle menu</span>
+            </Button>
+          </div>
 
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form>
@@ -196,7 +197,7 @@ export default function AdminDashboardLayout({
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search..."
+                  placeholder={t("search")}
                   className="w-full bg-background pl-8 md:w-[200px] lg:w-[300px]"
                 />
               </div>
@@ -206,7 +207,7 @@ export default function AdminDashboardLayout({
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
+              <span className="sr-only">{t("notifications")}</span>
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"></span>
             </Button>
 
@@ -220,23 +221,23 @@ export default function AdminDashboardLayout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("myAccount")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/dashboard/admin/profile" className="flex w-full items-center">
-                    Profile
+                    {t("profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/dashboard/admin/settings" className="flex w-full items-center">
-                    Settings
+                    {t("settings")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/login" className="flex w-full items-center">
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{t("logout")}</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -245,7 +246,7 @@ export default function AdminDashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 geometric-pattern">{children}</main>
       </div>
     </div>
   )

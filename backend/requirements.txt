@@ -4,3 +4,8 @@ Flask-Bcrypt
 Flask-JWT-Extended
 Flask-Login
 python-dotenv
+google-generativeai
+pdfminer.six
+easyocr
+Pillow
+pydantic

@@ -34,6 +34,8 @@ class Educator(UserMixin, db.Model):
     EmergencyContactNumber = db.Column(db.String(10))
     BloodGroup = db.Column(db.String(3))
     Password = db.Column(db.Text, nullable=False)
+    CVFilePath = db.Column(db.String(255), nullable=True)  # Path to CV file
+
     IsRegistered = db.Column(db.Boolean)
 
     students_primary = db.relationship('Student', backref='primary_educator', lazy=True, foreign_keys='Student.PrimaryEducatorID')
@@ -121,7 +123,7 @@ class Feedback(db.Model):
     __tablename__ = 'feedback'
     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'), primary_key=True)
     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'), primary_key=True)
-    Date = db.Column(db.Date)
+    Date = db.Column(db.Date, primary_key=True)
     Comments = db.Column(db.Text)
     TPS = db.Column(db.Integer)
     Attendance = db.Column(db.Integer)

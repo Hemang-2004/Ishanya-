@@ -1,13 +1,17 @@
 "use client"
+
 import {
-  Chart,
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  ChartLegend,
-  ChartLegendItem,
-} from "@/components/ui/chart"
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from "recharts"
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  ReferenceLine,
+} from "recharts"
+import { ChartTooltip } from "@/components/ui/chart"
 
 const data = [
   {
@@ -44,56 +48,29 @@ const data = [
 
 export function ReportsChart() {
   return (
-    <ChartContainer>
-      <ChartLegend className="mb-4">
-        <ChartLegendItem name="Completion Rate" color="hsl(var(--primary))" />
-        <ChartLegendItem name="Target" color="hsl(var(--muted))" />
-      </ChartLegend>
-      <Chart className="h-[300px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart
-            data={data}
-            margin={{
-              top: 10,
-              right: 10,
-              left: 0,
-              bottom: 0,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
-            <XAxis dataKey="name" className="text-sm text-muted-foreground" />
-            <YAxis className="text-sm text-muted-foreground" />
-            <ChartTooltip
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <ChartTooltipContent
-                      className="border-none shadow-md"
-                      label={`${label}`}
-                      content={
-                        <div className="flex flex-col gap-2">
-                          {payload.map((entry) => (
-                            <div key={entry.name} className="flex items-center gap-2">
-                              <div className="h-2 w-2 rounded-full" style={{ backgroundColor: entry.color }} />
-                              <span className="text-sm text-muted-foreground">
-                                {entry.name}: {entry.value}%
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      }
-                    />
-                  )
-                }
-                return null
-              }}
-            />
-            <Bar dataKey="completion" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="target" fill="hsl(var(--muted))" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Chart>
-    </ChartContainer>
+    <div className="h-[300px]">
+      <ResponsiveContainer width="100%" height="100%">
+        <LineChart
+          data={data}
+          margin={{
+            top: 5,
+            right: 30,
+            left: 20,
+            bottom: 5,
+          }}
+        >
+          <CartesianGrid strokeDasharray="3 3" />
+          <XAxis dataKey="name" />
+          <YAxis domain={[50, 100]} />
+          <Tooltip content={<ChartTooltip />} />
+          <Legend />
+          <ReferenceLine y={80} label="Target" stroke="red" strokeDasharray="3 3" />
+          <Line type="monotone" dataKey="completion" stroke="#8884d8" activeDot={{ r: 8 }} name="Completion Rate (%)" />
+        </LineChart>
+      </ResponsiveContainer>
+    </div>
   )
 }
+
+export default ReportsChart
 

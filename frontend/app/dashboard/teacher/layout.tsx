@@ -20,6 +20,7 @@ import {
   Settings,
   MessageSquare,
   ClipboardList,
+  BookOpen,
 } from "lucide-react"
 import {
   DropdownMenu,
@@ -33,6 +34,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { IshanyaLogo } from "@/components/ishanya-logo"
+import { useLanguage } from "@/components/language-provider"
 
 export default function TeacherDashboardLayout({
   children,
@@ -41,16 +43,18 @@ export default function TeacherDashboardLayout({
 }) {
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const { t } = useLanguage()
 
   const navigation = [
-    { name: "Dashboard", href: "/dashboard/teacher", icon: Home },
-    { name: "My Students", href: "/dashboard/teacher/students", icon: Users },
-    { name: "Progress Reports", href: "/dashboard/teacher/reports", icon: GraduationCap },
-    { name: "Assignments", href: "/dashboard/teacher/assignments", icon: FileText },
-    { name: "Feedback Forms", href: "/dashboard/teacher/feedback", icon: ClipboardList },
-    { name: "Schedule", href: "/dashboard/teacher/schedule", icon: Calendar },
-    { name: "Messages", href: "/dashboard/teacher/messages", icon: MessageSquare, badge: 3 },
-    { name: "Settings", href: "/dashboard/teacher/settings", icon: Settings },
+    { name: t("dashboard"), href: "/dashboard/teacher", icon: Home },
+    { name: t("myCourses"), href: "/dashboard/teacher/courses", icon: BookOpen },
+    { name: t("myStudents"), href: "/dashboard/teacher/students", icon: Users },
+    { name: t("progressReports"), href: "/dashboard/teacher/reports", icon: GraduationCap },
+    { name: t("assignments"), href: "/dashboard/teacher/assignments", icon: FileText },
+    { name: t("feedbackForms"), href: "/dashboard/teacher/feedback", icon: ClipboardList },
+    { name: t("schedule"), href: "/dashboard/teacher/schedule", icon: Calendar },
+    { name: t("messages"), href: "/dashboard/teacher/messages", icon: MessageSquare, badge: 3 },
+    { name: t("settings"), href: "/dashboard/teacher/settings", icon: Settings },
   ]
 
   const NavLink = ({ item }: { item: (typeof navigation)[0] }) => {
@@ -81,19 +85,19 @@ export default function TeacherDashboardLayout({
       <aside className="hidden md:flex w-64 flex-col border-r">
         <div className="flex h-16 items-center border-b px-4 bg-primary">
           <Link href="/dashboard/teacher" className="flex items-center gap-2">
-            <IshanyaLogo className="h-10 w-10" />
+            <IshanyaLogo className="h-10 w-10" showTagline={false} />
             <div>
               <span className="font-bold text-primary-foreground block leading-tight">Ishanya Connect</span>
-              <span className="text-xs text-primary-foreground/80">Teacher Portal</span>
+              <span className="text-xs text-primary-foreground/80">{t("teacherDashboard")}</span>
             </div>
           </Link>
         </div>
         <div className="flex items-center px-4 py-2 bg-muted/50">
           <Badge variant="outline" className="w-full justify-center py-1 border-secondary text-secondary">
-            Teacher
+            {t("teacher")}
           </Badge>
         </div>
-        <nav className="flex-1 space-y-1 p-4">
+        <nav className="flex-1 space-y-1 p-4 geometric-pattern">
           {navigation.map((item) => (
             <NavLink key={item.name} item={item} />
           ))}
@@ -127,19 +131,19 @@ export default function TeacherDashboardLayout({
               className="flex items-center gap-2"
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <IshanyaLogo className="h-10 w-10" />
+              <IshanyaLogo className="h-10 w-10" showTagline={false} />
               <div>
                 <span className="font-bold text-primary-foreground block leading-tight">Ishanya Connect</span>
-                <span className="text-xs text-primary-foreground/80">Teacher Portal</span>
+                <span className="text-xs text-primary-foreground/80">{t("teacherDashboard")}</span>
               </div>
             </Link>
           </div>
           <div className="flex items-center px-4 py-2 bg-muted/50">
             <Badge variant="outline" className="w-full justify-center py-1 border-secondary text-secondary">
-              Teacher
+              {t("teacher")}
             </Badge>
           </div>
-          <nav className="flex-1 space-y-1 p-4">
+          <nav className="flex-1 space-y-1 p-4 geometric-pattern">
             {navigation.map((item) => (
               <Link
                 key={item.name}
@@ -180,12 +184,12 @@ export default function TeacherDashboardLayout({
       <div className="flex flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="flex h-16 items-center gap-4 border-b bg-background px-4 lg:px-6">
-          <SheetTrigger asChild className="md:hidden">
+          <div className="md:hidden">
             <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(true)}>
               <Menu className="h-5 w-5" />
               <span className="sr-only">Toggle menu</span>
             </Button>
-          </SheetTrigger>
+          </div>
 
           <div className="w-full flex-1 md:w-auto md:flex-none">
             <form>
@@ -193,7 +197,7 @@ export default function TeacherDashboardLayout({
                 <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
                   type="search"
-                  placeholder="Search students..."
+                  placeholder={t("search")}
                   className="w-full bg-background pl-8 md:w-[200px] lg:w-[300px]"
                 />
               </div>
@@ -203,7 +207,7 @@ export default function TeacherDashboardLayout({
           <div className="flex items-center gap-2">
             <Button variant="ghost" size="icon" className="relative">
               <Bell className="h-5 w-5" />
-              <span className="sr-only">Notifications</span>
+              <span className="sr-only">{t("notifications")}</span>
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"></span>
             </Button>
 
@@ -217,23 +221,23 @@ export default function TeacherDashboardLayout({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel>{t("myAccount")}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/dashboard/teacher/profile" className="flex w-full items-center">
-                    Profile
+                    {t("profile")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem>
                   <Link href="/dashboard/teacher/settings" className="flex w-full items-center">
-                    Settings
+                    {t("settings")}
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem>
                   <Link href="/login" className="flex w-full items-center">
                     <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
+                    <span>{t("logout")}</span>
                   </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -242,7 +246,7 @@ export default function TeacherDashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6 geometric-pattern">{children}</main>
       </div>
     </div>
   )

@@ -1,255 +1,619 @@
+"use client"
+
 import type React from "react"
+
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Progress } from "@/components/ui/progress"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { useRouter } from "next/navigation"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useLanguage } from "@/components/language-provider"
+import Link from "next/link"
 import {
   Users,
-  UserCheck,
+  GraduationCap,
+  BookOpen,
   Award,
-  TrendingUp,
-  Calendar,
-  Bell,
-  ArrowUpRight,
-  ArrowDownRight,
   UserPlus,
   Download,
+  FileText,
+  BarChart3,
+  LineChart,
+  PieChart,
+  ArrowUpRight,
+  ArrowDownRight,
+  Bell,
+  Calendar,
+  CheckCircle2,
+  Clock,
+  UserCheck,
 } from "lucide-react"
-import { Progress } from "@/components/ui/progress"
-import { DashboardChart } from "@/components/dashboard-chart"
-import { RecentActivities } from "@/components/recent-activities"
-import { UpcomingEvents } from "@/components/upcoming-events"
-import Link from "next/link"
 
 export default function AdminDashboardPage() {
+  const router = useRouter()
+  const { t } = useLanguage()
+  const [timeRange, setTimeRange] = useState("month")
+  const [programFilter, setProgramFilter] = useState("all")
+  const [dashboardData, setDashboardData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/admins/dashboard")
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (error) {
+        console.error("API fetch error:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Admin Dashboard</h2>
-          <p className="text-muted-foreground">
-            Welcome back, Admin! Here's an overview of Ishanya Connect activities.
-          </p>
+          <p className="text-muted-foreground">Welcome back! Here's what's happening at Ishanya Connect</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
-            Export Data
+            Export Report
           </Button>
-          <Button className="bg-secondary hover:bg-secondary/90">
-            <Bell className="mr-2 h-4 w-4" />
-            Notifications
+          <Button onClick={() => router.push("/dashboard/admin/add-student")}>
+            <UserPlus className="mr-2 h-4 w-4" />
+            Add Student
           </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="programs">Programs</TabsTrigger>
+            <TabsTrigger value="staff">Staff</TabsTrigger>
+          </TabsList>
+        </Tabs>
+
+        <div className="flex gap-2 w-full md:w-auto">
+          <Select defaultValue={timeRange} onValueChange={setTimeRange}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Select time range" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="week">Last Week</SelectItem>
+              <SelectItem value="month">Last Month</SelectItem>
+              <SelectItem value="quarter">Last Quarter</SelectItem>
+              <SelectItem value="year">Last Year</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select defaultValue={programFilter} onValueChange={setProgramFilter}>
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Filter by program" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Programs</SelectItem>
+              <SelectItem value="digital-literacy">Digital Literacy</SelectItem>
+              <SelectItem value="vocational-training">Vocational Training</SelectItem>
+              <SelectItem value="community-leadership">Community Leadership</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
+        <MetricCard
           title="Total Students"
-          value="1,856"
-          description="+12% from last month"
+          value={dashboardData?.num_registered_students?.toString()}
+          change="+12%"
           trend="up"
-          icon={<Users className="h-4 w-4 text-muted-foreground" />}
+          description="vs. previous period"
+          icon={<Users className="h-4 w-4" />}
         />
-        <StatsCard
-          title="Active Teachers"
-          value="42"
-          description="+8% from last month"
+        <MetricCard
+          title="Active Educators"
+          value={dashboardData?.num_educators?.toString()}
+          change="+8%"
           trend="up"
-          icon={<UserCheck className="h-4 w-4 text-muted-foreground" />}
+          description="vs. previous period"
+          icon={<GraduationCap className="h-4 w-4" />}
         />
-        <StatsCard
-          title="Completed Programs"
-          value="128"
-          description="+24% from last month"
+        <MetricCard
+          title="Active Programs"
+          value={dashboardData?.active_programs?.toString()}
+          change="+2"
           trend="up"
-          icon={<Award className="h-4 w-4 text-muted-foreground" />}
+          description="vs. previous period"
+          icon={<BookOpen className="h-4 w-4" />}
         />
-        <StatsCard
-          title="Dropout Rate"
-          value="3.2%"
-          description="-2% from last month"
-          trend="down"
-          icon={<TrendingUp className="h-4 w-4 text-muted-foreground" />}
+        <MetricCard
+          title="Completion Rate"
+          value={dashboardData?.completion_rate?.toString() + "%"}
+
+          change="+5%"
+          trend="up"
+          description="vs. previous period"
+          icon={<Award className="h-4 w-4" />}
         />
       </div>
 
-      {/* Registration Requests Alert */}
-      <Card className="border-destructive/50 bg-destructive/5">
-        <CardContent className="p-6">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div className="flex items-center gap-3">
-              <UserPlus className="h-8 w-8 text-destructive" />
-              <div>
-                <h3 className="font-medium">Pending Registration Requests</h3>
-                <p className="text-sm text-muted-foreground">5 new student registrations require your approval</p>
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-4">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Student Growth</CardTitle>
+              <CardDescription>Monthly student acquisition and retention</CardDescription>
+            </div>
+            <Select defaultValue="6months">
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="30days">Last 30 Days</SelectItem>
+                <SelectItem value="6months">Last 6 Months</SelectItem>
+                <SelectItem value="1year">Last Year</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <StudentGrowthChart />
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-3">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Program Distribution</CardTitle>
+              <CardDescription>Students enrolled by program</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <ProgramDistributionChart />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle>Completion Rates</CardTitle>
+            <CardDescription>Program completion statistics</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Digital Literacy</span>
+                  <span className="text-sm text-muted-foreground">85%</span>
+                </div>
+                <Progress value={85} className="h-2" />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Vocational Training</span>
+                  <span className="text-sm text-muted-foreground">72%</span>
+                </div>
+                <Progress value={72} className="h-2" />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Community Leadership</span>
+                  <span className="text-sm text-muted-foreground">68%</span>
+                </div>
+                <Progress value={68} className="h-2" />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Health & Wellness</span>
+                  <span className="text-sm text-muted-foreground">79%</span>
+                </div>
+                <Progress value={79} className="h-2" />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Financial Literacy</span>
+                  <span className="text-sm text-muted-foreground">62%</span>
+                </div>
+                <Progress value={62} className="h-2" />
               </div>
             </div>
-            <Button asChild className="bg-secondary hover:bg-secondary/90">
-              <Link href="/dashboard/admin/registration-requests">Review Requests</Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
-          <TabsTrigger value="reports">Reports</TabsTrigger>
-        </TabsList>
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Student Growth</CardTitle>
-                <CardDescription>Monthly student acquisition and retention</CardDescription>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <DashboardChart />
-              </CardContent>
-            </Card>
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Recent Activities</CardTitle>
-                <CardDescription>Latest updates from your stakeholders</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <RecentActivities />
-              </CardContent>
-            </Card>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="lg:col-span-3">
-              <CardHeader>
-                <CardTitle>Upcoming Events</CardTitle>
-                <CardDescription>Schedule for the next 7 days</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <UpcomingEvents />
-              </CardContent>
-            </Card>
-            <Card className="lg:col-span-4">
-              <CardHeader>
-                <CardTitle>Program Progress</CardTitle>
-                <CardDescription>Current status of active programs</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-8">
-                <ProgramProgress
-                  name="Digital Literacy"
-                  progress={75}
-                  startDate="Jan 15, 2023"
-                  endDate="Dec 15, 2023"
-                />
-                <ProgramProgress
-                  name="Vocational Training"
-                  progress={45}
-                  startDate="Mar 1, 2023"
-                  endDate="Feb 28, 2024"
-                />
-                <ProgramProgress
-                  name="Community Outreach"
-                  progress={90}
-                  startDate="Apr 10, 2023"
-                  endDate="Oct 10, 2023"
-                />
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-        <TabsContent value="analytics" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Analytics Content</CardTitle>
-              <CardDescription>Detailed analytics will be displayed here</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] flex items-center justify-center border rounded-md">
-                <p className="text-muted-foreground">Analytics dashboard content</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-        <TabsContent value="reports" className="space-y-4">
-          <Card>
-            <CardHeader>
-              <CardTitle>Reports Content</CardTitle>
-              <CardDescription>Generated reports will be displayed here</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[400px] flex items-center justify-center border rounded-md">
-                <p className="text-muted-foreground">Reports dashboard content</p>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+        <Card className="md:col-span-4">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <div>
+              <CardTitle>Monthly Attendance</CardTitle>
+              <CardDescription>Average attendance rates by program</CardDescription>
+            </div>
+            <Select defaultValue="3months">
+              <SelectTrigger className="w-[140px]">
+                <SelectValue placeholder="Select period" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="1month">Last Month</SelectItem>
+                <SelectItem value="3months">Last 3 Months</SelectItem>
+                <SelectItem value="6months">Last 6 Months</SelectItem>
+              </SelectContent>
+            </Select>
+          </CardHeader>
+          <CardContent>
+            <div className="h-[300px] w-full">
+              <AttendanceChart />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Registration Requests</CardTitle>
+            <CardDescription>New student and teacher registration requests</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {registrationRequests.map((request) => (
+                <div key={request.id} className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex items-center gap-3">
+                    <Avatar>
+                      <AvatarImage src={request.avatar} />
+                      <AvatarFallback>{request.initials}</AvatarFallback>
+                    </Avatar>
+                    <div>
+                      <div className="font-medium">{request.name}</div>
+                      <div className="text-sm text-muted-foreground">
+                        {request.role} • {request.date}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm">
+                      View
+                    </Button>
+                    <Button size="sm">Approve</Button>
+                  </div>
+                </div>
+              ))}
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/dashboard/admin/registration-requests">View All Requests</Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle>Quick Actions</CardTitle>
+            <CardDescription>Frequently used admin actions</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 gap-2">
+              <Button className="justify-start" asChild>
+                <Link href="/dashboard/admin/add-student">
+                  <UserPlus className="mr-2 h-4 w-4" />
+                  Add New Student
+                </Link>
+              </Button>
+              <Button className="justify-start" asChild>
+                <Link href="/dashboard/admin/add-teacher">
+                  <GraduationCap className="mr-2 h-4 w-4" />
+                  Add New Teacher
+                </Link>
+              </Button>
+              <Button className="justify-start" variant="outline" asChild>
+                <Link href="/dashboard/admin/programs">
+                  <BookOpen className="mr-2 h-4 w-4" />
+                  Manage Programs
+                </Link>
+              </Button>
+              <Button className="justify-start" variant="outline" asChild>
+                <Link href="/dashboard/admin/reports">
+                  <FileText className="mr-2 h-4 w-4" />
+                  Generate Reports
+                </Link>
+              </Button>
+              <Button className="justify-start" variant="outline" asChild>
+                <Link href="/dashboard/admin/analytics">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  View Analytics
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle>Upcoming Events</CardTitle>
+            <CardDescription>Scheduled events and activities</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {upcomingEvents.map((event) => (
+                <div key={event.id} className="flex items-start gap-3 p-3 border rounded-md">
+                  <div className="bg-primary/10 p-2 rounded-full">
+                    <Calendar className="h-5 w-5 text-primary" />
+                  </div>
+                  <div>
+                    <div className="font-medium">{event.title}</div>
+                    <div className="text-sm text-muted-foreground">
+                      {event.date} • {event.time}
+                    </div>
+                    <div className="text-sm mt-1">{event.description}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Activities</CardTitle>
+            <CardDescription>Latest activities across the platform</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {recentActivities.map((activity) => (
+                <div key={activity.id} className="flex items-start gap-3">
+                  <div className={`p-2 rounded-full ${getActivityIconBg(activity.type)}`}>
+                    {getActivityIcon(activity.type)}
+                  </div>
+                  <div>
+                    <div className="font-medium">{activity.title}</div>
+                    <div className="text-sm text-muted-foreground">{activity.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
 
-function StatsCard({
-  title,
-  value,
-  description,
-  trend,
-  icon,
-}: {
+interface MetricCardProps {
   title: string
   value: string
+  change: string
+  trend: "up" | "down" | "neutral"
   description: string
-  trend: "up" | "down"
   icon: React.ReactNode
-}) {
+}
+
+function MetricCard({ title, value, change, trend, description, icon }: MetricCardProps) {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium">{title}</CardTitle>
-        {icon}
+        <div className="h-4 w-4 text-muted-foreground">{icon}</div>
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>
         <p className="text-xs text-muted-foreground flex items-center mt-1">
           {trend === "up" ? (
             <ArrowUpRight className="mr-1 h-4 w-4 text-green-500" />
-          ) : (
+          ) : trend === "down" ? (
             <ArrowDownRight className="mr-1 h-4 w-4 text-red-500" />
-          )}
-          {description}
+          ) : null}
+          <span className={trend === "up" ? "text-green-500" : trend === "down" ? "text-red-500" : ""}>{change}</span>
+          <span className="ml-1">{description}</span>
         </p>
       </CardContent>
     </Card>
   )
 }
 
-function ProgramProgress({
-  name,
-  progress,
-  startDate,
-  endDate,
-}: {
-  name: string
-  progress: number
-  startDate: string
-  endDate: string
-}) {
+function StudentGrowthChart() {
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <div className="font-medium">{name}</div>
-        <div className="text-sm text-muted-foreground">{progress}%</div>
+    <div className="relative h-full w-full">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <LineChart className="h-16 w-16 text-muted-foreground/50" />
       </div>
-      <Progress value={progress} className="h-2" />
-      <div className="flex items-center justify-between text-xs text-muted-foreground">
+      <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-transparent to-transparent">
+        <div
+          className="h-full w-full bg-gradient-to-t from-primary/10 to-transparent rounded-md"
+          style={{
+            clipPath:
+              "polygon(0 100%, 10% 80%, 20% 90%, 30% 70%, 40% 60%, 50% 50%, 60% 55%, 70% 45%, 80% 40%, 90% 30%, 100% 40%, 100% 100%, 0 100%)",
+          }}
+        ></div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 pb-4 text-xs text-muted-foreground">
+        <span>Jan</span>
+        <span>Feb</span>
+        <span>Mar</span>
+        <span>Apr</span>
+        <span>May</span>
+        <span>Jun</span>
+      </div>
+    </div>
+  )
+}
+
+function ProgramDistributionChart() {
+  return (
+    <div className="relative h-full w-full flex items-center justify-center">
+      <PieChart className="h-16 w-16 text-muted-foreground/50 absolute" />
+      <div className="w-[200px] h-[200px] rounded-full border-8 border-primary/20 relative">
+        <div className="absolute inset-0 border-8 border-transparent border-t-secondary rounded-full transform rotate-[45deg]"></div>
+        <div className="absolute inset-0 border-8 border-transparent border-r-green-500 rounded-full transform rotate-[145deg]"></div>
+        <div className="absolute inset-0 border-8 border-transparent border-b-blue-500 rounded-full transform rotate-[245deg]"></div>
+      </div>
+      <div className="absolute bottom-0 w-full flex justify-around text-xs text-muted-foreground">
         <div className="flex items-center">
-          <Calendar className="mr-1 h-3 w-3" />
-          {startDate}
+          <div className="w-3 h-3 bg-secondary rounded-full mr-1"></div>
+          <span>Digital Literacy (45%)</span>
         </div>
         <div className="flex items-center">
-          <Calendar className="mr-1 h-3 w-3" />
-          {endDate}
+          <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
+          <span>Vocational (30%)</span>
+        </div>
+        <div className="flex items-center">
+          <div className="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
+          <span>Leadership (25%)</span>
         </div>
       </div>
     </div>
   )
 }
+
+function AttendanceChart() {
+  return (
+    <div className="relative h-full w-full">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <BarChart3 className="h-16 w-16 text-muted-foreground/50" />
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 h-[70%] flex items-end justify-around px-4 gap-2">
+        <div className="w-full h-[85%] bg-primary/20 rounded-t-md"></div>
+        <div className="w-full h-[75%] bg-primary/20 rounded-t-md"></div>
+        <div className="w-full h-[90%] bg-primary/20 rounded-t-md"></div>
+        <div className="w-full h-[80%] bg-secondary/60 rounded-t-md"></div>
+        <div className="w-full h-[70%] bg-primary/20 rounded-t-md"></div>
+        <div className="w-full h-[85%] bg-primary/20 rounded-t-md"></div>
+      </div>
+      <div className="absolute bottom-0 left-0 right-0 flex justify-around px-4 pb-4 text-xs text-muted-foreground">
+        <span>Jan</span>
+        <span>Feb</span>
+        <span>Mar</span>
+        <span>Apr</span>
+        <span>May</span>
+        <span>Jun</span>
+      </div>
+    </div>
+  )
+}
+
+function getActivityIcon(type: string) {
+  switch (type) {
+    case "registration":
+      return <UserCheck className="h-4 w-4 text-green-500" />
+    case "completion":
+      return <CheckCircle2 className="h-4 w-4 text-blue-500" />
+    case "notification":
+      return <Bell className="h-4 w-4 text-yellow-500" />
+    default:
+      return <Clock className="h-4 w-4 text-muted-foreground" />
+  }
+}
+
+function getActivityIconBg(type: string) {
+  switch (type) {
+    case "registration":
+      return "bg-green-500/10"
+    case "completion":
+      return "bg-blue-500/10"
+    case "notification":
+      return "bg-yellow-500/10"
+    default:
+      return "bg-muted"
+  }
+}
+
+// Sample data
+const registrationRequests = [
+  {
+    id: "1",
+    name: "Rahul Mehta",
+    role: "Student",
+    date: "Today, 10:30 AM",
+    avatar: "/placeholder.svg?height=40&width=40",
+    initials: "RM",
+  },
+  {
+    id: "2",
+    name: "Priya Sharma",
+    role: "Teacher",
+    date: "Yesterday, 3:45 PM",
+    avatar: "/placeholder.svg?height=40&width=40",
+    initials: "PS",
+  },
+  {
+    id: "3",
+    name: "Amit Kumar",
+    role: "Student",
+    date: "Yesterday, 11:20 AM",
+    avatar: "/placeholder.svg?height=40&width=40",
+    initials: "AK",
+  },
+]
+
+const upcomingEvents = [
+  {
+    id: "1",
+    title: "Digital Literacy Workshop",
+    date: "June 15, 2023",
+    time: "10:00 AM - 12:00 PM",
+    description: "Introductory workshop for new students in the Digital Literacy program.",
+  },
+  {
+    id: "2",
+    title: "Teacher Training Session",
+    date: "June 18, 2023",
+    time: "2:00 PM - 4:00 PM",
+    description: "Professional development session for all teaching staff.",
+  },
+  {
+    id: "3",
+    title: "Community Outreach Program",
+    date: "June 20, 2023",
+    time: "9:00 AM - 1:00 PM",
+    description: "Engaging with local communities to promote educational opportunities.",
+  },
+]
+
+const recentActivities = [
+  {
+    id: "1",
+    type: "registration",
+    title: "New student Rahul Mehta registered",
+    time: "10 minutes ago",
+  },
+  {
+    id: "2",
+    type: "completion",
+    title: "Arjun Patel completed Digital Literacy Module 3",
+    time: "30 minutes ago",
+  },
+  {
+    id: "3",
+    type: "notification",
+    title: "New program 'Financial Literacy' launched",
+    time: "1 hour ago",
+  },
+  {
+    id: "4",
+    type: "registration",
+    title: "New teacher Priya Sharma registered",
+    time: "2 hours ago",
+  },
+  {
+    id: "5",
+    type: "completion",
+    title: "Meera Singh completed Vocational Training",
+    time: "3 hours ago",
+  },
+]
 
