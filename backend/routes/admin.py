@@ -22,7 +22,10 @@ def dashboard():
         ],
         "students_per_educator": num_students_per_educator(),
         "top_performing_students": top_performers(),
-        "top_educators": top_educators()
+        "top_educators": top_educators(),
+        "num_educators": num_educators(),
+        "completion_rate": completion_rate(),
+        "active_programs": active_programs()
     })
 
 

@@ -34,6 +34,9 @@ def num_educators_programwise():
 def num_students_per_educator():
     total_educators = Educator.query.count()
     total_students = Student.query.filter_by(IsRegistered=True, Status='Active').count()
+
+    if total_educators == 0:
+        return None
     return total_students / total_educators
 
 def top_performers():
@@ -94,3 +97,11 @@ def top_educators():
         for row in result
     ]
 
+def num_educators():
+    return Educator.query.count()
+
+def completion_rate():
+    return num_registered_students() * 100 / (num_registered_students() + num_dropouts())
+
+def active_programs():
+    return Program.query.count()

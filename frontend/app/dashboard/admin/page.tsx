@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -38,6 +38,21 @@ export default function AdminDashboardPage() {
   const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState("month")
   const [programFilter, setProgramFilter] = useState("all")
+  const [dashboardData, setDashboardData] = useState<any>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/admins/dashboard")
+        const data = await response.json()
+        setDashboardData(data)
+      } catch (error) {
+        console.error("API fetch error:", error)
+      }
+    }
+
+    fetchData()
+  }, [])
 
   return (
     <div className="space-y-6">
@@ -99,15 +114,15 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
           title="Total Students"
-          value="1,856"
+          value={dashboardData?.num_registered_students?.toString()}
           change="+12%"
           trend="up"
           description="vs. previous period"
           icon={<Users className="h-4 w-4" />}
         />
         <MetricCard
-          title="Active Teachers"
-          value="42"
+          title="Active Educators"
+          value={dashboardData?.num_educators?.toString()}
           change="+8%"
           trend="up"
           description="vs. previous period"
@@ -115,7 +130,7 @@ export default function AdminDashboardPage() {
         />
         <MetricCard
           title="Active Programs"
-          value="12"
+          value={dashboardData?.active_programs?.toString()}
           change="+2"
           trend="up"
           description="vs. previous period"
@@ -123,7 +138,8 @@ export default function AdminDashboardPage() {
         />
         <MetricCard
           title="Completion Rate"
-          value="78%"
+          value={dashboardData?.completion_rate?.toString() + "%"}
+
           change="+5%"
           trend="up"
           description="vs. previous period"
