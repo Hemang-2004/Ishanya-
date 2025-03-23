@@ -18,9 +18,15 @@ def login():
     else:
         user = Student.query.filter_by(EmailID=email).first()
 
-    if user and user.check_password(password):
-        token = create_access_token(identity={"id": user.get_id(), "role": role})
-        return jsonify({"token": token, "role": role}), 200
+    # Check if user exists but is not registered
+    if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
+        return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
+
+    # Ensure IsRegistered is True
+    if user:
+        if user.check_password(password):
+            token = create_access_token(identity={"id": user.get_id(), "role": role})
+            return jsonify({"token": token, "role": role}), 200
 
     return jsonify({"error": "Invalid credentials"}), 401
 
@@ -98,7 +104,7 @@ def register_student():
             "FathersName", "MothersName", "BloodGroup", "Allergies", "ContactNumber",
             "AltContactNumber", "ParentsEmail", "Address", "Transport", "Strengths",
             "Weaknesses", "PreferredLanguage", "AssistiveDevices", "LearningStyle",
-            "PreferredCommunicationStyle", "IsRegistered", "ParentAnnualIncome"
+            "PreferredCommunicationStyle", "ParentAnnualIncome"
         ]
         for field in optional_fields:
             if field in data:
@@ -114,3 +120,4 @@ def register_student():
 
     except Exception as e:
         return jsonify({"error": "An error occurred. Please try again."}), 500
+

@@ -34,6 +34,7 @@ class Educator(UserMixin, db.Model):
     EmergencyContactNumber = db.Column(db.String(10))
     BloodGroup = db.Column(db.String(3))
     Password = db.Column(db.Text, nullable=False)
+    IsRegistered = db.Column(db.Boolean)
 
     students_primary = db.relationship('Student', backref='primary_educator', lazy=True, foreign_keys='Student.PrimaryEducatorID')
     students_secondary = db.relationship('Student', backref='secondary_educator', lazy=True, foreign_keys='Student.SecondaryEducatorID')
@@ -61,13 +62,15 @@ class Student(UserMixin, db.Model):
     PrimaryDiagnosis = db.Column(db.String(30))
     Comorbidity = db.Column(db.String(30))
     UDID = db.Column(db.String(3))
-    Enrollment = db.Column(db.Integer)
     Status = db.Column(db.String(20))
     IntegrationType = db.Column(db.String(30))
     EmailID = db.Column(db.String(50), unique=True, nullable=False)  # Increased length for better email support
     ProgramID = db.Column(db.Integer, db.ForeignKey('program.ProgramID'))
     CurrentLevel = db.Column(db.String(20))
-    Attendance = db.Column(db.Integer)
+    DateOfJoining = db.Column(db.Date)
+    AadharFilePath = db.Column(db.String(255), nullable=True)  # Path to Aadhar file
+    UDIDFilePath = db.Column(db.String(255), nullable=True)  # Path to UDID file
+    MedicalCertificatePath = db.Column(db.String(255), nullable=True)  # Path to Medical Certificate file
     DaysOfWeek = db.Column(db.Text)
     PrimaryEducatorID = db.Column(db.Integer, db.ForeignKey('educator.EducatorID'))  # Foreign key now references new auto-incremented ID
     SecondaryEducatorID = db.Column(db.Integer, db.ForeignKey('educator.EducatorID'))
@@ -121,6 +124,7 @@ class Feedback(db.Model):
     Date = db.Column(db.Date)
     Comments = db.Column(db.Text)
     TPS = db.Column(db.Integer)
+    Attendance = db.Column(db.Integer)
     OrganizationPlanning = db.Column(db.Integer)
     TimeManagement = db.Column(db.Integer)
     TaskInitiationCompletion = db.Column(db.Integer)
