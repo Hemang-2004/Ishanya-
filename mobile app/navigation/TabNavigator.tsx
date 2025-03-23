@@ -98,13 +98,14 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   tabIconContainer: {
+    marginTop:14,
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: -14, // Prevents ellipsis
   },
   tabLabel: {
     fontSize: 12,
-    marginTop: 2,
+    marginTop: 4,
     fontWeight: "500",
   },
 })

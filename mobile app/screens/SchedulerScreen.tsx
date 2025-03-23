@@ -11,6 +11,7 @@ const CURRENT_DATE = new Date()
 const MONTH = CURRENT_DATE.toLocaleString("default", { month: "long" })
 const YEAR = CURRENT_DATE.getFullYear()
 
+
 // Generate dates for the current week
 const generateWeekDates = () => {
   const dates = []

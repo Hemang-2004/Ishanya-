@@ -19,29 +19,22 @@ import StatsCard from "../components/StatsCard"
 import CourseCard from "../components/CourseCard"
 import MessageCard from "../components/MessageCard"
 import RadialProgress from "../components/RadialProgress"
-// We'll need to create these components
-import BarChart from "../components/BarChart"
-import RadarChart from "../components/RadarChart"
-import LineChart from "../components/LineChart"
+import AttendanceGraph from "../components/AttendanceGraph"
+import AIChat from "../components/AIChat"
 
 export default function Dashboard() {
   const scrollY = useRef(new Animated.Value(0)).current
   const [showMinHeader, setShowMinHeader] = useState(false)
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const [showChatModal, setShowChatModal] = useState(false)
-  const [showChatbotModal, setShowChatbotModal] = useState(false)
+  const [showAIChatModal, setShowAIChatModal] = useState(false)
   const [currentTeacher, setCurrentTeacher] = useState("")
   const [message, setMessage] = useState("")
-  const [chatbotMessage, setChatbotMessage] = useState("")
-  const [chatbotHistory, setChatbotHistory] = useState<{role: string, content: string}[]>([])
   const [showCoursesModal, setShowCoursesModal] = useState(false)
   const [showAssignmentsModal, setShowAssignmentsModal] = useState(false)
   const [showSessionsModal, setShowSessionsModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
-  const [expandedAnalytic, setExpandedAnalytic] = useState<string | null>(null)
-  
-  // Animation value for the progress pie chart
-  const progressAnimation = useRef(new Animated.Value(0)).current
+  const [studentName, setStudentName] = useState("Arjun")
 
   // Sample data
   const courses = [
@@ -64,33 +57,20 @@ export default function Dashboard() {
     { id: "2", teacher: "Rahul Verma", time: "Yesterday", message: "Prepare for our group discussion." },
   ]
 
-  // Sample data for analytics
-  const attendanceData = [85, 90, 100, 95, 80, 85, 88, 92]
-  const marksData = [
-    { subject: "Digital Literacy", marks: 85 },
-    { subject: "Communication", marks: 78 },
-    { subject: "Life Skills", marks: 65 },
-    { subject: "Programming", marks: 92 },
+  // Attendance data for the graph
+  const attendanceData = [
+    { month: "May", percentage: 65 },
+    { month: "Jun", percentage: 40 },
+    { month: "Jul", percentage: 62 },
+    { month: "Aug", percentage: 75 },
+    { month: "Sep", percentage: 78 },
   ]
-  const skillsData = {
-    categories: ["Communication", "Teamwork", "Problem Solving", "Technical", "Leadership"],
-    values: [80, 70, 85, 90, 65]
-  }
 
   useEffect(() => {
     scrollY.addListener(({ value }) => {
       setShowMinHeader(value > 100)
     })
     return () => scrollY.removeAllListeners()
-  }, [])
-
-  // Animate progress chart when component mounts
-  useEffect(() => {
-    Animated.timing(progressAnimation, {
-      toValue: 78,
-      duration: 1500,
-      useNativeDriver: false,
-    }).start()
   }, [])
 
   const headerHeight = scrollY.interpolate({
@@ -133,30 +113,8 @@ export default function Dashboard() {
     setShowProfileModal(true)
   }
 
-  const handleChatbotOpen = () => {
-    setShowChatbotModal(true)
-  }
-
-  const sendChatbotMessage = () => {
-    if (chatbotMessage.trim()) {
-      // Add user message to history
-      setChatbotHistory([...chatbotHistory, {role: 'user', content: chatbotMessage}])
-      
-      // Here you would integrate with Gemini API
-      // Simulating a response for now
-      setTimeout(() => {
-        setChatbotHistory(prev => [
-          ...prev, 
-          {role: 'assistant', content: `I'm your AI assistant. You asked: "${chatbotMessage}". How can I help you further with your courses?`}
-        ])
-      }, 1000)
-      
-      setChatbotMessage("")
-    }
-  }
-
-  const toggleAnalyticExpansion = (analyticName: string) => {
-    setExpandedAnalytic(expandedAnalytic === analyticName ? null : analyticName)
+  const handleAIChatPress = () => {
+    setShowAIChatModal(true)
   }
 
   return (
@@ -169,7 +127,7 @@ export default function Dashboard() {
               <Pressable onPress={handleProfilePress}>
                 <View style={styles.logo} />
               </Pressable>
-              <Text style={styles.welcomeText}>Arjun</Text>
+              <Text style={styles.welcomeText}>{studentName}</Text>
             </View>
           ) : (
             <View style={styles.headerContent}>
@@ -179,7 +137,7 @@ export default function Dashboard() {
                 </View>
               </Pressable>
               <View style={styles.welcomeContainer}>
-                <Text style={styles.welcomeText}>Welcome Back, Arjun!</Text>
+                <Text style={styles.welcomeText}>Welcome Back, {studentName}!</Text>
                 <Text style={styles.subText}>Track your progress and stay connected.</Text>
               </View>
             </View>
@@ -193,7 +151,7 @@ export default function Dashboard() {
         </Pressable>
 
         {/* Floating Chat Button */}
-        <Pressable style={styles.floatingButton} onPress={handleChatbotOpen}>
+        <Pressable style={styles.floatingButton} onPress={handleAIChatPress}>
           <MaterialIcons name="chat" size={24} color="#fff" />
         </Pressable>
 
@@ -207,14 +165,8 @@ export default function Dashboard() {
               style={styles.radialProgressCard}
               onPress={() => setSelectedCard(selectedCard === "overallProgress" ? null : "overallProgress")}
             >
-              <Text style={[{ fontFamily: 'JosefinSans-Regular', fontSize: 14 }]}>Overall Progress</Text>
-              <RadialProgress 
-                percentage={progressAnimation} 
-                size={120} 
-                strokeWidth={12} 
-                color="#408c4c" 
-                animated 
-              />
+              <Text style={[{ fontFamily: "JosefinSans-Regular", fontSize: 14 }]}>Overall Progress</Text>
+              <RadialProgress percentage={78} size={120} strokeWidth={12} color="#408c4c" />
             </Pressable>
 
             <StatsCard
@@ -246,6 +198,9 @@ export default function Dashboard() {
             />
           </View>
 
+          {/* Attendance Graph */}
+          <AttendanceGraph data={attendanceData} />
+
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>My Courses</Text>
             {courses.map((course) => (
@@ -259,76 +214,6 @@ export default function Dashboard() {
                 isSelected={selectedCard === `course-${course.id}`}
               />
             ))}
-          </View>
-
-          {/* New Analytics Section */}
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Analytics</Text>
-            
-            {/* Bar Chart Card */}
-            <Pressable 
-              style={[
-                styles.analyticCard,
-                expandedAnalytic === 'barChart' && styles.expandedAnalyticCard
-              ]} 
-              onPress={() => toggleAnalyticExpansion('barChart')}
-            >
-              <View style={styles.analyticCardHeader}>
-                <Text style={styles.analyticCardTitle}>Subject Performance</Text>
-                <MaterialIcons name={expandedAnalytic === 'barChart' ? "expand-less" : "expand-more"} size={24} color="#333" />
-              </View>
-              
-              <View style={expandedAnalytic === 'barChart' ? styles.expandedChartContainer : styles.chartContainer}>
-                <BarChart 
-                  data={marksData} 
-                  height={expandedAnalytic === 'barChart' ? 300 : 180} 
-                  width={expandedAnalytic === 'barChart' ? "100%" : "90%"}
-                />
-              </View>
-            </Pressable>
-            
-            {/* Radar Chart Card */}
-            <Pressable 
-              style={[
-                styles.analyticCard,
-                expandedAnalytic === 'radarChart' && styles.expandedAnalyticCard
-              ]} 
-              onPress={() => toggleAnalyticExpansion('radarChart')}
-            >
-              <View style={styles.analyticCardHeader}>
-                <Text style={styles.analyticCardTitle}>Skills Assessment</Text>
-                <MaterialIcons name={expandedAnalytic === 'radarChart' ? "expand-less" : "expand-more"} size={24} color="#333" />
-              </View>
-              
-              <View style={expandedAnalytic === 'radarChart' ? styles.expandedChartContainer : styles.chartContainer}>
-                <RadarChart 
-                  data={skillsData} 
-                  size={expandedAnalytic === 'radarChart' ? 300 : 180}
-                />
-              </View>
-            </Pressable>
-            
-            {/* Line Chart Card */}
-            <Pressable 
-              style={[
-                styles.analyticCard,
-                expandedAnalytic === 'lineChart' && styles.expandedAnalyticCard
-              ]} 
-              onPress={() => toggleAnalyticExpansion('lineChart')}
-            >
-              <View style={styles.analyticCardHeader}>
-                <Text style={styles.analyticCardTitle}>Attendance Trends</Text>
-                <MaterialIcons name={expandedAnalytic === 'lineChart' ? "expand-less" : "expand-more"} size={24} color="#333" />
-              </View>
-              
-              <View style={expandedAnalytic === 'lineChart' ? styles.expandedChartContainer : styles.chartContainer}>
-                <LineChart 
-                  data={attendanceData} 
-                  height={expandedAnalytic === 'lineChart' ? 300 : 180} 
-                  width={expandedAnalytic === 'lineChart' ? "100%" : "90%"}
-                />
-              </View>
-            </Pressable>
           </View>
 
           <View style={styles.section}>
@@ -382,55 +267,16 @@ export default function Dashboard() {
           </View>
         </Modal>
 
-        {/* Chatbot Modal (for Gemini AI) */}
+        {/* AI Chat Modal */}
         <Modal
-          visible={showChatbotModal}
+          visible={showAIChatModal}
           transparent={true}
           animationType="slide"
-          onRequestClose={() => setShowChatbotModal(false)}
+          onRequestClose={() => setShowAIChatModal(false)}
         >
           <View style={styles.modalOverlay}>
-            <View style={styles.chatContainer}>
-              <View style={styles.chatHeader}>
-                <Text style={styles.chatHeaderText}>AI Study Assistant</Text>
-                <Pressable onPress={() => setShowChatbotModal(false)}>
-                  <MaterialIcons name="close" size={24} color="#333" />
-                </Pressable>
-              </View>
-              <ScrollView style={styles.chatMessages}>
-                {chatbotHistory.length === 0 ? (
-                  <View style={styles.welcomeMessage}>
-                    <MaterialIcons name="smart-toy" size={36} color="#408c4c" />
-                    <Text style={styles.chatbotWelcome}>
-                      Hello! I'm your AI study assistant. How can I help you today?
-                    </Text>
-                  </View>
-                ) : (
-                  chatbotHistory.map((msg, index) => (
-                    <View 
-                      key={index} 
-                      style={[
-                        styles.chatMessageBubble,
-                        msg.role === 'user' ? styles.userMessage : styles.assistantMessage
-                      ]}
-                    >
-                      <Text style={styles.chatMessageText}>{msg.content}</Text>
-                    </View>
-                  ))
-                )}
-              </ScrollView>
-              <View style={styles.chatInputContainer}>
-                <TextInput
-                  style={styles.chatInput}
-                  placeholder="Ask me anything..."
-                  value={chatbotMessage}
-                  onChangeText={setChatbotMessage}
-                  autoFocus={true}
-                />
-                <Pressable style={styles.sendButton} onPress={sendChatbotMessage}>
-                  <MaterialIcons name="send" size={24} color="#408c4c" />
-                </Pressable>
-              </View>
+            <View style={styles.aiChatContainer}>
+              <AIChat studentName={studentName} onClose={() => setShowAIChatModal(false)} />
             </View>
           </View>
         </Modal>
@@ -553,9 +399,9 @@ export default function Dashboard() {
               </View>
               <View style={styles.profileContent}>
                 <View style={styles.profileAvatar} />
-                <Text style={styles.profileName}>Arjun Singh</Text>
+                <Text style={styles.profileName}>{studentName} Singh</Text>
                 <Text style={styles.profileInfo}>Student ID: 2023001</Text>
-                <Text style={styles.profileInfo}>Email: arjun.s@example.com</Text>
+                <Text style={styles.profileInfo}>Email: {studentName.toLowerCase()}.s@example.com</Text>
                 <Text style={styles.profileInfo}>Phone: +91 98765 43210</Text>
 
                 <View style={styles.profileSection}>
@@ -568,13 +414,6 @@ export default function Dashboard() {
             </View>
           </View>
         </Modal>
-
-        {/* Expanded Analytic Overlay */}
-        {expandedAnalytic && (
-          <View style={styles.analyticsOverlay}>
-            {/* This provides the blur effect for other elements */}
-          </View>
-        )}
       </SafeAreaView>
     </ImageBackground>
   )
@@ -729,6 +568,12 @@ const styles = StyleSheet.create({
     height: "70%",
     padding: 20,
   },
+  aiChatContainer: {
+    backgroundColor: "#fff",
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    height: "80%",
+  },
   chatHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -856,99 +701,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: "JosefinSans-Bold",
   },
-  // New Analytics Section Styles
-  analyticCard: {
-    backgroundColor: "#FFF8DC",
-    borderRadius: 12,
-    padding: 15,
-    marginBottom: 15,
-    borderWidth: 1,
-    borderColor: "#D2B48C",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-    zIndex: 1,
-  },
-  expandedAnalyticCard: {
-    position: "absolute",
-    top: "10%",
-    left: "5%",
-    right: "5%",
-    backgroundColor: "#FFF8DC",
-    borderRadius: 12,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: "#D2B48C",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 10,
-    zIndex: 100,
-  },
-  analyticCardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 10,
-  },
-  analyticCardTitle: {
-    fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
-    fontFamily: "JosefinSans-Bold",
-  },
-  chartContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 180,
-  },
-  expandedChartContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    height: 300,
-    marginTop: 10,
-  },
-  analyticsOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: "rgba(0,0,0,0.5)",
-    zIndex: 50,
-  },
-  // Chatbot styles
-  welcomeMessage: {
-    alignItems: "center",
-    padding: 20,
-  },
-  chatbotWelcome: {
-    fontSize: 16,
-    color: "#333",
-    textAlign: "center",
-    marginTop: 10,
-    fontFamily: "JosefinSans-Regular",
-  },
-  chatMessageBubble: {
-    padding: 12,
-    borderRadius: 15,
-    marginBottom: 10,
-    maxWidth: "80%",
-  },
-  userMessage: {
-    alignSelf: "flex-end",
-    backgroundColor: "#DCF8C6",
-  },
-  assistantMessage: {
-    alignSelf: "flex-start",
-    backgroundColor: "#E5E5EA",
-  },
-  chatMessageText: {
-    fontSize: 14,
-    color: "#333",
-    fontFamily: "JosefinSans-Regular",
-  },
 })
+
