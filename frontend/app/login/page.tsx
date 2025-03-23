@@ -11,13 +11,20 @@ import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useToast } from "@/components/ui/use-toast"
+import { LanguageSwitcher } from "@/components/language-switcher"
+import { useLanguage } from "@/components/language-provider"
+import { Eye, EyeOff } from "lucide-react"
 import { IshanyaLogo } from "@/components/ishanya-logo"
 
 export default function LoginPage() {
   const router = useRouter()
   const { toast } = useToast()
+  const { t } = useLanguage()
   const [isLoading, setIsLoading] = useState(false)
   const [role, setRole] = useState<string>("student")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [showPassword, setShowPassword] = useState(false)
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,41 +44,53 @@ export default function LoginPage() {
       }
 
       toast({
-        title: "Logged in successfully",
+        title: "Login successful",
         description: `Welcome back! You've been logged in as ${role}.`,
       })
     }, 1000)
   }
 
   return (
-    <div className="min-h-screen flex flex-col ishanya-pattern-bg">
+    <div className="min-h-screen flex flex-col geometric-pattern">
       {/* Header */}
-      <div className="ishanya-header py-2 px-4 flex justify-between items-center">
-        <div className="text-sm">
-          <span className="mr-6">info@ishanyaindia.org</span>
-          <span>+91 73496 76668</span>
+      <div className="ishanya-top-header py-2 px-4 flex justify-between items-center bg-white/80 backdrop-blur-sm">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span>+91 73496 76668</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span>info@ishanyaindia.org</span>
+          </div>
         </div>
+        <LanguageSwitcher />
       </div>
 
       {/* Main content */}
       <div className="flex-1 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
-          <div className="text-center mb-8">
-            <IshanyaLogo className="mx-auto h-24 w-auto" />
-            <h1 className="text-2xl font-bold mt-4 text-secondary">Ishanya Connect</h1>
-            <p className="text-sm text-muted-foreground mt-1">Journey to Inclusion</p>
+          <div className="text-center mb-6">
+            <IshanyaLogo className="mx-auto w-16 h-16" showTagline={false} />
+            <h1 className="text-2xl font-bold mt-2">Ishanya Connect</h1>
+            <p className="text-sm text-muted-foreground">Journey to Inclusion</p>
           </div>
 
           <Card className="border-none shadow-md">
             <CardHeader className="space-y-1">
-              <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+              <CardTitle className="text-2xl text-center">Welcome Back</CardTitle>
               <CardDescription className="text-center">Enter your credentials to access your account</CardDescription>
             </CardHeader>
             <form onSubmit={handleLogin}>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="name@example.com" required />
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="name@example.com"
+                    required
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -80,12 +99,30 @@ export default function LoginPage() {
                       Forgot password?
                     </Link>
                   </div>
-                  <Input id="password" type="password" required />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      required
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
+                    </Button>
+                  </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="role">Login as</Label>
                   <Select defaultValue="student" onValueChange={setRole}>
-                    <SelectTrigger>
+                    <SelectTrigger id="role">
                       <SelectValue placeholder="Select role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -113,7 +150,7 @@ export default function LoginPage() {
       </div>
 
       {/* Footer */}
-      <div className="py-4 text-center text-sm text-muted-foreground">
+      <div className="py-4 text-center text-sm text-muted-foreground bg-white/80 backdrop-blur-sm">
         © {new Date().getFullYear()} Ishanya India Foundation. All rights reserved.
       </div>
     </div>

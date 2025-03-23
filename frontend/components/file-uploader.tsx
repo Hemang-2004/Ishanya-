@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Upload, X, FileText } from "lucide-react"
@@ -117,4 +116,6 @@ export function FileUploader({ onFileChange, accept = "*", maxSize = 5 }: FileUp
     </div>
   )
 }
+
+export default FileUploader
 
