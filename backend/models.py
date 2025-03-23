@@ -123,7 +123,7 @@ class Feedback(db.Model):
     __tablename__ = 'feedback'
     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'), primary_key=True)
     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'), primary_key=True)
-    Date = db.Column(db.Date)
+    Date = db.Column(db.Date, primary_key=True)
     Comments = db.Column(db.Text)
     TPS = db.Column(db.Integer)
     Attendance = db.Column(db.Integer)
