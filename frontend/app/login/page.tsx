@@ -26,13 +26,42 @@ export default function LoginPage() {
   const [password, setPassword] = useState("")
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
-    // Simulate login process with role-based redirection
-    setTimeout(() => {
-      setIsLoading(false)
+    try {
+      const response = await fetch("http://127.0.0.1:5000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email,
+          password,
+          role,
+        }),
+      })
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        // Show error toast if login failed
+        toast({
+          title: "Login failed",
+          description: result.error || "Invalid email or password.",
+          variant: "destructive",
+          duration: 5000,
+        })
+        setIsLoading(false)
+        return
+      }
+
+      // Show success toast
+      toast({
+        title: "Login successful",
+        description: `Welcome back! You've been logged in as ${role}.`,
+      })
 
       // Redirect based on role
       if (role === "admin") {
@@ -43,11 +72,17 @@ export default function LoginPage() {
         router.push("/dashboard/student")
       }
 
+    } catch (error) {
       toast({
-        title: "Login successful",
-        description: `Welcome back! You've been logged in as ${role}.`,
+        title: "Login error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+        duration: 5000,
       })
-    }, 1000)
+      console.error("Login error:", error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (

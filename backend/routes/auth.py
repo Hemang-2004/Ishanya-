@@ -18,7 +18,7 @@ def login():
 
     if role == 'admin':
         user = Admin.query.filter_by(Email=email).first()
-    elif role == 'educator':
+    elif role == 'teacher':
         user = Educator.query.filter_by(Email=email).first()
     else:
         user = Student.query.filter_by(EmailID=email).first()
