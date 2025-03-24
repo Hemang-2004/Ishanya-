@@ -9,3 +9,5 @@ pdfminer.six
 easyocr
 Pillow
 pydantic
+faker
+flask_cors
