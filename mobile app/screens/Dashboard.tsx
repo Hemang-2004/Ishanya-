@@ -757,6 +757,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: "JosefinSans-Bold",
   },
+
+  //faq section trial
   // faqItem: {
   //   backgroundColor: "#FFF8DC",
   //   borderRadius: 12,
