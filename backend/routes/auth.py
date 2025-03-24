@@ -24,6 +24,9 @@ def login():
         user = Student.query.filter_by(EmailID=email).first()
 
     # Check if user exists but is not registered
+
+    # if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
+        # print("hello")
     if role != 'admin' and user and (user.IsRegistered is None or user.IsRegistered is False):
         return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
 
@@ -98,6 +101,7 @@ def register_educator():
             Name=f'{data["FirstName"]} {data["LastName"]}',
             Email=data["Email"]
         )
+
         educator.set_password(data["Password"])  # Hash password using model method
 
         optional_fields = [
