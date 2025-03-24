@@ -1,3 +1,4 @@
+import React, { useState } from "react"
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs"
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs"
 import { MaterialIcons } from "@expo/vector-icons"
@@ -21,26 +22,35 @@ const TabBarIcon = ({ name, color, label }) => (
 )
 
 // Top tab navigator for swipe functionality
-const TopTabNavigator = ({ initialRoute }) => {
+const TopTabNavigator = ({ initialRoute, setActiveTab }) => {
   return (
     <TopTab.Navigator
       initialRouteName={initialRoute}
-      tabBarPosition="none" // Hide the top tab bar
-      swipeEnabled={true}
+      screenListeners={{
+        state: (e) => {
+          // Update active tab when swiping between screens
+          const activeIndex = e.data.state.index
+          const routeNames = ["Dashboard", "GroupChat", "Scheduler", "Profile"]
+          setActiveTab(routeNames[activeIndex])
+        },
+      }}
       screenOptions={{
         tabBarShowLabel: false,
+        swipeEnabled: true,
       }}
     >
-      <TopTab.Screen name="DashboardSwipe" component={Dashboard} />
-      <TopTab.Screen name="GroupChatSwipe" component={GroupChatScreen} />
-      <TopTab.Screen name="SchedulerSwipe" component={SchedulerScreen} />
-      <TopTab.Screen name="ProfileSwipe" component={ProfileScreen} />
+      <TopTab.Screen name="Dashboard" component={Dashboard} />
+      <TopTab.Screen name="GroupChat" component={GroupChatScreen} />
+      <TopTab.Screen name="Scheduler" component={SchedulerScreen} />
+      <TopTab.Screen name="Profile" component={ProfileScreen} />
     </TopTab.Navigator>
   )
 }
 
 // Main tab navigator
 const TabNavigator = () => {
+  const [activeTab, setActiveTab] = useState("Dashboard") // Track active tab
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -53,30 +63,38 @@ const TabNavigator = () => {
     >
       <Tab.Screen
         name="Dashboard"
-        children={() => <TopTabNavigator initialRoute="DashboardSwipe" />}
+        children={() => <TopTabNavigator initialRoute="Dashboard" setActiveTab={setActiveTab} />}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="dashboard" color={color} label="Home" />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="dashboard" color={activeTab === "Dashboard" ? "#408c4c" : "#8B4513"} label="Home" />
+          ),
         }}
       />
       <Tab.Screen
         name="GroupChat"
-        children={() => <TopTabNavigator initialRoute="GroupChatSwipe" />}
+        children={() => <TopTabNavigator initialRoute="GroupChat" setActiveTab={setActiveTab} />}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="chat" color={color} label="Chat" />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="chat" color={activeTab === "GroupChat" ? "#408c4c" : "#8B4513"} label="Chat" />
+          ),
         }}
       />
       <Tab.Screen
         name="Scheduler"
-        children={() => <TopTabNavigator initialRoute="SchedulerSwipe" />}
+        children={() => <TopTabNavigator initialRoute="Scheduler" setActiveTab={setActiveTab} />}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="event" color={color} label="Calendar" />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="event" color={activeTab === "Scheduler" ? "#408c4c" : "#8B4513"} label="Calendar" />
+          ),
         }}
       />
       <Tab.Screen
         name="Profile"
-        children={() => <TopTabNavigator initialRoute="ProfileSwipe" />}
+        children={() => <TopTabNavigator initialRoute="Profile" setActiveTab={setActiveTab} />}
         options={{
-          tabBarIcon: ({ color }) => <TabBarIcon name="person" color={color} label="Profile" />,
+          tabBarIcon: ({ color }) => (
+            <TabBarIcon name="person" color={activeTab === "Profile" ? "#408c4c" : "#8B4513"} label="Profile" />
+          ),
         }}
       />
     </Tab.Navigator>
@@ -98,7 +116,7 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   tabIconContainer: {
-    marginTop:14,
+    marginTop: 14,
     alignItems: "center",
     justifyContent: "center",
     marginHorizontal: -14, // Prevents ellipsis
@@ -111,6 +129,3 @@ const styles = StyleSheet.create({
 })
 
 export default TabNavigator
-
-
-
