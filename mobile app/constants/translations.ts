@@ -26,7 +26,7 @@ export const translations = {
     subtitle:
       "If you are the parent of a differently-abled individual & are looking to get the right intervention – Schedule an appointment with us, we can help you make the right decision!",
     browse_programs: "Browse Programs",
-    schedule_appointment: "Schedule an Appointment",
+    schedule_appointment: "Register User",
     parent_login: "Parent Login",
     find_us: "Find Us",
     about_us: "About Us",

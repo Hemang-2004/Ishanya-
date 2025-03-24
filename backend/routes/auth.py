@@ -26,7 +26,7 @@ def login():
     # Check if user exists but is not registered
 
     # if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
-        # print("hello")
+        print("hello")
     if role != 'admin' and user and (user.IsRegistered is None or user.IsRegistered is False):
         return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
 

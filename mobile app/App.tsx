@@ -13,6 +13,7 @@ import TabNavigator from './navigation/TabNavigator';
 import Dashboard from './screens/Dashboard'
 import TabRender from './screens/TabRender'
 import { LanguageProvider } from './components/LanguageContext';
+import RegistrationSuccess from './screens/RegistrationSuccess';
 // import { useLanguage } from "./context/LanguageContext"
 const Stack = createNativeStackNavigator();
 
@@ -21,6 +22,7 @@ function RootStack() {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Home" component={HomeScreen} />
       <Stack.Screen name="Login" component={LoginForm} />
+      <Stack.Screen name="RegistrationSuccess" component={RegistrationSuccess} />
       <Stack.Screen name="RegistrationForm" component={RegistrationForm} />
       <Stack.Screen name="Tabs" component={TabNavigator} />
       {/* <Stack.Screen name="Dashboard" component={Dashboard} /> */}

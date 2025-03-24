@@ -22,6 +22,15 @@ import RadialProgress from "../components/RadialProgress"
 import AttendanceGraph from "../components/AttendanceGraph"
 import AIChat from "../components/AIChat"
 
+
+
+
+
+
+
+
+
+
 // FAQ data
 /*
 const faqData = [

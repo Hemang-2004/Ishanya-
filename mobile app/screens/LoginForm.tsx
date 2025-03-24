@@ -8,42 +8,86 @@ import { Picker } from "@react-native-picker/picker"
 import { translations } from "../constants/translations"
 import { useNavigation } from "@react-navigation/native"
 
+
+
+
+
+
 export default function LoginForm() {
+  const [isRegistered, setIsRegistered] = useState(false)
   const navigation = useNavigation()
   const [language, setLanguage] = useState("en")
   const t = translations[language]
 
   const [formData, setFormData] = useState({
-    name: "",
     email: "",
     password: "",
+    role: "Student"
   })
 
-  const [errors, setErrors] = useState({})
+  const [errors, setErrors] = useState<FormErrors>({})
   const [loading, setLoading] = useState(false)
 
+  const apiUrl = "http://192.168.109.54:5000/auth/login" // Update with your IP address
+
   const handleInputChange = (field, value) => {
-    // Make name and email lowercase for case insensitivity
     if (field === "name" || field === "email") {
       value = value.toLowerCase()
     }
-
     setFormData((prev) => ({ ...prev, [field]: value }))
-    // Clear error when user types
+
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: null }))
     }
   }
 
-  const validateForm = () => {
-    const newErrors = {}
+  const API_URL = "http://192.168.109.54:5000/auth/login" // Replace with your IP address
+  
+async function handleLogin() {
+  if (!formData.email || !formData.password) {
+    Alert.alert("Error", "Please enter both email and password.")
+    return
+  }
 
-    // Name validation
-    if (!formData.name) {
-      newErrors.name = t.required
+  setLoading(true)
+
+
+
+
+  try {
+    const response = await fetch(API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email: formData.email.toLowerCase(), // Ensure lowercase email
+        password: formData.password,
+        role: "Student", // Optional if role is dynamic
+      }),
+    })
+
+    const data = await response.json()
+
+    if (response.ok) {
+      Alert.alert("Success", data.message || "Logged in successfully!")
+      navigation.navigate("Tabs") // Navigate to Home or Dashboard
+    } else {
+      Alert.alert("Login Failed", data.message || "Invalid credentials.")
     }
+  } catch (error) {
+    console.error("Error:", error)
+    Alert.alert("Error", "Unable to connect to the server. Please try again.")
+  }
 
-    // Email validation
+  setLoading(false)
+}
+
+  
+
+  const validateForm = () => {
+    const newErrors: FormErrors = {}
+
     if (!formData.email) {
       newErrors.email = t.required
     } else {
@@ -53,7 +97,6 @@ export default function LoginForm() {
       }
     }
 
-    // Password validation
     if (!formData.password) {
       newErrors.password = t.required
     }
@@ -69,29 +112,47 @@ export default function LoginForm() {
     }
 
     setLoading(true)
-    // const { error } = await supabase.auth.signInWithPassword({
-    //   email: formData.email,
-    //   password: formData.password,
-    // })
 
-    // if (error) {
-    //   Alert.alert("Error", error.message)
-    // } else {
-    //   Alert.alert("Success", "Logged in successfully!")
-    //   // Navigate to home screen or dashboard
-    // }
-    // setLoading(false)
+    try {
+      console.log("Checking registration status...")
+
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          role: "Student"
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.isRegistered) {
+        setIsRegistered(true)
+        handleLogin()
+      } else {
+        setIsRegistered(false)
+        Alert.alert("Registration Error", "User is not registered. Please register first.")
+      }
+    } catch (error) {
+      console.error("Registration Error:", error.message)
+      Alert.alert("Error", "An unexpected error occurred.")
+    }
+
+    setLoading(false)
   }
 
   const handleForgotPassword = () => {
-    // Handle forgot password logic
     Alert.alert("Forgot Password", "Please enter your email to reset your password")
   }
 
   const handleRegister = () => {
-    // Navigate to registration screen
-    navigation.navigate('RegistrationForm')
+    navigation.navigate("RegistrationForm")
   }
+
 
   return (
     <ImageBackground source={require("../assets/images/1.jpg")} style={styles.background} resizeMode="cover">
@@ -182,7 +243,7 @@ export default function LoginForm() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.submitButton} onPress={signInWithEmail} disabled={loading}>
+          <TouchableOpacity style={styles.submitButton} onPress={handleLogin} disabled={loading}>
             <Text style={[styles.submitButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
               {loading ? t.loggingIn || "Logging in..." : t.login || "Login"}
             </Text>
