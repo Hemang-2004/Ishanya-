@@ -40,6 +40,89 @@ import {
   AlertTriangle,
 } from "lucide-react"
 
+const studentGrowthData = [
+  { name: "Jan", newStudents: 40, returningStudents: 24 },
+  { name: "Feb", newStudents: 30, returningStudents: 13 },
+  { name: "Mar", newStudents: 20, returningStudents: 98 },
+  { name: "Apr", newStudents: 27, returningStudents: 39 },
+  { name: "May", newStudents: 18, returningStudents: 48 },
+  { name: "Jun", newStudents: 23, returningStudents: 38 },
+  { name: "Jul", newStudents: 40, returningStudents: 24 },
+  { name: "Aug", newStudents: 30, returningStudents: 13 },
+  { name: "Sep", newStudents: 20, returningStudents: 98 },
+  { name: "Oct", newStudents: 27, returningStudents: 39 },
+  { name: "Nov", newStudents: 18, returningStudents: 48 },
+  { name: "Dec", newStudents: 23, returningStudents: 38 },
+]
+
+const programDistributionData = [
+  { name: "Digital Literacy", value: 400 },
+  { name: "Vocational Training", value: 300 },
+  { name: "Community Leadership", value: 300 },
+  { name: "Health & Wellness", value: 200 },
+]
+
+const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"]
+
+const completionRatesData = [
+  { name: "Digital Literacy", value: 85 },
+  { name: "Vocational Training", value: 70 },
+  { name: "Community Leadership", value: 90 },
+  { name: "Health & Wellness", value: 75 },
+]
+
+const attendanceData = [
+  { month: "Jan", digitalLiteracy: 80, vocationalTraining: 75, communityLeadership: 85 },
+  { month: "Feb", digitalLiteracy: 85, vocationalTraining: 80, communityLeadership: 90 },
+  { month: "Mar", digitalLiteracy: 90, vocationalTraining: 85, communityLeadership: 95 },
+  { month: "Apr", digitalLiteracy: 95, vocationalTraining: 90, communityLeadership: 100 },
+  { month: "May", digitalLiteracy: 100, vocationalTraining: 95, communityLeadership: 80 },
+  { month: "Jun", digitalLiteracy: 75, vocationalTraining: 70, communityLeadership: 85 },
+]
+
+const genderDistributionData = [
+  { name: "Male", value: 550 },
+  { name: "Female", value: 450 },
+]
+
+const ageDistributionData = [
+  { name: "18-24", value: 300 },
+  { name: "25-34", value: 400 },
+  { name: "35-44", value: 200 },
+  { name: "45+", value: 100 },
+]
+
+const locationDistributionData = [
+  { name: "Urban", value: 700 },
+  { name: "Rural", value: 300 },
+]
+
+const educationLevelData = [
+  { name: "High School", value: 400 },
+  { name: "College", value: 300 },
+  { name: "Graduate", value: 200 },
+  { name: "No formal education", value: 100 },
+]
+
+const studentPerformanceData = [
+  { program: "Digital Literacy", attendance: 85, score: 78 },
+  { program: "Digital Literacy", attendance: 92, score: 85 },
+  { program: "Digital Literacy", attendance: 78, score: 70 },
+  { program: "Vocational Training", attendance: 90, score: 88 },
+  { program: "Vocational Training", attendance: 75, score: 68 },
+  { program: "Vocational Training", attendance: 82, score: 75 },
+  { program: "Community Leadership", attendance: 95, score: 92 },
+  { program: "Community Leadership", attendance: 88, score: 80 },
+  { program: "Community Leadership", attendance: 70, score: 65 },
+]
+
+const studentEngagementData = [
+  { month: "Jan", classParticipation: 75, assignmentCompletion: 80, forumActivity: 65 },
+  { month: "Feb", classParticipation: 80, assignmentCompletion: 85, forumActivity: 70 },
+  { month: "Mar", classParticipation: 85, assignmentCompletion: 90, forumActivity: 75 },
+  { month: "Apr", classParticipation: 90, assignmentCompletion: 95, forumActivity: 80 },
+]
+
 export default function AnalyticsPage() {
   const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState("year")
@@ -302,12 +385,7 @@ export default function AnalyticsPage() {
                         stroke="#8884d8"
                         activeDot={{ r: 8 }}
                       />
-                      <Line
-                        type="monotone"
-                        dataKey="vocationalTraining"
-                        name="Vocational Training"
-                        stroke="#82ca9d"
-                      />
+                      <Line type="monotone" dataKey="vocationalTraining" name="Vocational Training" stroke="#82ca9d" />
                       <Line
                         type="monotone"
                         dataKey="communityLeadership"
@@ -355,10 +433,10 @@ export default function AnalyticsPage() {
                     <Lightbulb className="h-5 w-5 text-blue-500" />
                     <h3 className="font-medium">Success Factor</h3>
                   </div>
-                 <p className="text-sm text-muted-foreground">
-  Students with regular attendance (&gt;85%) are three times more likely to complete their programs successfully. 
-  Focus on improving attendance.
-</p>
+                  <p className="text-sm text-muted-foreground">
+                    Students with regular attendance ( `&gt;`85%) are 3x more likely to complete their programs successfully.
+                    Focus on attendance improvement.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -598,122 +676,13 @@ export default function AnalyticsPage() {
                       <Line type="monotone" dataKey="forumActivity" name="Forum Activity" stroke="#ffc658" />
                     </LineChart>
                   </ResponsiveContainer>
-                </CardContent>
+                </div>
+              </CardContent>
             </Card>
-           </div>
+          </div>
         </TabsContent>
-      </Tab>
+      </Tabs>
     </div>
-    )
+  )
 }
-
-// Sample data
-const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"]
-
-const studentGrowthData = [
-  { name: "Jan", completion: 65, target: 80, students: 120, graduates: 40, dropouts: 5, period: "Jan 2023" },
-  { name: "Feb", completion: 70, target: 80, students: 145, graduates: 45, dropouts: 8, period: "Feb 2023" },
-  { name: "Mar", completion: 75, target: 80, students: 190, graduates: 50, dropouts: 10, period: "Mar 2023" },
-  { name: "Apr", completion: 72, target: 80, students: 210, graduates: 55, dropouts: 7, period: "Apr 2023" },
-  { name: "May", completion: 78, target: 80, students: 250, graduates: 60, dropouts: 12, period: "May 2023" },
-  { name: "Jun", completion: 82, target: 80, students: 280, graduates: 65, dropouts: 8, period: "Jun 2023" },
-]
-
-const programDistributionData = [
-  { name: "Digital Literacy", value: 35 },
-  { name: "Vocational Training", value: 25 },
-  { name: "Community Leadership", value: 20 },
-  { name: "Health & Wellness", value: 15 },
-  { name: "Financial Literacy", value: 5 },
-]
-
-const completionRatesData = [
-  { name: "Digital Literacy", value: 85 },
-  { name: "Vocational Training", value: 72 },
-  { name: "Community Leadership", value: 68 },
-  { name: "Health & Wellness", value: 79 },
-  { name: "Financial Literacy", value: 62 },
-]
-
-const demographicsData = [
-  { name: "18-24", male: 120, female: 150, other: 10 },
-  { name: "25-34", male: 100, female: 130, other: 5 },
-  { name: "35-44", male: 80, female: 100, other: 3 },
-  { name: "45-54", male: 40, female: 60, other: 2 },
-  { name: "55+", male: 20, female: 30, other: 1 },
-]
-
-const performanceData = [
-  { name: "Digital Literacy", score: 85, average: 75 },
-  { name: "Vocational Training", score: 78, average: 70 },
-  { name: "Community Leadership", score: 82, average: 72 },
-  { name: "Health & Wellness", score: 88, average: 78 },
-  { name: "Financial Literacy", score: 75, average: 68 },
-]
-
-const programEffectivenessData = [
-  { name: "Digital Literacy", completion: 85, employment: 70, satisfaction: 90 },
-  { name: "Vocational Training", completion: 78, employment: 85, satisfaction: 82 },
-  { name: "Community Leadership", completion: 82, employment: 65, satisfaction: 88 },
-  { name: "Health & Wellness", completion: 88, employment: 60, satisfaction: 92 },
-  { name: "Financial Literacy", completion: 75, employment: 72, satisfaction: 80 },
-]
-
-const resourceAllocationData = [
-  { name: "Digital Literacy", value: 1250000 },
-  { name: "Vocational Training", value: 1575000 },
-  { name: "Community Leadership", value: 825000 },
-  { name: "Health & Wellness", value: 650000 },
-  { name: "Financial Literacy", value: 575000 },
-]
-
-const programGrowthData = [
-  { name: "Q1 2022", digital: 80, vocational: 60, community: 40, health: 30 },
-  { name: "Q2 2022", digital: 100, vocational: 75, community: 50, health: 40 },
-  { name: "Q3 2022", digital: 120, vocational: 90, community: 65, health: 50 },
-  { name: "Q4 2022", digital: 150, vocational: 110, community: 80, health: 65 },
-  { name: "Q1 2023", digital: 180, vocational: 130, community: 95, health: 80 },
-  { name: "Q2 2023", digital: 210, vocational: 150, community: 110, health: 95 },
-]
-
-const recentReports = [
-  {
-    id: "1",
-    title: "Q2 2023 Impact Summary",
-    date: "Jul 15, 2023",
-  },
-  {
-    id: "2",
-    title: "Digital Literacy Program Outcomes",
-    date: "Jun 30, 2023",
-  },
-  {
-    id: "3",
-    title: "Volunteer Engagement Report",
-    date: "Jun 22, 2023",
-  },
-  {
-    id: "4",
-    title: "Annual Stakeholder Analysis",
-    date: "May 10, 2023",
-  },
-]
-
-const savedCustomReports = [
-  {
-    id: "1",
-    title: "Student Demographics by Region",
-    date: "Jun 12, 2023",
-  },
-  {
-    id: "2",
-    title: "Program ROI Analysis",
-    date: "May 28, 2023",
-  },
-  {
-    id: "3",
-    title: "Teacher Performance Metrics",
-    date: "Apr 15, 2023",
-  },
-]
 
