@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Chat, Feedback, Student, db, Educator
+from models import Chat, Feedback, Program, Student, db, Educator
 from datetime import datetime, timezone
 
 educator_bp = Blueprint("educator", __name__)
@@ -190,7 +190,7 @@ def send_message():
             StudentID=student_id,
             EducatorID=educator_id,
             Message=message,
-            DateTime=datetime.utcnow()
+            DateTime=datetime.now(timezone.utc)
         )
 
         db.session.add(new_message)
