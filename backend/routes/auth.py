@@ -24,12 +24,10 @@ def login():
         user = Student.query.filter_by(EmailID=email).first()
 
     # Check if user exists but is not registered
-<<<<<<< HEAD
-    if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
+
+    # if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
         # print("hello")
-=======
     if role != 'admin' and user and (user.IsRegistered is None or user.IsRegistered is False):
->>>>>>> cb604e48ff202a4a3c9aee63c40179e106f38d61
         return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
 
     # Ensure IsRegistered is True
