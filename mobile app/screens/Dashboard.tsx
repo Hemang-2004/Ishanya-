@@ -66,6 +66,8 @@ export default function Dashboard() {
   const [showSessionsModal, setShowSessionsModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [studentName, setStudentName] = useState("Arjun")
+  const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
+  const [hasUnreadAssignments, setHasUnreadAssignments] = useState(true)
   // const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
 
   // Sample data
@@ -118,6 +120,7 @@ export default function Dashboard() {
       setShowCoursesModal(true)
     } else if (cardType === "pendingAssignments") {
       setShowAssignmentsModal(true)
+      setHasUnreadAssignments(false)
     } else if (cardType === "upcomingSessions") {
       setShowSessionsModal(true)
     }
@@ -139,6 +142,7 @@ export default function Dashboard() {
 
   const handleBellPress = () => {
     setShowAssignmentsModal(true)
+    setHasUnreadNotifications(false)
   }
 
   const handleProfilePress = () => {
@@ -179,7 +183,7 @@ export default function Dashboard() {
         {/* Notification Bell */}
         <Pressable style={styles.notificationBell} onPress={handleBellPress}>
           <MaterialIcons name="notifications" size={24} color="#333" />
-          <View style={styles.notificationDot} />
+          {hasUnreadNotifications && <View style={styles.notificationDot} />}
         </Pressable>
 
         {/* Floating Chat Button */}
@@ -217,7 +221,7 @@ export default function Dashboard() {
               color="#FF9800"
               onPress={() => handleCardPress("pendingAssignments")}
               isSelected={selectedCard === "pendingAssignments"}
-              showNotification={true}
+              showNotification={hasUnreadAssignments}
             />
 
             <StatsCard
@@ -793,4 +797,3 @@ const styles = StyleSheet.create({
   //   lineHeight: 20,
   // },
 })
-
