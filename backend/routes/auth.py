@@ -25,6 +25,7 @@ def login():
 
     # Check if user exists but is not registered
     if role != 'admin' and user and user.IsRegistered is None or user.IsRegistered is False:
+        # print("hello")
         return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
 
     # Ensure IsRegistered is True
@@ -95,9 +96,10 @@ def register_educator():
 
         # Create Educator object
         educator = Educator(
-            Name=f"{data["FirstName"]} {data["LastName"]}",
+            Name=f'{data["FirstName"]} {data["LastName"]}',
             Email=data["Email"]
         )
+
         educator.set_password(data["Password"])  # Hash password using model method
 
         optional_fields = [

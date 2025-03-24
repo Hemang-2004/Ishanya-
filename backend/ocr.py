@@ -2,6 +2,8 @@ import easyocr
 from PIL import Image
 from pdfminer.high_level import extract_text
 from google import genai
+# import google.generativeai as genai
+
 from pydantic import BaseModel
 from typing import Optional
 from dotenv import load_dotenv
