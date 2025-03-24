@@ -22,24 +22,27 @@ export default function TeacherRegistrationPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [step, setStep] = useState(1)
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    password: "",
-    phone: "",
-    address: "",
-    dateOfBirth: "",
-    gender: "",
-    qualification: "",
-    specialization: "",
-    experience: "",
+    FirstName: "",
+    LastName: "",
+    Email: "",
+    Password: "",
+    Phone: "",
+    WorkLocation: "",
+    DateOfBirth: "",
+    BloodGroup: "",
+
+    // gender: "",
+    HighEducationQualification: "",
+    // Designation: "",
+    // specialization: "",
+    // experience: "",
     resume: null as File | null,
     photo: null as File | null,
-    idProof: null as File | null,
-    bio: "",
-    subjects: [] as string[],
-    availability: [] as string[],
-    references: "",
+    // idProof: null as File | null,
+    // bio: "",
+    // subjects: [] as string[],
+    // availability: [] as string[],
+    // references: "",
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -58,31 +61,71 @@ export default function TeacherRegistrationPage() {
   const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
     setFormData((prev) => {
       if (checked) {
-        return { ...prev, [name]: [...(prev[name as keyof typeof prev] as string[]), value] }
+        return { ...prev, [name]: [...(prev[name as keyof typeof prev] as unknown as string[]), value] }
       } else {
         return {
           ...prev,
-          [name]: (prev[name as keyof typeof prev] as string[]).filter((item) => item !== value),
+          [name]: (prev[name as keyof typeof prev] as unknown as string[]).filter((item) => item !== value),
         }
       }
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
+    
     // Simulate registration process
-    setTimeout(() => {
-      setIsLoading(false)
+    // setTimeout(() => {
+    //   setIsLoading(false)
 
+    //   toast({
+    //     title: "Registration submitted",
+    //     description: "Your registration has been submitted for approval. You'll be notified once approved.",
+    //   })
+
+    //   router.push("/registration-success")
+    // }, 1500)
+
+    try {
+      const formDataToSend = new FormData();
+      Object.entries(formData).forEach(([key, value]) => {
+        if (value && value instanceof File) {
+          formDataToSend.append(key, value); // Append files
+        } else if (value) {
+          formDataToSend.append(key, String(value)); // Append non-file values
+        }
+      });
+      console.log(formDataToSend);
+      const response = await fetch(
+        "http://localhost:5000/auth/register/educator",
+        {
+          method: "POST",
+          body: formDataToSend,
+        }
+      );
+
+      const result = await response.json();
+
+      if (response.ok) {
+        toast({
+          title: "Registration successful",
+          description: "Your registration has been submitted successfully.",
+        });
+        router.push("/registration-success");
+      } else {
+        throw new Error(result.message || "Something went wrong");
+      }
+    } catch (error) {
       toast({
-        title: "Registration submitted",
-        description: "Your registration has been submitted for approval. You'll be notified once approved.",
-      })
-
-      router.push("/registration-success")
-    }, 1500)
+        title: "Registration failed",
+        description: (error as Error).message,
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   }
 
   const nextStep = () => setStep((prev) => prev + 1)
@@ -105,52 +148,51 @@ export default function TeacherRegistrationPage() {
                 <ArrowLeft className="h-4 w-4" />
               </Link>
               <div className="inline-flex h-8 items-center justify-center rounded-full bg-secondary px-3 text-xs font-medium">
-                Teacher/Staff Registration
+                Educator/Staff Registration
               </div>
             </div>
-            <CardTitle className="text-2xl">Join as a Teacher/Staff</CardTitle>
+            <CardTitle className="text-2xl">Join as an Educator/Staff</CardTitle>
             <CardDescription>
-              Complete the form below to register as a teacher or staff member at Ishanya Foundation
+              Complete the form below to register as an Educator or a staff member at Ishanya Foundation
             </CardDescription>
           </CardHeader>
-          <form onSubmit={handleSubmit}>
             <CardContent className="space-y-4">
               {step === 1 && (
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="firstName">First Name*</Label>
+                      <Label htmlFor="FirstName">First Name*</Label>
                       <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
+                        id="FirstName"
+                        name="FirstName"
+                        value={formData.FirstName}
                         onChange={handleChange}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="lastName">Last Name*</Label>
-                      <Input id="lastName" name="lastName" value={formData.lastName} onChange={handleChange} required />
+                      <Label htmlFor="LastName">Last Name*</Label>
+                      <Input id="LastName" name="LastName" value={formData.LastName} onChange={handleChange} required />
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email*</Label>
+                    <Label htmlFor="Email">Email*</Label>
                     <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
+                      id="Email"
+                      name="Email"
+                      type="Email"
+                      value={formData.Email}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password*</Label>
+                    <Label htmlFor="Password">Password*</Label>
                     <Input
-                      id="password"
-                      name="password"
-                      type="password"
-                      value={formData.password}
+                      id="Password"
+                      name="Password"
+                      type="Password"
+                      value={formData.Password}
                       onChange={handleChange}
                       required
                     />
@@ -159,12 +201,12 @@ export default function TeacherRegistrationPage() {
                     </p>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="phone">Phone Number*</Label>
-                    <Input id="phone" name="phone" type="tel" value={formData.phone} onChange={handleChange} required />
+                    <Label htmlFor="Phone">Phone Number</Label>
+                    <Input id="Phone" name="Phone" type="tel" value={formData.Phone} onChange={handleChange} required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="address">Address*</Label>
-                    <Textarea id="address" name="address" value={formData.address} onChange={handleChange} required />
+                    <Label htmlFor="WorkLocation">Work Location</Label>
+                    <Textarea id="WorkLocation" name="WorkLocation" value={formData.WorkLocation} onChange={handleChange} required />
                   </div>
                 </div>
               )}
@@ -173,17 +215,17 @@ export default function TeacherRegistrationPage() {
                 <div className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
-                      <Label htmlFor="dateOfBirth">Date of Birth*</Label>
+                      <Label htmlFor="DateOfBirth">Date of Birth*</Label>
                       <Input
-                        id="dateOfBirth"
-                        name="dateOfBirth"
+                        id="DateOfBirth"
+                        name="DateOfBirth"
                         type="date"
-                        value={formData.dateOfBirth}
+                        value={formData.DateOfBirth}
                         onChange={handleChange}
                         required
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="gender">Gender*</Label>
                       <Select
                         defaultValue={formData.gender}
@@ -199,13 +241,13 @@ export default function TeacherRegistrationPage() {
                           <SelectItem value="prefer-not-to-say">Prefer not to say</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
+                    </div> */}
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="qualification">Highest Qualification*</Label>
+                    <Label htmlFor="HighEducationQualification">Highest Qualification*</Label>
                     <Select
-                      defaultValue={formData.qualification}
-                      onValueChange={(value) => handleSelectChange("qualification", value)}
+                      defaultValue={formData.HighEducationQualification}
+                      onValueChange={(value) => handleSelectChange("HighEducationQualification", value)}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select qualification" />
@@ -219,7 +261,7 @@ export default function TeacherRegistrationPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
+                  {/* <div className="space-y-2">
                     <Label htmlFor="specialization">Specialization/Subject*</Label>
                     <Input
                       id="specialization"
@@ -275,10 +317,41 @@ export default function TeacherRegistrationPage() {
                         </div>
                       ))}
                     </div>
+                  </div> */}
+                   <div className="space-y-2">
+                    <Label>Resume/CV*</Label>
+                    <FileUploader
+                      onFileChange={(file) => handleFileChange("resume", file)}
+                      accept=".pdf,.doc,.docx"
+                      maxSize={5}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Upload your resume or CV. Max size: 5MB. Formats: PDF, DOC, DOCX.
+                    </p>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Photo*</Label>
+                    <FileUploader
+                      onFileChange={(file) => handleFileChange("photo", file)}
+                      accept=".jpg,.jpeg,.png"
+                      maxSize={2}
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Upload a recent passport-sized photo. Max size: 2MB. Formats: JPG, PNG.
+                    </p>
+                  </div>
+                  <div className="rounded-lg bg-secondary/50 p-4 text-sm">
+                    <p className="font-medium mb-2">Important Note:</p>
+                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                      <li>All registrations require admin approval before activation.</li>
+                      <li>You will receive an Email notification once your registration is approved.</li>
+                      <li>Please ensure all information provided is accurate and documents are clearly visible.</li>
+                      <li>Background verification may be conducted for all teaching positions.</li>
+                    </ul>
                   </div>
                 </div>
               )}
-
+{/* 
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -369,13 +442,13 @@ export default function TeacherRegistrationPage() {
                     <p className="font-medium mb-2">Important Note:</p>
                     <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
                       <li>All registrations require admin approval before activation.</li>
-                      <li>You will receive an email notification once your registration is approved.</li>
+                      <li>You will receive an Email notification once your registration is approved.</li>
                       <li>Please ensure all information provided is accurate and documents are clearly visible.</li>
                       <li>Background verification may be conducted for all teaching positions.</li>
                     </ul>
                   </div>
                 </div>
-              )}
+              )} */}
             </CardContent>
             <CardFooter className="flex flex-col space-y-4">
               <div className="w-full flex justify-between">
@@ -384,20 +457,24 @@ export default function TeacherRegistrationPage() {
                     Previous
                   </Button>
                 )}
-                {step < 3 ? (
+                {step < 2 ? (
                   <Button type="button" className={`${step > 1 ? "ml-auto" : "w-full"}`} onClick={nextStep}>
                     Next
                   </Button>
                 ) : (
+                  <form onSubmit={handleSubmit}>
                   <Button type="submit" className="ml-auto" disabled={isLoading}>
                     {isLoading ? "Submitting..." : "Submit Registration"}
                   </Button>
+                  </form>
+
+
                 )}
               </div>
               <div className="w-full flex justify-between items-center pt-2">
-                <div className="text-sm text-muted-foreground">Step {step} of 3</div>
+                <div className="text-sm text-muted-foreground">Step {step} of 2</div>
                 <div className="flex gap-1">
-                  {[1, 2, 3].map((s) => (
+                  {[1, 2].map((s) => (
                     <div key={s} className={`h-2 w-8 rounded-full ${s === step ? "bg-primary" : "bg-muted"}`} />
                   ))}
                 </div>
@@ -409,7 +486,6 @@ export default function TeacherRegistrationPage() {
                 </Link>
               </div>
             </CardFooter>
-          </form>
         </Card>
       </div>
     </div>

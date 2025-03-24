@@ -144,7 +144,7 @@ def approve_and_assign_educator():
 
 
 
-@admin_bp.route('/get-educators/<int:program_id>', methods=['GET'])
+@admin_bp.route('/get-educators-of-program/<int:program_id>', methods=['GET'])
 def get_educators_by_program(program_id):
     try:
         program = Program.query.get(program_id)

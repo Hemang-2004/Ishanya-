@@ -4,6 +4,7 @@ from flask_jwt_extended import create_access_token
 from werkzeug.utils import secure_filename
 import os
 from ocr import parse_aadhar, parse_cv
+from datetime import datetime, timezone
 
 
 auth_bp = Blueprint("auth", __name__)
@@ -42,33 +43,92 @@ def validate_required_fields(data, required_fields):
     if missing_fields:
         raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
 
+# @auth_bp.route("/register/educator", methods=["POST"])
+# def register_educator():
+#     """Handles registration for Educators."""
+#     try:
+#         data = request.get_json()
+
+#         # Required Fields
+#         required_fields = ["FirstName", "LastName", "Email", "Password"]
+#         validate_required_fields(data, required_fields)
+
+#         # Create Educator with required fields
+#         educator = Educator(
+#             Name=f"{data["FirstName"]} {data["LastName"]}",
+#             Email=data["Email"]
+#         )
+#         educator.set_password(data["Password"])  # Hash password using model method
+
+#         # Fill optional fields if provided
+#         optional_fields = [
+#             "Photo", "Designation", "ProgramID", "Phone", "HighEducationQualification",
+#             "DateOfBirth", "DateOfJoining", "DateOfLeaving", "Status", "Tenure",
+#             "WorkLocation", "EmergencyContactName", "EmergencyContactNumber", "BloodGroup"
+#         ]
+#         for field in optional_fields:
+#             if field in data:
+#                 setattr(educator, field, data[field])
+
+#         db.session.add(educator)
+#         db.session.commit()
+
+#         return jsonify({"message": "Educator registered successfully!"}), 201
+
+#     except ValueError as e:
+#         return jsonify({"error": str(e)}), 400
+
+#     except Exception as e:
+#         return jsonify({"error": "An error occurred. Please try again."}), 500
+
 @auth_bp.route("/register/educator", methods=["POST"])
 def register_educator():
     """Handles registration for Educators."""
     try:
-        data = request.get_json()
+        data = request.form.to_dict()
+        resume_file = request.files.get("resume")
+        photo_file = request.files.get("photo")
 
         # Required Fields
-        required_fields = ["Name", "Email", "Password"]
+        required_fields = ["FirstName", "LastName", "Email", "Password"]
         validate_required_fields(data, required_fields)
 
-        # Create Educator with required fields
+        # Create Educator object
         educator = Educator(
-            Name=data["Name"],
+            Name=f"{data["FirstName"]} {data["LastName"]}",
             Email=data["Email"]
         )
         educator.set_password(data["Password"])  # Hash password using model method
 
-        # Fill optional fields if provided
         optional_fields = [
-            "Photo", "Designation", "ProgramID", "Phone", "HighEducationQualification",
+            "Designation", "ProgramID", "Phone", "HighEducationQualification",
             "DateOfBirth", "DateOfJoining", "DateOfLeaving", "Status", "Tenure",
             "WorkLocation", "EmergencyContactName", "EmergencyContactNumber", "BloodGroup"
         ]
+        
         for field in optional_fields:
-            if field in data:
-                setattr(educator, field, data[field])
+            if field in data and data[field] != "":
+                if field == "DateOfBirth":
+                    setattr(educator, field, datetime.strptime(data[field], "%Y-%m-%d").date())
+                else:
+                    setattr(educator, field, data[field])
+            else:
+                setattr(educator, field, None)
 
+        # Handle File Uploads
+        if resume_file and allowed_file_CV(resume_file.filename):
+            resume_filename = secure_filename(resume_file.filename)
+            resume_path = os.path.join(UPLOAD_FOLDER, resume_filename)
+            resume_file.save(resume_path)
+            educator.CVFilePath = resume_path  # Save path in DB
+
+        if photo_file and allowed_file_aadhar(photo_file.filename):
+            photo_filename = secure_filename(photo_file.filename)
+            photo_path = os.path.join(UPLOAD_FOLDER, photo_filename)
+            photo_file.save(photo_path)
+            educator.Photo = photo_path  # Save path in DB
+
+        # Save Educator to DB
         db.session.add(educator)
         db.session.commit()
 
@@ -78,41 +138,117 @@ def register_educator():
         return jsonify({"error": str(e)}), 400
 
     except Exception as e:
-        return jsonify({"error": "An error occurred. Please try again."}), 500
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+# @auth_bp.route("/register/student", methods=["POST"])
+# def register_student():
+#     """Handles registration for Students."""
+#     try:
+#         data = request.get_json()
+#         print("data ", data)
+#         # Required Fields
+#         required_fields = ["FirstName", "LastName", "Gender", "EmailID", "Password"]
+#         validate_required_fields(data, required_fields)
+
+#         # Create Student with required fields
+#         student = Student(
+#             FirstName=data["FirstName"],
+#             LastName=data["LastName"],
+#             Gender=data["Gender"],
+#             EmailID=data["EmailID"]
+#         )
+#         student.set_password(data["Password"])  # Hash password using model method
+
+#         # Fill optional fields if provided
+#         optional_fields = [
+#             "DateOfBirth", "Photo", "PrimaryDiagnosis", "Comorbidity", "UDID",
+#             "Enrollment", "Status", "IntegrationType", "ProgramID", "CurrentLevel",
+#             "Attendance", "DaysOfWeek", "PrimaryEducatorID", "SecondaryEducatorID",
+#             "FathersName", "MothersName", "BloodGroup", "Allergies", "ContactNumber",
+#             "AltContactNumber", "ParentsEmail", "Address", "Transport", "Strengths",
+#             "Weaknesses", "PreferredLanguage", "AssistiveDevices", "LearningStyle",
+#             "PreferredCommunicationStyle", "ParentAnnualIncome"
+#         ]
+#         # print("second printing....")
+#         # for field in optional_fields:
+#         #     if field in data:
+#         #         print(field, data[field])
+#         #         setattr(student, field, data[field])
+#         for field in optional_fields:
+#             if field in data and data[field] != "":
+#                 if field == "DateOfBirth":
+#                     setattr(student, field, datetime.strptime(data[field], "%Y-%m-%d").date())
+#                 elif field == "ParentAnnualIncome":
+#                     setattr(student, field, int(data[field]))
+#                 else:
+#                     setattr(student, field, data[field])
+#         else:
+#             setattr(student, field, None)
+
+#         db.session.add(student)
+#         db.session.commit()
+
+#         return jsonify({"message": "Student registered successfully!"}), 201
+
+#     except ValueError as e:
+#         return jsonify({"error": str(e)}), 400
+
+#     except Exception as e:
+#         return jsonify({"error": "An error occurred. Please try again."}), 500
+
 
 
 @auth_bp.route("/register/student", methods=["POST"])
 def register_student():
-    """Handles registration for Students."""
     try:
-        data = request.get_json()
-
-        # Required Fields
+        data = request.form.to_dict()
+        id_proof_file = request.files.get("idProof")
+        photo_file = request.files.get("Photo")
         required_fields = ["FirstName", "LastName", "Gender", "EmailID", "Password"]
         validate_required_fields(data, required_fields)
 
-        # Create Student with required fields
         student = Student(
             FirstName=data["FirstName"],
             LastName=data["LastName"],
             Gender=data["Gender"],
             EmailID=data["EmailID"]
         )
-        student.set_password(data["Password"])  # Hash password using model method
+        student.set_password(data["Password"])
 
-        # Fill optional fields if provided
-        optional_fields = [
-            "DateOfBirth", "Photo", "PrimaryDiagnosis", "Comorbidity", "UDID",
-            "Enrollment", "Status", "IntegrationType", "ProgramID", "CurrentLevel",
-            "Attendance", "DaysOfWeek", "PrimaryEducatorID", "SecondaryEducatorID",
-            "FathersName", "MothersName", "BloodGroup", "Allergies", "ContactNumber",
-            "AltContactNumber", "ParentsEmail", "Address", "Transport", "Strengths",
-            "Weaknesses", "PreferredLanguage", "AssistiveDevices", "LearningStyle",
-            "PreferredCommunicationStyle", "ParentAnnualIncome"
-        ]
+        if id_proof_file and allowed_file_CV(id_proof_file.filename):
+            id_proof_filename = secure_filename(id_proof_file.filename)
+            id_proof_path = os.path.join(UPLOAD_FOLDER, id_proof_filename)
+            id_proof_file.save(id_proof_path)
+            student.AadharFilePath = id_proof_path  # Save file path in DB
+
+        if photo_file and allowed_file_aadhar(photo_file.filename):
+            photo_filename = secure_filename(photo_file.filename)
+            photo_path = os.path.join(UPLOAD_FOLDER, photo_filename)
+            photo_file.save(photo_path)
+            student.Photo = photo_path
+            print(photo_path)
+
+        # Handle optional fields
+        optional_fields = ["DateOfBirth", "PrimaryDiagnosis", "Comorbidity", "UDID",
+                           "Enrollment", "Status", "IntegrationType", "ProgramID",
+                           "CurrentLevel", "Attendance", "DaysOfWeek", "PrimaryEducatorID",
+                           "SecondaryEducatorID", "FathersName", "MothersName", "BloodGroup",
+                           "Allergies", "ContactNumber", "AltContactNumber", "ParentsEmail",
+                           "Address", "Transport", "Strengths", "Weaknesses",
+                           "PreferredLanguage", "AssistiveDevices", "LearningStyle",
+                           "PreferredCommunicationStyle", "ParentAnnualIncome"]
+
         for field in optional_fields:
-            if field in data:
-                setattr(student, field, data[field])
+            if field in data and data[field] != "":
+                if field == "DateOfBirth":
+                    setattr(student, field, datetime.strptime(data[field], "%Y-%m-%d").date())
+                elif field == "ParentAnnualIncome":
+                    setattr(student, field, int(data[field]))
+                else:
+                    setattr(student, field, data[field])
+            else:
+                setattr(student, field, None)
 
         db.session.add(student)
         db.session.commit()
@@ -124,6 +260,7 @@ def register_student():
 
     except Exception as e:
         return jsonify({"error": "An error occurred. Please try again."}), 500
+
 
 
 UPLOAD_FOLDER = "uploads/"

@@ -46,15 +46,15 @@ export default function AdminDashboardLayout({
   const { t } = useLanguage()
 
   const navigation = [
-    { name: t("dashboard"), href: "/dashboard/admin", icon: Home },
-    { name: t("students"), href: "/dashboard/admin/students", icon: Users },
-    { name: t("staff"), href: "/dashboard/admin/staff", icon: UserCheck },
-    { name: t("programs"), href: "/dashboard/admin/programs", icon: Layers },
-    { name: t("analytics"), href: "/dashboard/admin/analytics", icon: PieChart },
-    { name: t("reports"), href: "/dashboard/admin/reports", icon: BarChart3 },
-    { name: t("funds"), href: "/dashboard/admin/funds", icon: DollarSign },
-    { name: t("registrationRequests"), href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
-    { name: t("settings"), href: "/dashboard/admin/settings", icon: Settings },
+    { name: t("Dashboard"), href: "/dashboard/admin", icon: Home },
+    { name: t("Students"), href: "/dashboard/admin/students", icon: Users },
+    { name: t("Staff"), href: "/dashboard/admin/staff", icon: UserCheck },
+    { name: t("Programs"), href: "/dashboard/admin/programs", icon: Layers },
+    { name: t("Analytics"), href: "/dashboard/admin/analytics", icon: PieChart },
+    { name: t("Reports"), href: "/dashboard/admin/reports", icon: BarChart3 },
+    { name: t("Funds"), href: "/dashboard/admin/funds", icon: DollarSign },
+    { name: t("Registration Requests"), href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
+    { name: t("Settings"), href: "/dashboard/admin/settings", icon: Settings },
   ]
 
   const NavLink = ({ item }: { item: (typeof navigation)[0] }) => {
