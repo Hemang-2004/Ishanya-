@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from models import Feedback, Student, db, Educator
+from models import Chat, Feedback, Program, Student, db, Educator
 from datetime import datetime, timezone
 import json
 
@@ -189,3 +189,74 @@ def submit_feedback(educator_id, student_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+    
+@educator_bp.route('/get-educators', methods=['GET'])
+def get_all_educators():
+    try:
+        educators = (
+            db.session.query(Educator, Program.ProgramName)
+            .join(Program, Educator.ProgramID == Program.ProgramID)
+            .filter(Educator.IsRegistered == True)
+            .all()
+        )
+
+        if not educators:
+            return jsonify({"message": "No educators found"}), 404
+
+        educator_list = [{
+            "educator_id": educator.EducatorID,
+            "name": educator.Name, 
+            "program_id": educator.ProgramID,
+            "program_name": program_name
+        } for educator, program_name in educators]
+
+        return jsonify({"educators": educator_list}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+    
+
+@educator_bp.route('/students/<int:educator_id>', methods=['GET'])
+def get_students_for_educator(educator_id):
+    try:
+        students = Student.query.filter(Student.PrimaryEducatorID == educator_id).all()
+        if not students:
+            return jsonify({"message": "No students found"}), 404
+
+        student_list = [{
+            "student_id": student.StudentID,
+            "name": f"{student.FirstName} {student.LastName}"
+        } for student in students]
+
+        return jsonify({"educator_id": educator_id, "students": student_list}), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+@educator_bp.route('/send-message', methods=['POST'])
+def send_message():
+    try:
+        data = request.get_json()
+        student_id = data.get('student_id')
+        educator_id = data.get('educator_id')
+        message = data.get('message')
+
+        if not student_id or not educator_id or not message:
+            return jsonify({"error": "Missing required fields"}), 400
+
+        new_message = Chat(
+            StudentID=student_id,
+            EducatorID=educator_id,
+            Message=message,
+            DateTime=datetime.now(timezone.utc)
+        )
+
+        db.session.add(new_message)
+        db.session.commit()
+
+        return jsonify({"message": "Message sent successfully"}), 201
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+    
+
+
