@@ -22,6 +22,37 @@ import RadialProgress from "../components/RadialProgress"
 import AttendanceGraph from "../components/AttendanceGraph"
 import AIChat from "../components/AIChat"
 
+// FAQ data
+/*
+const faqData = [
+  {
+    id: "1",
+    question: "How do I join a live session?",
+    answer: "You can join a live session by clicking on the session in the 'Upcoming Sessions' section. The app will automatically connect you to the virtual classroom at the scheduled time."
+  },
+  {
+    id: "2",
+    question: "How do I submit assignments?",
+    answer: "To submit assignments, go to the 'Pending Assignments' section, select the assignment you want to submit, and follow the upload instructions. You can attach files, images, or type your response directly."
+  },
+  {
+    id: "3",
+    question: "How can I contact my teachers?",
+    answer: "You can contact your teachers through the chat feature. Click on the floating chat button or use the 'Messages From Teachers' section to start a conversation."
+  },
+  {
+    id: "4",
+    question: "How is my attendance calculated?",
+    answer: "Your attendance is automatically tracked based on your participation in live sessions and completion of assignments. The attendance graph shows your monthly attendance percentage."
+  },
+  {
+    id: "5",
+    question: "What is the AI Chat feature?",
+    answer: "The AI Chat feature provides instant help with your studies. You can ask questions about your courses, get help with assignments, or seek clarification on any topic."
+  }
+]
+*/
+
 export default function Dashboard() {
   const scrollY = useRef(new Animated.Value(0)).current
   const [showMinHeader, setShowMinHeader] = useState(false)
@@ -35,6 +66,7 @@ export default function Dashboard() {
   const [showSessionsModal, setShowSessionsModal] = useState(false)
   const [showProfileModal, setShowProfileModal] = useState(false)
   const [studentName, setStudentName] = useState("Arjun")
+  // const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
 
   // Sample data
   const courses = [
@@ -231,6 +263,30 @@ export default function Dashboard() {
             ))}
           </View>
 
+          {/* FAQ Section */}
+          {/* <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Frequently Asked Questions</Text>
+            {faqData.map((faq) => (
+              <Pressable
+                key={faq.id}
+                style={styles.faqItem}
+                onPress={() => setExpandedFaq(expandedFaq === faq.id ? null : faq.id)}
+              >
+                <View style={styles.faqHeader}>
+                  <Text style={styles.faqQuestion}>{faq.question}</Text>
+                  <MaterialIcons
+                    name={expandedFaq === faq.id ? "expand-less" : "expand-more"}
+                    size={24}
+                    color="#8B4513"
+                  />
+                </View>
+                {expandedFaq === faq.id && (
+                  <Text style={styles.faqAnswer}>{faq.answer}</Text>
+                )}
+              </Pressable>
+            ))}
+          </View> */}
+
           {/* Add padding at the bottom for tab bar */}
           <View style={{ height: 80 }} />
         </Animated.ScrollView>
@@ -265,7 +321,7 @@ export default function Dashboard() {
               </View>
             </View>
           </View>
-        </Modal>
+         </Modal>
 
         {/* AI Chat Modal */}
         <Modal
@@ -701,5 +757,40 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: "JosefinSans-Bold",
   },
+
+  //faq section trial
+  // faqItem: {
+  //   backgroundColor: "#FFF8DC",
+  //   borderRadius: 12,
+  //   marginBottom: 10,
+  //   padding: 15,
+  //   borderWidth: 1,
+  //   borderColor: "#D2B48C",
+  //   shadowColor: "#000",
+  //   shadowOffset: { width: 0, height: 2 },
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  //   elevation: 3,
+  // },
+  // faqHeader: {
+  //   flexDirection: "row",
+  //   justifyContent: "space-between",
+  //   alignItems: "center",
+  // },
+  // faqQuestion: {
+  //   fontSize: 16,
+  //   fontWeight: "bold",
+  //   color: "#333",
+  //   fontFamily: "JosefinSans-Bold",
+  //   flex: 1,
+  //   marginRight: 10,
+  // },
+  // faqAnswer: {
+  //   fontSize: 14,
+  //   color: "#666",
+  //   marginTop: 10,
+  //   fontFamily: "JosefinSans-Regular",
+  //   lineHeight: 20,
+  // },
 })
 

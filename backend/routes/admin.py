@@ -65,7 +65,6 @@ def get_registration_requests():
             }
             for e in educators
         ]
-        educator_data = []
         print(student_data)
         return jsonify({"success": True, "students": student_data, "educators": educator_data}), 200
 
@@ -151,7 +150,7 @@ def get_educators_by_program(program_id):
         if not program:
             return jsonify({"success": False, "message": "Program not found"}), 404
 
-        educators = Educator.query.filter_by(ProgramID=program_id, isRegistered=True).all()
+        educators = Educator.query.filter_by(ProgramID=program_id, IsRegistered=True).all()
 
         educator_list = [
             {"EducatorID": edu.EducatorID, "Name": edu.Name, "Email": edu.Email}
@@ -162,8 +161,6 @@ def get_educators_by_program(program_id):
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
 
 
 
@@ -311,3 +308,14 @@ def get_top_performers(program_id):
     return jsonify(response), status
 
 
+@admin_bp.route('/get-programs', methods=['GET'])
+def get_programs():
+    try:
+        programs = Program.query.all()
+        programs_list = [
+            {"id": p.ProgramID, "name": p.ProgramName}
+            for p in programs
+        ]
+        return jsonify({"success": True, "programs": programs_list}), 200
+    except Exception as e:
+        return jsonify({"success": False, "message": str(e)}), 500
