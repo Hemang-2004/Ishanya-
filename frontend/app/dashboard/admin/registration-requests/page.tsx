@@ -115,7 +115,9 @@ export default function RegistrationRequestsPage() {
   
       if (data.success) {
         alert("Student approved and assigned successfully.");
-        setRequests((prev) => prev.filter((request) => request.id !== studentId)); 
+        setRequests((prev) => prev.filter((request) => request.id !== studentId));
+        window.location.reload(); 
+
       } else {
         alert(`Failed: ${data.message}`);
       }
@@ -217,6 +219,7 @@ export default function RegistrationRequestsPage() {
           headers: {
             "Content-Type": "application/json",
           },
+
           body: JSON.stringify({ id: id, role: role }),
         }
       );
@@ -226,6 +229,8 @@ export default function RegistrationRequestsPage() {
       if (data.success) {
         alert("User rejected successfully.");
         fetchRequests();
+        window.location.reload(); 
+
       } else {
         alert("Failed to reject user.");
       }
@@ -469,7 +474,7 @@ export default function RegistrationRequestsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Date Applied</TableHead>
+                      {/* <TableHead>Date Applied</TableHead> */}
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -508,8 +513,8 @@ export default function RegistrationRequestsPage() {
                             <div className="flex justify-end gap-2">
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4 mr-1" />
+                                  <Button variant="outline" size="sm" className="gap-1 bg-secondary hover:bg-secondary/90">
+                                    <Eye className="h-4 w-4 mr-1"  />
                                     View
                                   </Button>
                                 </DialogTrigger>
@@ -615,14 +620,14 @@ export default function RegistrationRequestsPage() {
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
-                              <Button
+                              {/* <Button
                                 variant="default"
                                 size="sm"
                                 className="gap-1 bg-secondary hover:bg-secondary/90"
                               >
                                 <CheckCircle className="h-4 w-4" />
                                 Approve
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="outline"
                                 size="sm"
@@ -649,7 +654,7 @@ export default function RegistrationRequestsPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Date Applied</TableHead>
+                      {/* <TableHead>Date Applied</TableHead> */}
                       <TableHead>Status</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -692,8 +697,9 @@ export default function RegistrationRequestsPage() {
                               </Button> */}
                               <Dialog>
                                 <DialogTrigger asChild>
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="h-4 w-4 mr-1" />
+                                  <Button variant="outline" size="sm" className="gap-1 bg-secondary hover:bg-secondary/90"
+                                  >
+                                    <Eye className="h-4 w-4 mr-1"  />
                                     View
                                   </Button>
                                 </DialogTrigger>
@@ -788,14 +794,14 @@ export default function RegistrationRequestsPage() {
                                   </DialogFooter>
                                 </DialogContent>
                               </Dialog>
-                              <Button
+                              {/* <Button
                                 variant="default"
                                 size="sm"
                                 className="gap-1 bg-secondary hover:bg-secondary/90"
                               >
                                 <CheckCircle className="h-4 w-4" />
                                 Approve
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="outline"
                                 size="sm"

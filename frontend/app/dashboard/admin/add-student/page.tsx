@@ -57,20 +57,62 @@ export default function AddStudentPage() {
     setFormData((prev) => ({ ...prev, [name]: checked }))
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  // const handleSubmit = (e: React.FormEvent) => {
+  //   e.preventDefault()
+  //   setIsSubmitting(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      toast({
-        title: "Student added successfully",
-        description: `${formData.firstName} ${formData.lastName} has been added to the system.`,
-      })
-      router.push("/dashboard/admin/students")
-    }, 1500)
-  }
+  //   // Simulate API call
+  //   setTimeout(() => {
+  //     setIsSubmitting(false)
+  //     toast({
+  //       title: "Student added successfully",
+  //       description: `${formData.firstName} ${formData.lastName} has been added to the system.`,
+  //     })
+  //     router.push("/dashboard/admin/students")
+  //   }, 1500)
+  // }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const formDataToSend = new FormData();
+    formDataToSend.append("FirstName", formData.firstName);
+    formDataToSend.append("LastName", formData.lastName);
+    formDataToSend.append("EmailID", formData.email);
+    formDataToSend.append("Phone", formData.phone);
+    formDataToSend.append("DateOfBirth", formData.dateOfBirth);
+    formDataToSend.append("Gender", formData.gender);
+    formDataToSend.append("Address", formData.address);
+    formDataToSend.append("FathersName", formData.guardianName);
+    formDataToSend.append("AltContactNumber", formData.guardianContact);
+    formDataToSend.append("ProgramID", formData.program);
+    formDataToSend.append("IsRegistered", "1");
+    
+    if (formData.photo) {
+        formDataToSend.append("photo", formData.photo);
+    }
+    
+    if (formData.idProof) {
+        formDataToSend.append("idProof", formData.idProof);
+    }
+
+    try {
+        const response = await fetch("http://localhost:5000/auth/register/student", {
+            method: "POST",
+            body: formDataToSend, // No need to set Content-Type; browser will handle it
+        });
+
+        const result = await response.json();
+        if (response.ok) {
+            console.log("Registration successful:", result);
+        } else {
+            console.error("Registration failed:", result);
+        }
+    } catch (error) {
+        console.error("Error submitting form:", error);
+    }
+};
+
 
   const handleDocumentUpload = (file: File | null) => {
     if (file) {

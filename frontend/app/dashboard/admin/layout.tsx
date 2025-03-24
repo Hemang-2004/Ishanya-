@@ -1,8 +1,66 @@
+// "use client"
+
+// import type React from "react"
+
+// import { useState } from "react"
+// import Link from "next/link"
+// import { usePathname } from "next/navigation"
+// import { Button } from "@/components/ui/button"
+// import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+// import {
+//   BarChart3,
+//   Users,
+//   Settings,
+//   LogOut,
+//   Menu,
+//   Bell,
+//   Search,
+//   Home,
+//   UserCheck,
+//   UserPlus,
+//   Layers,
+//   DollarSign,
+//   PieChart,
+// } from "lucide-react"
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuLabel,
+//   DropdownMenuSeparator,
+//   DropdownMenuTrigger,
+// } from "@/components/ui/dropdown-menu"
+// import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
+// import { Input } from "@/components/ui/input"
+// import { Badge } from "@/components/ui/badge"
+// import { IshanyaLogo } from "@/components/ishanya-logo"
+// import { useLanguage } from "@/components/language-provider"
+
+// export default function AdminDashboardLayout({
+//   children,
+// }: {
+//   children: React.ReactNode
+// }) {
+//   const pathname = usePathname()
+//   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+//   const { t } = useLanguage()
+
+//   const navigation = [
+//     { name: t("Dashboard"), href: "/dashboard/admin", icon: Home },
+//     { name: t("Students"), href: "/dashboard/admin/students", icon: Users },
+//     { name: t("Staff"), href: "/dashboard/admin/staff", icon: UserCheck },
+//     { name: t("Programs"), href: "/dashboard/admin/programs", icon: Layers },
+//     { name: t("Analytics"), href: "/dashboard/admin/analytics", icon: PieChart },
+//     { name: t("Reports"), href: "/dashboard/admin/reports", icon: BarChart3 },
+//     { name: t("Funds"), href: "/dashboard/admin/funds", icon: DollarSign },
+//     { name: t("Registration Requests"), href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
+//     { name: t("Settings"), href: "/dashboard/admin/settings", icon: Settings },
+//   ]
+
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -44,6 +102,24 @@ export default function AdminDashboardLayout({
   const pathname = usePathname()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const { t } = useLanguage()
+  const [registrationCount, setRegistrationCount] = useState(0)
+
+  useEffect(() => {
+    async function fetchRegistrationRequests() {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/admins/registration-requests")
+        const data = await response.json()
+        if (data.success) {
+          const count = (data.students?.length || 0) + (data.educators?.length || 0)
+          setRegistrationCount(count)
+        }
+      } catch (error) {
+        console.error("Error fetching registration requests:", error)
+      }
+    }
+
+    fetchRegistrationRequests()
+  }, [])
 
   const navigation = [
     { name: t("Dashboard"), href: "/dashboard/admin", icon: Home },
@@ -53,9 +129,15 @@ export default function AdminDashboardLayout({
     { name: t("Analytics"), href: "/dashboard/admin/analytics", icon: PieChart },
     { name: t("Reports"), href: "/dashboard/admin/reports", icon: BarChart3 },
     { name: t("Funds"), href: "/dashboard/admin/funds", icon: DollarSign },
-    { name: t("Registration Requests"), href: "/dashboard/admin/registration-requests", icon: UserPlus, badge: 5 },
+    {
+      name: t("Registration Requests"),
+      href: "/dashboard/admin/registration-requests",
+      icon: UserPlus,
+      badge: registrationCount
+    },
     { name: t("Settings"), href: "/dashboard/admin/settings", icon: Settings },
   ]
+
 
   const NavLink = ({ item }: { item: (typeof navigation)[0] }) => {
     const isActive = pathname === item.href

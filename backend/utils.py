@@ -4,6 +4,13 @@ from sqlalchemy import func, text
 def num_registered_students():
     return Student.query.filter_by(IsRegistered=True, Status='Active').count()
 
+def students_pending():
+    return Student.query.filter_by(IsRegistered=False).all()
+
+def educators_pending():
+    return Educator.query.filter_by(IsRegistered=False).all()
+
+
 def num_dropouts():
     return Student.query.filter_by(IsRegistered=True, Status='Discontinued').count()
 

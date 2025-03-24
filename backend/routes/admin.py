@@ -65,13 +65,10 @@ def get_registration_requests():
             }
             for e in educators
         ]
-        print(student_data)
         return jsonify({"success": True, "students": student_data, "educators": educator_data}), 200
 
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
-
-
 
 
 @admin_bp.route('/reject-registration', methods=['POST'])
@@ -203,6 +200,7 @@ def approve_and_assign_student():
         student.DateOfJoining = datetime.now(timezone.utc)
         student.ProgramID = program_id
         student.PrimaryEducatorID = primary_educator_id
+        student.Status = "Active"
 
         db.session.commit()
         return jsonify({"success": True, "message": "Student approved and assigned to program and educators successfully"}), 200

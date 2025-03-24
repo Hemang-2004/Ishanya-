@@ -1,5 +1,5 @@
 from app import db, app
-from models import Program, Educator, Student
+from models import Program, Educator, Student, Admin
 from faker import Faker
 from datetime import date, timedelta
 import random
@@ -46,6 +46,27 @@ with app.app_context():
         educators.append(educator)
 
     db.session.add_all(educators)
+    db.session.commit()
+
+
+    # --- Add Admin Users ---
+    admins = [
+        Admin(
+            AdminName="Super Admin",
+            Email="admin@example.com",
+            PasswordHash="admin123"
+        ),
+        Admin(
+            AdminName="Support Admin",
+            Email="support@example.com",
+            PasswordHash="support123"
+        )
+    ]
+    
+    for admin in admins:
+        admin.set_password('test123')
+        
+    db.session.add_all(admins)
     db.session.commit()
 
     # --- Add Students ---
