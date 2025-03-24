@@ -146,6 +146,7 @@ class Chat(db.Model):
     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'))
     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'))
     DateTime = db.Column(db.DateTime)
+    SenderType = db.Column(db.String(10), nullable=False)  # 'student' or 'educator'
     Message = db.Column(db.Text)
 
 
