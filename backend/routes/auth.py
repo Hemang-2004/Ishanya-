@@ -107,13 +107,16 @@ def register_educator():
         optional_fields = [
             "Designation", "ProgramID", "Phone", "HighEducationQualification",
             "DateOfBirth", "DateOfJoining", "DateOfLeaving", "Status", "Tenure",
-            "WorkLocation", "EmergencyContactName", "EmergencyContactNumber", "BloodGroup"
+            "WorkLocation", "EmergencyContactName", "EmergencyContactNumber", "BloodGroup", "IsRegistered"
         ]
         
         for field in optional_fields:
             if field in data and data[field] != "":
                 if field == "DateOfBirth":
                     setattr(educator, field, datetime.strptime(data[field], "%Y-%m-%d").date())
+                elif field == "IsRegistered":
+                    IsRegistered = data[field] == "1"
+                    setattr(educator, field, IsRegistered)
                 else:
                     setattr(educator, field, data[field])
             else:
@@ -241,7 +244,7 @@ def register_student():
                            "Allergies", "ContactNumber", "AltContactNumber", "ParentsEmail",
                            "Address", "Transport", "Strengths", "Weaknesses",
                            "PreferredLanguage", "AssistiveDevices", "LearningStyle",
-                           "PreferredCommunicationStyle", "ParentAnnualIncome"]
+                           "PreferredCommunicationStyle", "ParentAnnualIncome", "IsRegistered"]
 
         for field in optional_fields:
             if field in data and data[field] != "":
@@ -249,6 +252,9 @@ def register_student():
                     setattr(student, field, datetime.strptime(data[field], "%Y-%m-%d").date())
                 elif field == "ParentAnnualIncome":
                     setattr(student, field, int(data[field]))
+                elif field == "IsRegistered":
+                    IsRegistered = data[field] == "1"
+                    setattr(student, field, IsRegistered)
                 else:
                     setattr(student, field, data[field])
             else:
