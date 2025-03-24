@@ -1,6 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin
+import json
 
 db = SQLAlchemy()
 bcrypt = Bcrypt()
@@ -85,8 +86,8 @@ class Student(UserMixin, db.Model):
     ParentsEmail = db.Column(db.String(50))
     Address = db.Column(db.String(100))
     Transport = db.Column(db.String(3))
-    Strengths = db.Column(db.Text)
-    Weaknesses = db.Column(db.Text)
+    # Strengths = db.Column(db.Text)
+    # Weaknesses = db.Column(db.Text)
     PreferredLanguage = db.Column(db.String(15))
     AssistiveDevices = db.Column(db.Text)
     LearningStyle = db.Column(db.String(15))
@@ -119,12 +120,42 @@ class Assessment(db.Model):
     SuggestedProgram = db.Column(db.Integer, db.ForeignKey('program.ProgramID'))
     Comments = db.Column(db.Text)
 
+# class Feedback(db.Model):
+#     __tablename__ = 'feedback'
+#     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'), primary_key=True)
+#     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'), primary_key=True)
+#     Date = db.Column(db.Date, primary_key=True)
+#     Comments = db.Column(db.Text)
+#     TPS = db.Column(db.Integer)
+#     Attendance = db.Column(db.Integer)
+#     OrganizationPlanning = db.Column(db.Integer)
+#     TimeManagement = db.Column(db.Integer)
+#     TaskInitiationCompletion = db.Column(db.Integer)
+#     SelfCareIndependence = db.Column(db.Integer)
+#     PeerInteraction = db.Column(db.Integer)
+#     EmpathyPerspectiveTaking = db.Column(db.Integer)
+#     FocusAttention = db.Column(db.Integer)
+#     CuriosityInquiry = db.Column(db.Integer)
+#     PersistenceProblemSolving = db.Column(db.Integer)
+#     CommunicationSkills = db.Column(db.Integer)
+#     ArtisticExpression = db.Column(db.Integer)
+#     MovementPlay = db.Column(db.Integer)
+#     Strengths = db.Column(db.Text)
+#     Weaknesses = db.Column(db.Text)
+
 class Feedback(db.Model):
     __tablename__ = 'feedback'
+
     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'), primary_key=True)
     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'), primary_key=True)
     Date = db.Column(db.Date, primary_key=True)
+
+    # Text fields
     Comments = db.Column(db.Text)
+    Strengths = db.Column(db.Text)
+    Weaknesses = db.Column(db.Text)
+
+    # Integer rating fields
     TPS = db.Column(db.Integer)
     Attendance = db.Column(db.Integer)
     OrganizationPlanning = db.Column(db.Integer)
@@ -139,6 +170,64 @@ class Feedback(db.Model):
     CommunicationSkills = db.Column(db.Integer)
     ArtisticExpression = db.Column(db.Integer)
     MovementPlay = db.Column(db.Integer)
+
+    FeedbackMetrics = db.Column(db.Text, nullable=True)  # Storing JSON as a string
+
+    def __init__(self, StudentID, EducatorID, Date, Comments=None, Strengths=None, Weaknesses=None, 
+                 TPS=None, Attendance=None, OrganizationPlanning=None, TimeManagement=None, 
+                 TaskInitiationCompletion=None, SelfCareIndependence=None, PeerInteraction=None, 
+                 EmpathyPerspectiveTaking=None, FocusAttention=None, CuriosityInquiry=None, 
+                 PersistenceProblemSolving=None, CommunicationSkills=None, ArtisticExpression=None, 
+                 MovementPlay=None, FeedbackMetrics=None):
+        
+        self.StudentID = StudentID
+        self.EducatorID = EducatorID
+        self.Date = Date
+        self.Comments = Comments
+        self.Strengths = Strengths
+        self.Weaknesses = Weaknesses
+        self.TPS = TPS
+        self.Attendance = Attendance
+        self.OrganizationPlanning = OrganizationPlanning
+        self.TimeManagement = TimeManagement
+        self.TaskInitiationCompletion = TaskInitiationCompletion
+        self.SelfCareIndependence = SelfCareIndependence
+        self.PeerInteraction = PeerInteraction
+        self.EmpathyPerspectiveTaking = EmpathyPerspectiveTaking
+        self.FocusAttention = FocusAttention
+        self.CuriosityInquiry = CuriosityInquiry
+        self.PersistenceProblemSolving = PersistenceProblemSolving
+        self.CommunicationSkills = CommunicationSkills
+        self.ArtisticExpression = ArtisticExpression
+        self.MovementPlay = MovementPlay
+        self.FeedbackMetrics = json.dumps(FeedbackMetrics) if FeedbackMetrics else json.dumps({})  # Ensure JSON format
+
+    def to_dict(self):
+        return {
+            "StudentID": self.StudentID,
+            "EducatorID": self.EducatorID,
+            "Date": self.Date.strftime("%Y-%m-%d"),
+            "Comments": self.Comments,
+            "Strengths": self.Strengths,
+            "Weaknesses": self.Weaknesses,
+            "TPS": self.TPS,
+            "Attendance": self.Attendance,
+            "OrganizationPlanning": self.OrganizationPlanning,
+            "TimeManagement": self.TimeManagement,
+            "TaskInitiationCompletion": self.TaskInitiationCompletion,
+            "SelfCareIndependence": self.SelfCareIndependence,
+            "PeerInteraction": self.PeerInteraction,
+            "EmpathyPerspectiveTaking": self.EmpathyPerspectiveTaking,
+            "FocusAttention": self.FocusAttention,
+            "CuriosityInquiry": self.CuriosityInquiry,
+            "PersistenceProblemSolving": self.PersistenceProblemSolving,
+            "CommunicationSkills": self.CommunicationSkills,
+            "ArtisticExpression": self.ArtisticExpression,
+            "MovementPlay": self.MovementPlay,
+            "FeedbackMetrics": json.loads(self.FeedbackMetrics) if self.FeedbackMetrics else {},
+        }
+
+
 
 class Chat(db.Model):
     __tablename__ = 'chat'

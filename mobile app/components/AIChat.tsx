@@ -1,6 +1,6 @@
-// "use client"
+"use client"
 
-import React from "react"
+import type React from "react"
 import { useState, useRef, useEffect } from "react"
 import {
   View,
@@ -13,10 +13,8 @@ import {
   Keyboard,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
-// Import for React Native environment
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
 interface Message {
@@ -27,13 +25,12 @@ interface Message {
 }
 
 interface AIChatProps {
-  studentName: string
+  studentName?: string // Made optional
   onClose: () => void
-  apiKey: string // Correct type declaration
- // Gemini API key
+  apiKey: string // Changed to accept the key as a prop
 }
 
-const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
+const AIChat: React.FC<AIChatProps> = ({ studentName = "Student", onClose, apiKey }) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
@@ -45,23 +42,23 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
   const [inputText, setInputText] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const scrollViewRef = useRef<ScrollView>(null)
-  
+
   // Generate response using Gemini API
   const generateGeminiResponse = async (userMessage: string) => {
     setIsLoading(true)
-    
+
     try {
-      // Initialize the API with your key
+      // Initialize the API with the provided key
       const genAI = new GoogleGenerativeAI(apiKey)
-      
+
       // Get the model
-      const model = genAI.getGenerativeModel({ model: "gemini-pro-vision" })
-      
+      const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-001" })
+
       // Create conversation history for context
       const conversationHistory = messages
-        .map(msg => `${msg.sender === 'user' ? studentName : 'Assistant'}: ${msg.text}`)
-        .join('\n')
-      
+        .map((msg) => `${msg.sender === "user" ? studentName : "Assistant"}: ${msg.text}`)
+        .join("\n")
+
       // Create the prompt with context
       const prompt = `
         You are an AI study assistant helping ${studentName} with their academic queries.
@@ -74,11 +71,11 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
         ${studentName}: ${userMessage}
         Assistant:
       `
-      
+
       // Generate content
       const result = await model.generateContent(prompt)
       const response = result.response.text()
-      
+
       // Add AI response to messages
       const newMessage: Message = {
         id: Date.now().toString(),
@@ -86,11 +83,11 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
         sender: "ai",
         timestamp: new Date(),
       }
-      
-      setMessages(prev => [...prev, newMessage])
+
+      setMessages((prev) => [...prev, newMessage])
     } catch (error) {
       console.error("Error with Gemini API:", error)
-      
+
       // Fallback response
       const fallbackMessage: Message = {
         id: Date.now().toString(),
@@ -98,8 +95,8 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
         sender: "ai",
         timestamp: new Date(),
       }
-      
-      setMessages(prev => [...prev, fallbackMessage])
+
+      setMessages((prev) => [...prev, fallbackMessage])
     } finally {
       setIsLoading(false)
     }
@@ -115,7 +112,7 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
       timestamp: new Date(),
     }
 
-    setMessages(prev => [...prev, userMessage])
+    setMessages((prev) => [...prev, userMessage])
     setInputText("")
 
     // Generate AI response
@@ -138,7 +135,7 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
   return (
     <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : "height"} style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>AI Assistant</Text>
+        <Text style={styles.headerTitle}>AI Study Assistant</Text>
         <Pressable onPress={onClose} style={styles.closeButton}>
           <MaterialIcons name="close" size={24} color="#333" />
         </Pressable>
@@ -148,20 +145,17 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
         {messages.map((message) => (
           <View
             key={message.id}
-            style={[styles.messageBubble, message.sender === "user" ? styles.userMessage : styles.aiMessage]}
+            style={[styles.messageBubble, message.sender === "user" ? styles.userBubble : styles.aiBubble]}
           >
-            <Text style={[styles.messageText, { color: message.sender === "user" ? "#fff" : "#333" }]}>
+            <Text style={[styles.messageText, message.sender === "user" ? styles.userText : styles.aiText]}>
               {message.text}
             </Text>
-            <Text style={[styles.timestamp, { color: message.sender === "user" ? "#eee" : "#888" }]}>
-              {formatTime(message.timestamp)}
-            </Text>
+            <Text style={styles.timestamp}>{formatTime(message.timestamp)}</Text>
           </View>
         ))}
-
         {isLoading && (
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="small" color="#408c4c" />
+            <ActivityIndicator size="small" color="#007AFF" />
             <Text style={styles.loadingText}>Thinking...</Text>
           </View>
         )}
@@ -170,18 +164,18 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose, apiKey }) => {
       <View style={styles.inputContainer}>
         <TextInput
           style={styles.input}
-          placeholder="Ask me anything..."
           value={inputText}
           onChangeText={setInputText}
+          placeholder="Ask me anything about your studies..."
+          placeholderTextColor="#999"
           multiline
-          maxLength={500}
         />
         <Pressable
-          style={[styles.sendButton, !inputText.trim() && styles.sendButtonDisabled]}
           onPress={handleSend}
-          disabled={!inputText.trim()}
+          style={({ pressed }) => [styles.sendButton, pressed && styles.sendButtonPressed]}
+          disabled={inputText.trim() === "" || isLoading}
         >
-          <MaterialIcons name="send" size={24} color={inputText.trim() ? "#408c4c" : "#ccc"} />
+          <MaterialIcons name="send" size={24} color={inputText.trim() === "" || isLoading ? "#ccc" : "#007AFF"} />
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -203,9 +197,8 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: "bold",
+    fontWeight: "600",
     color: "#333",
-    fontFamily: "JosefinSans-Bold",
   },
   closeButton: {
     padding: 4,
@@ -215,44 +208,52 @@ const styles = StyleSheet.create({
   },
   messagesContent: {
     padding: 16,
+    paddingBottom: 24,
   },
   messageBubble: {
     maxWidth: "80%",
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 12,
   },
-  userMessage: {
+  userBubble: {
+    backgroundColor: "#007AFF",
     alignSelf: "flex-end",
-    backgroundColor: "#408c4c",
+    borderBottomRightRadius: 4,
   },
-  aiMessage: {
+  aiBubble: {
+    backgroundColor: "#F0F0F0",
     alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
+    borderBottomLeftRadius: 4,
   },
   messageText: {
     fontSize: 16,
-    fontFamily: "JosefinSans-Regular",
+  },
+  userText: {
+    color: "#fff",
+  },
+  aiText: {
+    color: "#333",
   },
   timestamp: {
-    fontSize: 10,
-    alignSelf: "flex-end",
+    fontSize: 12,
+    color: "#999",
     marginTop: 4,
+    alignSelf: "flex-end",
   },
   loadingContainer: {
     flexDirection: "row",
     alignItems: "center",
     alignSelf: "flex-start",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#F0F0F0",
     padding: 12,
-    borderRadius: 16,
+    borderRadius: 18,
     marginBottom: 12,
   },
   loadingText: {
-    marginLeft: 8,
     fontSize: 14,
     color: "#666",
-    fontFamily: "JosefinSans-Regular",
+    marginLeft: 8,
   },
   inputContainer: {
     flexDirection: "row",
@@ -263,20 +264,21 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "#F0F0F0",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 10,
-    maxHeight: 100,
-    fontFamily: "JosefinSans-Regular",
+    fontSize: 16,
+    maxHeight: 120,
   },
   sendButton: {
     marginLeft: 12,
     padding: 8,
   },
-  sendButtonDisabled: {
-    opacity: 0.5,
+  sendButtonPressed: {
+    opacity: 0.7,
   },
 })
 
 export default AIChat
+
