@@ -2,7 +2,8 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -33,6 +34,8 @@ export default function StudentRegistrationPage() {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
+  const searchParams = useSearchParams();
+
   const [formData, setFormData] = useState({
     FirstName: "",
     LastName: "",
@@ -66,6 +69,41 @@ export default function StudentRegistrationPage() {
     // bio: "",
   });
 
+  useEffect(() => {
+    const first_name = searchParams.get("first_name");
+    const last_name = searchParams.get("last_name");
+    let date_of_birth = searchParams.get("date_of_birth");
+    let gender = searchParams.get("gender");
+    let address = searchParams.get("address");
+
+    if (date_of_birth) {
+      const parts = date_of_birth.split("-");
+      if (parts.length === 3 && parts[1].length === 2 && parts[2].length === 2) {
+        const [year, day, month] = parts; // Rearrange day and month
+        date_of_birth = `${year}-${month}-${day}`;
+      }
+    }
+
+    if (gender) {
+      gender = gender.toLowerCase(); // Convert "Female" → "female"
+    }
+
+    if (address?.toLowerCase() === "null") {
+      address = "";
+    }
+
+    setFormData((prev) => ({
+      ...prev,
+      FirstName: first_name || prev.FirstName,
+      LastName: last_name || prev.LastName,
+      DateOfBirth: date_of_birth || prev.DateOfBirth,
+      Gender: gender || prev.Gender,
+      Address: address || prev.Address,
+    }));
+  }, [searchParams]);
+
+  console.log("DOB ", formData.DateOfBirth);
+  console.log("gender ", formData.Gender)
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
