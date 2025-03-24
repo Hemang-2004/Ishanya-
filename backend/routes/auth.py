@@ -46,43 +46,6 @@ def validate_required_fields(data, required_fields):
     if missing_fields:
         raise ValueError(f"Missing required fields: {', '.join(missing_fields)}")
 
-# @auth_bp.route("/register/educator", methods=["POST"])
-# def register_educator():
-#     """Handles registration for Educators."""
-#     try:
-#         data = request.get_json()
-
-#         # Required Fields
-#         required_fields = ["FirstName", "LastName", "Email", "Password"]
-#         validate_required_fields(data, required_fields)
-
-#         # Create Educator with required fields
-#         educator = Educator(
-#             Name=f"{data["FirstName"]} {data["LastName"]}",
-#             Email=data["Email"]
-#         )
-#         educator.set_password(data["Password"])  # Hash password using model method
-
-#         # Fill optional fields if provided
-#         optional_fields = [
-#             "Photo", "Designation", "ProgramID", "Phone", "HighEducationQualification",
-#             "DateOfBirth", "DateOfJoining", "DateOfLeaving", "Status", "Tenure",
-#             "WorkLocation", "EmergencyContactName", "EmergencyContactNumber", "BloodGroup"
-#         ]
-#         for field in optional_fields:
-#             if field in data:
-#                 setattr(educator, field, data[field])
-
-#         db.session.add(educator)
-#         db.session.commit()
-
-#         return jsonify({"message": "Educator registered successfully!"}), 201
-
-#     except ValueError as e:
-#         return jsonify({"error": str(e)}), 400
-
-#     except Exception as e:
-#         return jsonify({"error": "An error occurred. Please try again."}), 500
 
 @auth_bp.route("/register/educator", methods=["POST"])
 def register_educator():
@@ -143,63 +106,6 @@ def register_educator():
 
     except Exception as e:
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
-
-
-# @auth_bp.route("/register/student", methods=["POST"])
-# def register_student():
-#     """Handles registration for Students."""
-#     try:
-#         data = request.get_json()
-#         print("data ", data)
-#         # Required Fields
-#         required_fields = ["FirstName", "LastName", "Gender", "EmailID", "Password"]
-#         validate_required_fields(data, required_fields)
-
-#         # Create Student with required fields
-#         student = Student(
-#             FirstName=data["FirstName"],
-#             LastName=data["LastName"],
-#             Gender=data["Gender"],
-#             EmailID=data["EmailID"]
-#         )
-#         student.set_password(data["Password"])  # Hash password using model method
-
-#         # Fill optional fields if provided
-#         optional_fields = [
-#             "DateOfBirth", "Photo", "PrimaryDiagnosis", "Comorbidity", "UDID",
-#             "Enrollment", "Status", "IntegrationType", "ProgramID", "CurrentLevel",
-#             "Attendance", "DaysOfWeek", "PrimaryEducatorID", "SecondaryEducatorID",
-#             "FathersName", "MothersName", "BloodGroup", "Allergies", "ContactNumber",
-#             "AltContactNumber", "ParentsEmail", "Address", "Transport", "Strengths",
-#             "Weaknesses", "PreferredLanguage", "AssistiveDevices", "LearningStyle",
-#             "PreferredCommunicationStyle", "ParentAnnualIncome"
-#         ]
-#         # print("second printing....")
-#         # for field in optional_fields:
-#         #     if field in data:
-#         #         print(field, data[field])
-#         #         setattr(student, field, data[field])
-#         for field in optional_fields:
-#             if field in data and data[field] != "":
-#                 if field == "DateOfBirth":
-#                     setattr(student, field, datetime.strptime(data[field], "%Y-%m-%d").date())
-#                 elif field == "ParentAnnualIncome":
-#                     setattr(student, field, int(data[field]))
-#                 else:
-#                     setattr(student, field, data[field])
-#         else:
-#             setattr(student, field, None)
-
-#         db.session.add(student)
-#         db.session.commit()
-
-#         return jsonify({"message": "Student registered successfully!"}), 201
-
-#     except ValueError as e:
-#         return jsonify({"error": str(e)}), 400
-
-#     except Exception as e:
-#         return jsonify({"error": "An error occurred. Please try again."}), 500
 
 
 

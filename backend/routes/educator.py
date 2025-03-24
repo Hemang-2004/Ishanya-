@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from models import Feedback, Student, db, Educator
 from datetime import datetime, timezone
+import json
 
 educator_bp = Blueprint("educator", __name__)
 
@@ -82,46 +83,102 @@ def get_graduated_students_of_an_educator(educator_id):
     return get_graduated_students_data(educator_id=educator_id, use_average=True)
 
 
+# @educator_bp.route('/give-feedback/<int:educator_id>/<int:student_id>', methods=['POST'])
+# def submit_feedback(educator_id, student_id):
+#     try: 
+#         data = request.json
+        
+#         required_fields = [
+#             "TPS", "Attendance", "OrganizationPlanning", "TimeManagement", 
+#             "TaskInitiationCompletion", "SelfCareIndependence", "PeerInteraction", 
+#             "EmpathyPerspectiveTaking", "FocusAttention", "CuriosityInquiry", 
+#             "PersistenceProblemSolving", "CommunicationSkills", 
+#             "ArtisticExpression", "MovementPlay", "Comments"
+#         ]
+        
+#         if not all(field in data for field in required_fields):
+#             return jsonify({"error": "Missing required fields"}), 400
+        
+#         # Validate the range (1-5) for numeric fields
+#         for field in required_fields[:-1]:  # Exclude "Comments"
+#             if not (1 <= data[field] <= 5):
+#                 return jsonify({"error": f"Invalid value for {field}, must be between 1 and 5"}), 400
+
+#         new_feedback = Feedback(
+#             StudentID = student_id,
+#             EducatorID = educator_id,
+#             TPS = data["TPS"],
+#             Attendance = data["Attendance"],
+#             OrganizationPlanning = data["OrganizationPlanning"],
+#             TimeManagement = data["TimeManagement"],
+#             TaskInitiationCompletion = data["TaskInitiationCompletion"],
+#             SelfCareIndependence = data["SelfCareIndependence"],
+#             PeerInteraction = data["PeerInteraction"],
+#             EmpathyPerspectiveTaking = data["EmpathyPerspectiveTaking"],
+#             FocusAttention = data["FocusAttention"],
+#             CuriosityInquiry = data["CuriosityInquiry"],
+#             PersistenceProblemSolving = data["PersistenceProblemSolving"],
+#             CommunicationSkills = data["CommunicationSkills"],
+#             ArtisticExpression = data["ArtisticExpression"],
+#             MovementPlay = data["MovementPlay"],
+#             Comments = data["Comments"],
+#             Date = datetime.now(timezone.utc)
+#         )
+
+#         db.session.add(new_feedback)
+#         db.session.commit()
+
+#         return jsonify({"message": "Feedback submitted successfully"}), 201
+
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+
 @educator_bp.route('/give-feedback/<int:educator_id>/<int:student_id>', methods=['POST'])
 def submit_feedback(educator_id, student_id):
-    try: 
+    try:
         data = request.json
-        
+
         required_fields = [
-            "TPS", "Attendance", "OrganizationPlanning", "TimeManagement", 
-            "TaskInitiationCompletion", "SelfCareIndependence", "PeerInteraction", 
-            "EmpathyPerspectiveTaking", "FocusAttention", "CuriosityInquiry", 
-            "PersistenceProblemSolving", "CommunicationSkills", 
+            "TPS", "Attendance", "OrganizationPlanning", "TimeManagement",
+            "TaskInitiationCompletion", "SelfCareIndependence", "PeerInteraction",
+            "EmpathyPerspectiveTaking", "FocusAttention", "CuriosityInquiry",
+            "PersistenceProblemSolving", "CommunicationSkills",
             "ArtisticExpression", "MovementPlay", "Comments"
         ]
-        
+
+        # Validate that all required fields exist in request data
         if not all(field in data for field in required_fields):
             return jsonify({"error": "Missing required fields"}), 400
-        
-        # Validate the range (1-5) for numeric fields
+
+        # Validate range (1-5) for numeric fields
         for field in required_fields[:-1]:  # Exclude "Comments"
             if not (1 <= data[field] <= 5):
                 return jsonify({"error": f"Invalid value for {field}, must be between 1 and 5"}), 400
 
+        # Extract additional feedback metrics as JSON
+        feedback_metrics = data.get("FeedbackMetrics", {})
+
+        # Create Feedback object
         new_feedback = Feedback(
-            StudentID = student_id,
-            EducatorID = educator_id,
-            TPS = data["TPS"],
-            Attendance = data["Attendance"],
-            OrganizationPlanning = data["OrganizationPlanning"],
-            TimeManagement = data["TimeManagement"],
-            TaskInitiationCompletion = data["TaskInitiationCompletion"],
-            SelfCareIndependence = data["SelfCareIndependence"],
-            PeerInteraction = data["PeerInteraction"],
-            EmpathyPerspectiveTaking = data["EmpathyPerspectiveTaking"],
-            FocusAttention = data["FocusAttention"],
-            CuriosityInquiry = data["CuriosityInquiry"],
-            PersistenceProblemSolving = data["PersistenceProblemSolving"],
-            CommunicationSkills = data["CommunicationSkills"],
-            ArtisticExpression = data["ArtisticExpression"],
-            MovementPlay = data["MovementPlay"],
-            Comments = data["Comments"],
-            Date = datetime.now(timezone.utc)
+            StudentID=student_id,
+            EducatorID=educator_id,
+            Date=datetime.now(timezone.utc),
+            TPS=data["TPS"],
+            Attendance=data["Attendance"],
+            OrganizationPlanning=data["OrganizationPlanning"],
+            TimeManagement=data["TimeManagement"],
+            TaskInitiationCompletion=data["TaskInitiationCompletion"],
+            SelfCareIndependence=data["SelfCareIndependence"],
+            PeerInteraction=data["PeerInteraction"],
+            EmpathyPerspectiveTaking=data["EmpathyPerspectiveTaking"],
+            FocusAttention=data["FocusAttention"],
+            CuriosityInquiry=data["CuriosityInquiry"],
+            PersistenceProblemSolving=data["PersistenceProblemSolving"],
+            CommunicationSkills=data["CommunicationSkills"],
+            ArtisticExpression=data["ArtisticExpression"],
+            MovementPlay=data["MovementPlay"],
+            Comments=data["Comments"],
+            FeedbackMetrics=json.dumps(feedback_metrics)  # Save as JSON string
         )
 
         db.session.add(new_feedback)
@@ -130,4 +187,5 @@ def submit_feedback(educator_id, student_id):
         return jsonify({"message": "Feedback submitted successfully"}), 201
 
     except Exception as e:
+        db.session.rollback()
         return jsonify({"error": str(e)}), 500
