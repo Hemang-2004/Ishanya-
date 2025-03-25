@@ -87,6 +87,7 @@ export default function SchedulerScreen() {
       <Text style={[styles.dateText, (item.isToday || item.date === selectedDate) && styles.selectedDayText]}>
         {item.date}
       </Text>
+      
     </TouchableOpacity>
   )
 
