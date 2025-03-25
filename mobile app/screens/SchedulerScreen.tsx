@@ -11,6 +11,20 @@ const CURRENT_DATE = new Date()
 const MONTH = CURRENT_DATE.toLocaleString("default", { month: "long" })
 const YEAR = CURRENT_DATE.getFullYear()
 
+// Add this interface before the EVENTS constant
+interface Event {
+  id: string;
+  title: string;
+  time: string;
+  location: string;
+  color: string;
+  instructor: string;
+  courseCode: string;
+  duration: string;
+  description: string;
+  prerequisites: string;
+  materials: string;
+}
 
 // Generate dates for the current week and beyond
 const generateWeekDates = () => {
@@ -43,13 +57,19 @@ const generateWeekDates = () => {
 }
 
 // Sample events data
-const EVENTS = [
+const EVENTS: Event[] = [
   {
     id: "1",
     title: "Digital Literacy Class",
     time: "10:00 AM - 11:30 AM",
     location: "Room 101",
     color: "#4CAF50",
+    instructor: "Dr. Sarah Johnson",
+    courseCode: "DL101",
+    duration: "1.5 hours",
+    description: "Learn essential digital skills including computer basics, internet navigation, and digital communication tools.",
+    prerequisites: "None",
+    materials: "Laptop/Tablet, Notebook",
   },
   {
     id: "2",
@@ -57,6 +77,12 @@ const EVENTS = [
     time: "1:00 PM - 2:30 PM",
     location: "Auditorium",
     color: "#2196F3",
+    instructor: "Prof. Michael Chen",
+    courseCode: "CSW202",
+    duration: "1.5 hours",
+    description: "Enhance your verbal and written communication skills through interactive exercises and real-world scenarios.",
+    prerequisites: "Basic English proficiency",
+    materials: "Course workbook, Pen",
   },
   {
     id: "3",
@@ -64,6 +90,12 @@ const EVENTS = [
     time: "4:00 PM",
     location: "Online",
     color: "#FF9800",
+    instructor: "Dr. Emily Brown",
+    courseCode: "PSD303",
+    duration: "1 hour",
+    description: "Final project submission and presentation for the Digital Skills Certification program.",
+    prerequisites: "Completed all course modules",
+    materials: "Project documentation, Presentation slides",
   },
   {
     id: "4",
@@ -71,6 +103,12 @@ const EVENTS = [
     time: "5:00 PM - 5:30 PM",
     location: "Room 205",
     color: "#9C27B0",
+    instructor: "Ms. Lisa Anderson",
+    courseCode: "COU404",
+    duration: "30 minutes",
+    description: "One-on-one counseling session to discuss academic progress and future course planning.",
+    prerequisites: "None",
+    materials: "Academic records, Course plan",
   },
 ]
 
@@ -81,6 +119,7 @@ export default function SchedulerScreen() {
   const [showDropdown, setShowDropdown] = useState(false)
   const [currentMonth, setCurrentMonth] = useState(CURRENT_DATE.getMonth())
   const [currentYear, setCurrentYear] = useState(CURRENT_DATE.getFullYear())
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null)
   const weekDates = generateWeekDates()
 
   const panResponder = PanResponder.create({
@@ -128,6 +167,10 @@ export default function SchedulerScreen() {
     setSelectedMonth(month)
     setSelectedYear(year)
     setShowDropdown(false)
+  }
+
+  const handleEventExpand = (eventId: string) => {
+    setExpandedEventId(expandedEventId === eventId ? null : eventId)
   }
 
   const renderCalendarDays = () => {
@@ -184,11 +227,17 @@ export default function SchedulerScreen() {
     </TouchableOpacity>
   )
 
-  const renderEventItem = ({ item }) => (
+  const renderEventItem = ({ item }: { item: Event }) => (
     <View style={[styles.eventItem, { borderLeftColor: item.color }]}>
       <View style={styles.eventHeader}>
         <Text style={styles.eventTitle}>{item.title}</Text>
-        <MaterialIcons name="more-vert" size={20} color="#666" />
+        <TouchableOpacity onPress={() => handleEventExpand(item.id)}>
+          <MaterialIcons 
+            name={expandedEventId === item.id ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+            size={24} 
+            color="#666" 
+          />
+        </TouchableOpacity>
       </View>
       <View style={styles.eventDetails}>
         <View style={styles.eventDetail}>
@@ -200,6 +249,35 @@ export default function SchedulerScreen() {
           <Text style={styles.eventDetailText}>{item.location}</Text>
         </View>
       </View>
+      
+      {expandedEventId === item.id && (
+        <View style={styles.expandedDetails}>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="person" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>Instructor: {item.instructor}</Text>
+          </View>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="class" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>Course Code: {item.courseCode}</Text>
+          </View>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="timer" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>Duration: {item.duration}</Text>
+          </View>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="description" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>{item.description}</Text>
+          </View>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="school" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>Prerequisites: {item.prerequisites}</Text>
+          </View>
+          <View style={styles.expandedDetailRow}>
+            <MaterialIcons name="inventory" size={16} color="#666" />
+            <Text style={styles.expandedDetailText}>Materials: {item.materials}</Text>
+          </View>
+        </View>
+      )}
     </View>
   )
 
@@ -496,6 +574,24 @@ const styles = StyleSheet.create({
   },
   dropdownSelectedText: {
     color: "#fff",
+  },
+  expandedDetails: {
+    marginTop: 15,
+    paddingTop: 15,
+    borderTopWidth: 1,
+    borderTopColor: "#D2B48C",
+  },
+  expandedDetailRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: 10,
+  },
+  expandedDetailText: {
+    fontSize: 14,
+    color: "#666",
+    marginLeft: 8,
+    flex: 1,
+    fontFamily: "JosefinSans-Regular",
   },
 })
 
