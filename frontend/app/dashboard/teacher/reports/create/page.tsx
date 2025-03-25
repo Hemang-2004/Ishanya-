@@ -160,7 +160,7 @@ export default function CreateReportPage() {
       StudentID: studentId, // Ensure this is provided
       EducatorID: user?.userId, // Replace with actual logged-in educator's ID
       Comments: formData.learningEnvironment, // Or any relevant field
-      TPS: 5, // Example logic
+      TPS: formData.tps, // Example logic
       Attendance: parseInt(formData.attendance) || 0,
       Term: parseInt(formData.term) || 1,
       FeedbackMetrics: {
