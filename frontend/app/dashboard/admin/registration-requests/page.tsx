@@ -58,6 +58,7 @@ export default function RegistrationRequestsPage() {
       if (data.success) {
         alert("Educator approved and assigned successfully.")
         setRequests((prev) => prev.filter((request) => request.id !== educatorId))
+        window.location.reload(); 
       } else {
         alert(`Failed: ${data.message}`)
       }
