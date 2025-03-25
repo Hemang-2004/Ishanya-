@@ -120,9 +120,6 @@ export default function SchedulerScreen() {
             <TouchableOpacity style={styles.iconButton}>
               <MaterialIcons name="today" size={24} color="#408c4c" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
-              <MaterialIcons name="add" size={24} color="#408c4c" />
-            </TouchableOpacity>
           </View>
         </View>
 
