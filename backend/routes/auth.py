@@ -198,8 +198,9 @@ def allowed_file_aadhar(filename):
 
 @auth_bp.route("/parse_aadhar", methods=["POST"])
 def parse_aadhar_api():
+    print(request)
     if "file" not in request.files:
-        return jsonify({"error": "No file part"}), 400
+        return jsonify({"error": "No file part there"}), 400
 
     file = request.files["file"]
     if file.filename == "":
@@ -218,6 +219,8 @@ def parse_aadhar_api():
             return jsonify({"error": str(e)}), 500
 
     return jsonify({"error": "Invalid file type"}), 400
+
+
 
 @auth_bp.route("/parse_resume", methods=["POST"])
 def parse_resume_api():
