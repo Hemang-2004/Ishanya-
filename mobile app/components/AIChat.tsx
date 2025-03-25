@@ -62,14 +62,14 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose }) => {
       const requestBody = {
         contents: [
           {
-            role: "system",
+            role: "model",
             parts: [
               {
-                text: `You are an AI assistant for a student named ${studentName}. You help with educational questions, provide study tips, and assist with assignments. Keep responses concise, helpful, and educational.`,
+                text: `You are an AI assistant for a student named ${studentName}. You help with educational questions, provide study tips, and assist with assignments. Keep responses concise, helpful, and educational. dont return output in markdown or any other symbols like *`,
               },
             ],
           },
-          ...conversationHistory,
+          ...conversationHistory, 
         ],
         generationConfig: {
           temperature: 0.7,
@@ -87,6 +87,7 @@ const AIChat: React.FC<AIChatProps> = ({ studentName, onClose }) => {
       })
 
       const data = await response.json()
+      console.log(data);
 
       // Extract the response text
       let aiResponse = "Sorry, I couldn't generate a response. Please try again."

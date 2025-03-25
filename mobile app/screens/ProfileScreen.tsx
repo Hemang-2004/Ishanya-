@@ -2,8 +2,12 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ImageBackground, 
 import { SafeAreaView } from "react-native-safe-area-context"
 import { MaterialIcons } from "@expo/vector-icons"
 import { LinearGradient } from 'expo-linear-gradient';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useState } from "react";
+import { useEffect } from "react";
 
 export default function ProfileScreen() {
+    const [studentName, setStudentName] = useState("gdfgd")
   const handleShareProfile = async () => {
     try {
       await Share.share({
@@ -14,6 +18,47 @@ export default function ProfileScreen() {
       console.error(error);
     }
   };
+  let data;
+  let parsedData;
+  const fetchStudentId = async () => {
+    try {
+       data = await AsyncStorage.getItem("studentData")
+       
+  
+      if (data) {
+         parsedData = JSON.parse(data)
+        const studentId = parsedData?.id 
+        setStudentName(parsedData?.name);
+  
+        if (studentId) {
+          console.log("Student ID:", studentId)
+          console.log("Student dgyj")
+
+
+          return studentId
+        } else {
+          console.log("Student ID not found in the stored data.")
+          return null
+        }
+      } else {
+        console.log("No student data found.")
+        return null
+      }
+    } catch (error) {
+      console.error("Error fetching student data:", error)
+      return null
+    }
+  }
+  useEffect(() => {
+      const getStudentDetails = async () => {
+        const studentId = await fetchStudentId()
+        if (studentId) {
+          console.log("Fetching reports for student ID:", studentId)
+          // Fetch additional data or perform actions
+        }
+      }
+      getStudentDetails()
+    }, [])
 
   // Calculate profile completion percentage
   const profileFields = {
@@ -59,7 +104,10 @@ export default function ProfileScreen() {
                   <MaterialIcons name="edit" size={20} color="#fff" />
                 </TouchableOpacity>
               </View>
-              <Text style={styles.profileName}>Arjun Patel</Text>
+              <Text style={styles.profileName}>
+
+              {studentName}
+</Text>
               <Text style={styles.profileEmail}>arjun.patel@example.com</Text>
               <View style={styles.profileStats}>
                 <View style={styles.statItem}>

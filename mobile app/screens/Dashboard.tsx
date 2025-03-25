@@ -21,6 +21,7 @@ import MessageCard from "../components/MessageCard"
 import RadialProgress from "../components/RadialProgress"
 import AttendanceGraph from "../components/AttendanceGraph"
 import AIChat from "../components/AIChat"
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 // FAQ data
 /*
@@ -100,6 +101,93 @@ export default function Dashboard() {
     { month: "Aug", percentage: 75 },
     { month: "Sep", percentage: 78 },
   ]
+  let data;
+  const fetchStudentId = async () => {
+    try {
+       data = await AsyncStorage.getItem("studentData")
+       
+  
+      if (data) {
+        const parsedData = JSON.parse(data)
+        const studentId = parsedData?.id 
+        setStudentName(parsedData?.name);
+  
+        if (studentId) {
+          console.log("Student ID:", studentId)
+          return studentId
+        } else {
+          console.log("Student ID not found in the stored data.")
+          return null
+        }
+      } else {
+        console.log("No student data found.")
+        return null
+      }
+    } catch (error) {
+      console.error("Error fetching student data:", error)
+      return null
+    }
+  }
+  const fetchFeedbackReport = async (term) => {
+    try {
+      const studentId = await fetchStudentId() // Fetch studentId from AsyncStorage
+  
+      if (!studentId) {
+        console.log("No valid student ID found.")
+        return
+      }
+  
+      const response = await fetch(
+        `http://192.168.109.54:5000/admins/get-feedback-report/${studentId}/${term}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+  
+      if (!response.ok) {
+        throw new Error("Failed to fetch feedback report.")
+      }
+  
+      const data = await response.json()
+      console.log("Feedback Report:", data)
+  
+      // Handle report data (e.g., display or store for further use)
+      return data
+    } catch (error) {
+      console.error("Error fetching feedback report:", error)
+      return null
+    }
+  }
+  useEffect(() => {
+    const getFeedbackReport = async () => {
+      const term = 1 // Replace with actual term or dynamic value
+      const report = await fetchFeedbackReport(term)
+  
+      if (report) {
+        console.log("Feedback report fetched successfully:", report)
+        // Handle or display the report data here
+      }
+    }
+  
+    getFeedbackReport()
+  }, [])
+    
+  
+  
+  useEffect(() => {
+    const getStudentDetails = async () => {
+      const studentId = await fetchStudentId()
+      if (studentId) {
+        console.log("Fetching reports for student ID:", studentId)
+        // Fetch additional data or perform actions
+      }
+    }
+    getStudentDetails()
+  }, [])
+  
 
   useEffect(() => {
     scrollY.addListener(({ value }) => {
@@ -135,20 +223,29 @@ export default function Dashboard() {
   const handleReportGeneration = async (teacher: string, message: string, time: string) => {
     setIsGeneratingReport(true)
     try {
-      // You'll integrate your Flask API call here
-      console.log(`Generating report for message from ${teacher}: "${message}" (${time})`)
-      // Example of how you might call your Flask API:
-      // const response = await fetch('your-flask-api-endpoint/generate-report', {
-      //   method: 'POST',
-      //   headers: { 'Content-Type': 'application/json' },
-      //   body: JSON.stringify({ teacher, message, time })
-      // });
-      // const data = await response.json();
-      // if (data.success) {
-      //   console.log("Report generated successfully:", data.reportUrl);
-      // }
+      // Call the Flask API endpoint
+      const studentId = 1 // Replace with actual student ID from your app state
+      const term = 1 // Replace with actual term from your app state
+
+      const response = await fetch(`http://192.168.109.54:5000/get-feedback-report/${studentId}/${term}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch report")
+      }
+
+      const data = await response.json()
+      console.log("Report generated successfully:", data)
+
+      // Here you can handle the report data, e.g., display it in a modal
+      // or navigate to a report view screen
     } catch (error) {
       console.error("Error generating report:", error)
+      // You might want to show an error message to the user
     } finally {
       setIsGeneratingReport(false)
     }

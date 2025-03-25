@@ -6,9 +6,10 @@ from utils import *
 
 admin_bp = Blueprint("admin", __name__)
 
-@admin_bp.route("/get-feedback-report/<int:studentid>/<int:educatorid>/<int:term>", methods=["GET"])
-def get_report(studentid, educatorid, term):
-    feedback = Feedback.query.filter_by(StudentID=studentid, EducatorID=educatorid, Term=term).first()
+@admin_bp.route("/get-feedback-report/<int:studentid>/<int:term>", methods=["GET"])
+def get_report(studentid, term):
+    print("hgfds")
+    feedback = Feedback.query.filter_by(StudentID=studentid, Term=term).first()
 
     if not feedback:
         return jsonify({"error": "No feedback found for the given parameters"}), 404

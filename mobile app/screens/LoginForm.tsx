@@ -8,6 +8,7 @@ import { Picker } from "@react-native-picker/picker"
 import { translations } from "../constants/translations"
 import { useNavigation } from "@react-navigation/native"
 
+import AsyncStorage from "@react-native-async-storage/async-storage"
 
 
 
@@ -73,8 +74,10 @@ async function handleLogin() {
 
 
     const data = await response.json()
+    console.log(data);
 
     if (response.ok) {
+      await AsyncStorage.setItem("studentData", JSON.stringify(data))
       Alert.alert("Success", data.message || "Logged in successfully!")
       navigation.navigate("Tabs") // Navigate to Home or Dashboard
     } else {
