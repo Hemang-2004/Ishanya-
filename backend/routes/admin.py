@@ -6,6 +6,14 @@ from utils import *
 
 admin_bp = Blueprint("admin", __name__)
 
+@admin_bp.route('/get-all-programs', methods=['GET'])
+def get_all_programs():
+    programs = Program.query.all()
+    return jsonify([{
+        "ProgramName": program.ProgramName, 
+        "ProgramID": program.ProgramID} 
+        for program in programs])
+
 @admin_bp.route('/get-all-students', methods=['GET'])
 def get_all_students():
     students = db.session.query(
@@ -25,13 +33,13 @@ def get_all_students():
 
     for s in students:
         student_info = {
-            "StudentID": s.StudentID,
-            "Name": f"{s.FirstName} {s.LastName}",
-            "Email": s.EmailID,
-            "Program": s.ProgramName,
-            "Status": s.Status,
-            "DateJoined": s.DateOfJoining.strftime("%b %d, %Y") if s.DateOfJoining else None,
-            "PrimaryEducator": s.PrimaryEducatorName
+            "id": s.StudentID,
+            "name": f"{s.FirstName} {s.LastName}",
+            "email": s.EmailID,
+            "program": s.ProgramName,
+            "status": s.Status,
+            "joined": s.DateOfJoining.strftime("%b %d, %Y") if s.DateOfJoining else None,
+            "teacher": s.PrimaryEducatorName
         }
 
         result.append(student_info)
