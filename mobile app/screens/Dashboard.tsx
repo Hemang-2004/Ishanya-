@@ -22,15 +22,6 @@ import RadialProgress from "../components/RadialProgress"
 import AttendanceGraph from "../components/AttendanceGraph"
 import AIChat from "../components/AIChat"
 
-
-
-
-
-
-
-
-
-
 // FAQ data
 /*
 const faqData = [
@@ -77,6 +68,7 @@ export default function Dashboard() {
   const [studentName, setStudentName] = useState("Arjun")
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
   const [hasUnreadAssignments, setHasUnreadAssignments] = useState(true)
+  const [isGeneratingReport, setIsGeneratingReport] = useState(false)
   // const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
 
   // Sample data
@@ -138,6 +130,28 @@ export default function Dashboard() {
   const handleReply = (teacher: string) => {
     setCurrentTeacher(teacher)
     setShowChatModal(true)
+  }
+
+  const handleReportGeneration = async (teacher: string, message: string, time: string) => {
+    setIsGeneratingReport(true)
+    try {
+      // You'll integrate your Flask API call here
+      console.log(`Generating report for message from ${teacher}: "${message}" (${time})`)
+      // Example of how you might call your Flask API:
+      // const response = await fetch('your-flask-api-endpoint/generate-report', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify({ teacher, message, time })
+      // });
+      // const data = await response.json();
+      // if (data.success) {
+      //   console.log("Report generated successfully:", data.reportUrl);
+      // }
+    } catch (error) {
+      console.error("Error generating report:", error)
+    } finally {
+      setIsGeneratingReport(false)
+    }
   }
 
   const sendMessage = () => {
@@ -272,6 +286,7 @@ export default function Dashboard() {
                 onReply={() => handleReply(msg.teacher)}
                 onPress={() => setSelectedCard(selectedCard === `message-${msg.id}` ? null : `message-${msg.id}`)}
                 isSelected={selectedCard === `message-${msg.id}`}
+                onReport={() => handleReportGeneration(msg.teacher, msg.message, msg.time)}
               />
             ))}
           </View>
@@ -334,7 +349,7 @@ export default function Dashboard() {
               </View>
             </View>
           </View>
-         </Modal>
+        </Modal>
 
         {/* AI Chat Modal */}
         <Modal
@@ -806,3 +821,4 @@ const styles = StyleSheet.create({
   //   lineHeight: 20,
   // },
 })
+

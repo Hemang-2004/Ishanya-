@@ -31,6 +31,8 @@
     "expo-image-manipulator": "~13.0.6",
     "expo-image-picker": "~16.0.6",
     "expo-linear-gradient": "latest",
+    "expo-media-library": "^17.0.6",
+    "expo-sharing": "^13.0.1",
     "expo-status-bar": "~2.0.1",
     "lucide-react-native": "^0.483.0",
     "react": "18.3.1",
