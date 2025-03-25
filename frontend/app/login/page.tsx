@@ -108,6 +108,7 @@ export default function LoginPage() {
           variant: "destructive",
           duration: 5000,
         })
+        alert(result.error )
         setIsLoading(false)
         return
       }
@@ -119,6 +120,7 @@ export default function LoginPage() {
         title: "Login successful",
         description: `Welcome back! You've been logged in as ${role}.`,
       })
+      alert(`Welcome back! You've been logged in as ${role}.`)
   
       // Redirect based on role
       router.push(`/dashboard/${role}`)
@@ -130,6 +132,7 @@ export default function LoginPage() {
         variant: "destructive",
         duration: 5000,
       })
+      alert("Something went wrong. Please try again.")
       console.error("Login error:", error)
     } finally {
       setIsLoading(false)
@@ -201,7 +204,7 @@ export default function LoginPage() {
                       className="absolute right-0 top-0 h-full px-3"
                       onClick={() => setShowPassword(!showPassword)}
                     >
-                      {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                      {showPassword ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                       <span className="sr-only">{showPassword ? "Hide password" : "Show password"}</span>
                     </Button>
                   </div>

@@ -559,7 +559,7 @@ export default function TeacherStudentsPage() {
           <div className="text-sm font-medium">Progress</div>
           <div className="flex items-center gap-2">
             <Progress value={75} className="h-2 w-24" />
-            <span className="text-sm text-muted-foreground">"75"%</span>
+            <span className="text-sm text-muted-foreground">75%</span>
           </div>
         </div>
 

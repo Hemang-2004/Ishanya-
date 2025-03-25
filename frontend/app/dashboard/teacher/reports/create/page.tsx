@@ -13,6 +13,8 @@ import { Slider } from "@/components/ui/slider"
 import { useToast } from "@/components/ui/use-toast"
 import { ArrowLeft, Save, Download } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { setUserData, getUserData, clearUserData } from "@/utils/auth"
+
 
 export default function CreateReportPage() {
   const router = useRouter()
@@ -20,17 +22,28 @@ export default function CreateReportPage() {
   const { toast } = useToast()
   const [activeTab, setActiveTab] = useState("general")
   const [isSubmitting, setIsSubmitting] = useState(false)
-
+  const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
+  
   // Get student details from URL parameters
   const studentId = searchParams.get("studentId") || ""
   const studentNameFromUrl = searchParams.get("studentName") || ""
-
+  
   // Pre-fill form data with student details if available
+  
+  useEffect(() => {
+    const storedUser = getUserData();
+    if (storedUser) {
+      setUser(storedUser);
+      console.log("User ID here:", storedUser.userId);
+    } else {
+      console.log("No user data found");
+    }
+  }, []);
   const [formData, setFormData] = useState({
     studentName: studentNameFromUrl,
-    term: "2",
-    educatorName: "Priya Sharma",
-    reviewPeriod: "September to December 2024",
+    term: "",
+    educatorName: "",
+    reviewPeriod: "",
 
     // General observations
     attendance: "",
@@ -116,26 +129,134 @@ export default function CreateReportPage() {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
-    e.preventDefault()
+  // const handleSubmit = (e) => {
+  //   e.preventDefault()
 
-    setIsSubmitting(true)
+  //   setIsSubmitting(true)
 
-    // In a real application, you would save this data to your database
-    console.log("Form data submitted:", formData)
+  //   // In a real application, you would save this data to your database
+  //   console.log("Form data submitted:", formData)
 
-    // Simulate API call
-    setTimeout(() => {
+  //   // Simulate API call
+  //   setTimeout(() => {
+  //     toast({
+  //       title: "Report saved",
+  //       description: `Assessment report for ${formData.studentName} has been saved successfully.`,
+  //     })
+
+  //     // Navigate back to reports page
+  //     router.push("/dashboard/teacher/feedback")
+  //     setIsSubmitting(false)
+  //   }, 1500)
+  // }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+  
+    // Construct the request payload
+    const payload = {
+      StudentID: studentId, // Ensure this is provided
+      EducatorID: user?.userId, // Replace with actual logged-in educator's ID
+      Comments: formData.learningEnvironment, // Or any relevant field
+      TPS: 5, // Example logic
+      Attendance: parseInt(formData.attendance) || 0,
+      Term: parseInt(formData.term) || 1,
+      FeedbackMetrics: {
+        Punctuality: formData.punctuality,
+        Preparedness: formData.preparedness,
+        BehavioralIssues: formData.behavioralIssues,
+        Assistance: formData.assistance,
+        ParentalSupport: formData.parentalSupport,
+  
+        CommunicationSkills: {
+          FollowingInstructions: formData.followingInstructions,
+          PoliteWords: formData.politeWords,
+          AskingQuestions: formData.askingQuestions,
+          Conversation: formData.conversation,
+          Describing: formData.describing,
+          Commenting: formData.commenting,
+          EmotionalCommunication: formData.emotionalCommunication,
+          SentenceFormation: formData.sentenceFormation,
+          Notes: formData.communicationNotes,
+        },
+  
+        CognitionSkills: {
+          Prediction: formData.prediction,
+          LogicalSequencing: formData.logicalSequencing,
+          ProblemSolving: formData.problemSolving,
+          CauseEffect: formData.causeEffect,
+          DecisionMaking: formData.decisionMaking,
+          OddOneOut: formData.oddOneOut,
+          Notes: formData.cognitionNotes,
+        },
+  
+        AcademicSkills: {
+          EnglishReading: formData.englishReading,
+          EnglishWriting: formData.englishWriting,
+          EVS: formData.evs,
+          Math: formData.math,
+        },
+  
+        FunctionalSkills: {
+          CopyingDrawing: formData.copyingDrawing,
+          Pasting: formData.pasting,
+          Folding: formData.folding,
+          Cutting: formData.cutting,
+          KitchenUtensils: formData.kitchenUtensils,
+          Ingredients: formData.ingredients,
+          Pouring: formData.pouring,
+          Scooping: formData.scooping,
+          PersonalHygiene: formData.personalHygiene,
+          FoldingClothes: formData.foldingClothes,
+          FillingWater: formData.fillingWater,
+          Packing: formData.packing,
+          Wiping: formData.wiping,
+          GroupActivities: formData.groupActivities,
+          Notes: formData.functionalNotes,
+        },
+  
+        Extracurricular: formData.extracurricular,
+        Strengths: formData.interests,
+        LearningEnvironment: formData.learningEnvironment,
+      }
+    };
+  
+    try {
+      const response = await fetch("http://127.0.0.1:5000/educators/feedback", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to save feedback");
+      }
+  
+      const result = await response.json();
+      console.log("API Response:", result);
+  
       toast({
         title: "Report saved",
         description: `Assessment report for ${formData.studentName} has been saved successfully.`,
-      })
-
-      // Navigate back to reports page
-      router.push("/dashboard/teacher/feedback")
-      setIsSubmitting(false)
-    }, 1500)
-  }
+      });
+  
+      // Navigate back to feedback page
+      router.push("/dashboard/teacher/feedback");
+    } catch (error) {
+      console.error("Error submitting report:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save report. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
 
   const handleDownload = () => {
     // In a real application, you would generate a PDF here
