@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -16,17 +16,61 @@ import {
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Search, Filter, Download, MoreHorizontal, Edit, Trash, Eye, UserPlus } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Progress } from "@/components/ui/progress"
 import { useRouter } from "next/navigation"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import Link from "next/link"
+
+interface Student {
+  id: string;
+  name: string;
+  email: string;
+  program: string;
+  status: string;
+  joined: string;
+  teacher: string;
+}
 
 export default function StudentsPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedProgram, setSelectedProgram] = useState("all")
+  const [students, setStudents] = useState<Student[]>([]); 
+  const [programs, setPrograms] = useState([])
+
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/admins/get-all-students");
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        const data: Student[] = await response.json(); 
+        setStudents(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+
+    fetchStudents();
+  }, []);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/admins/get-all-programs");
+        if (!response.ok) {
+          throw new Error("Failed to fetch programs");
+        }
+        const programs = await response.json(); 
+        setPrograms(programs);
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
 
   // Filter function for students
   const filteredStudents = students.filter((student) => {
@@ -76,7 +120,7 @@ export default function StudentsPage() {
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="active">Active</TabsTrigger>
-                <TabsTrigger value="inactive">Inactive</TabsTrigger>
+                <TabsTrigger value="discontinued">Discontinued</TabsTrigger>
                 <TabsTrigger value="graduated">Graduated</TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-2">
@@ -100,29 +144,20 @@ export default function StudentsPage() {
                     <DropdownMenuLabel>Filter by Program</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem
-                      onClick={() => setSelectedProgram("all")}
-                      className={selectedProgram === "all" ? "bg-secondary/50" : ""}
+                      onClick={() => setSelectedProgram('all')}
+                      className={selectedProgram === 'all' ? 'bg-secondary/50' : ''}
                     >
                       All Programs
                     </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedProgram("digital literacy")}
-                      className={selectedProgram === "digital literacy" ? "bg-secondary/50" : ""}
-                    >
-                      Digital Literacy
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedProgram("vocational training")}
-                      className={selectedProgram === "vocational training" ? "bg-secondary/50" : ""}
-                    >
-                      Vocational Training
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                      onClick={() => setSelectedProgram("community leadership")}
-                      className={selectedProgram === "community leadership" ? "bg-secondary/50" : ""}
-                    >
-                      Community Leadership
-                    </DropdownMenuItem>
+                    {programs.map((program) => (
+                      <DropdownMenuItem
+                        key={program.ProgramID} // assuming your api returns ProgramID, or use a unique identifier from your api
+                        onClick={() => setSelectedProgram(program.ProgramName)} // assuming your api returns ProgramName
+                        className={selectedProgram === program.ProgramName ? 'bg-secondary/50' : ''}
+                      >
+                        {program.ProgramName}
+                      </DropdownMenuItem>
+                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
               </div>
@@ -135,7 +170,6 @@ export default function StudentsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Program</TableHead>
-                      <TableHead>Progress</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Teacher</TableHead>
@@ -148,10 +182,6 @@ export default function StudentsPage() {
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={student.avatar} />
-                                <AvatarFallback>{student.initials}</AvatarFallback>
-                              </Avatar>
                               <div>
                                 <div className="font-medium">{student.name}</div>
                                 <div className="text-sm text-muted-foreground">{student.email}</div>
@@ -160,12 +190,6 @@ export default function StudentsPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{student.program}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={student.progress} className="h-2 w-[60px]" />
-                              <span className="text-sm">{student.progress}%</span>
-                            </div>
                           </TableCell>
                           <TableCell>
                             <Badge variant={getStatusBadgeVariant(student.status)}>{student.status}</Badge>
@@ -234,7 +258,6 @@ export default function StudentsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Program</TableHead>
-                      <TableHead>Progress</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Teacher</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
@@ -247,10 +270,6 @@ export default function StudentsPage() {
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={student.avatar} />
-                                <AvatarFallback>{student.initials}</AvatarFallback>
-                              </Avatar>
                               <div>
                                 <div className="font-medium">{student.name}</div>
                                 <div className="text-sm text-muted-foreground">{student.email}</div>
@@ -259,12 +278,6 @@ export default function StudentsPage() {
                           </TableCell>
                           <TableCell>
                             <Badge variant="outline">{student.program}</Badge>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={student.progress} className="h-2 w-[60px]" />
-                              <span className="text-sm">{student.progress}%</span>
-                            </div>
                           </TableCell>
                           <TableCell>{student.joined}</TableCell>
                           <TableCell>{student.teacher}</TableCell>
@@ -280,30 +293,25 @@ export default function StudentsPage() {
               </div>
             </TabsContent>
 
-            <TabsContent value="inactive">
+            <TabsContent value="discontinued">
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Program</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Last Active</TableHead>
+                      <TableHead>Joined</TableHead>
                       <TableHead>Teacher</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {filteredStudents
-                      .filter((student) => student.status === "Inactive")
+                      .filter((student) => student.status === "Discontinued")
                       .map((student) => (
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={student.avatar} />
-                                <AvatarFallback>{student.initials}</AvatarFallback>
-                              </Avatar>
                               <div>
                                 <div className="font-medium">{student.name}</div>
                                 <div className="text-sm text-muted-foreground">{student.email}</div>
@@ -313,13 +321,7 @@ export default function StudentsPage() {
                           <TableCell>
                             <Badge variant="outline">{student.program}</Badge>
                           </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <Progress value={student.progress} className="h-2 w-[60px]" />
-                              <span className="text-sm">{student.progress}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell>{student.lastActive || "N/A"}</TableCell>
+                          <TableCell>{student.joined}</TableCell>
                           <TableCell>{student.teacher}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" asChild>
@@ -340,8 +342,7 @@ export default function StudentsPage() {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Program</TableHead>
-                      <TableHead>Completion Date</TableHead>
-                      <TableHead>Final Grade</TableHead>
+                      <TableHead>Joined</TableHead>
                       <TableHead>Teacher</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -353,10 +354,6 @@ export default function StudentsPage() {
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
-                                <AvatarImage src={student.avatar} />
-                                <AvatarFallback>{student.initials}</AvatarFallback>
-                              </Avatar>
                               <div>
                                 <div className="font-medium">{student.name}</div>
                                 <div className="text-sm text-muted-foreground">{student.email}</div>
@@ -366,8 +363,7 @@ export default function StudentsPage() {
                           <TableCell>
                             <Badge variant="outline">{student.program}</Badge>
                           </TableCell>
-                          <TableCell>{student.completionDate || "N/A"}</TableCell>
-                          <TableCell>{student.finalGrade || "N/A"}</TableCell>
+                          <TableCell>{student.teacher}</TableCell>
                           <TableCell>{student.teacher}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" asChild>
@@ -391,106 +387,12 @@ export default function StudentsPage() {
 function getStatusBadgeVariant(status: string) {
   switch (status) {
     case "Active":
-      return "success"
-    case "Inactive":
-      return "destructive"
+      return "outline"
     case "Graduated":
       return "secondary"
+    case "Discontinued":
+      return "destructive"
     default:
       return "outline"
   }
 }
-
-// Sample data
-const students = [
-  {
-    id: "1",
-    name: "Arjun Patel",
-    email: "arjun.p@example.com",
-    program: "Digital Literacy",
-    status: "Active",
-    progress: 85,
-    joined: "Jan 15, 2023",
-    teacher: "Priya Sharma",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "AP",
-  },
-  {
-    id: "2",
-    name: "Meera Singh",
-    email: "meera.s@example.com",
-    program: "Digital Literacy",
-    status: "Active",
-    progress: 72,
-    joined: "Feb 10, 2023",
-    teacher: "Priya Sharma",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "MS",
-  },
-  {
-    id: "3",
-    name: "Vikram Malhotra",
-    email: "vikram.m@example.com",
-    program: "Vocational Training",
-    status: "Active",
-    progress: 45,
-    joined: "Mar 5, 2023",
-    teacher: "Rahul Verma",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "VM",
-  },
-  {
-    id: "4",
-    name: "Priya Sharma",
-    email: "priya.s@example.com",
-    program: "Community Leadership",
-    status: "Graduated",
-    progress: 100,
-    joined: "Jan 5, 2022",
-    completionDate: "Dec 15, 2022",
-    finalGrade: "A",
-    teacher: "Anita Desai",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "PS",
-  },
-  {
-    id: "5",
-    name: "Rajesh Kumar",
-    email: "rajesh.k@example.com",
-    program: "Digital Literacy",
-    status: "Inactive",
-    progress: 35,
-    joined: "Apr 10, 2023",
-    lastActive: "Jun 15, 2023",
-    teacher: "Priya Sharma",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "RK",
-  },
-  {
-    id: "6",
-    name: "Anita Desai",
-    email: "anita.d@example.com",
-    program: "Vocational Training",
-    status: "Active",
-    progress: 68,
-    joined: "Feb 20, 2023",
-    teacher: "Rahul Verma",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "AD",
-  },
-  {
-    id: "7",
-    name: "Sunil Sharma",
-    email: "sunil.s@example.com",
-    program: "Community Leadership",
-    status: "Graduated",
-    progress: 100,
-    joined: "Mar 15, 2022",
-    completionDate: "Feb 28, 2023",
-    finalGrade: "B+",
-    teacher: "Anita Desai",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "SS",
-  },
-]
-

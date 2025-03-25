@@ -1,6 +1,8 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { getUserData } from "@/utils/auth" // Import getUserData function
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -24,7 +26,6 @@ import {
   Legend,
 } from "recharts"
 import { ChartTooltip } from "@/components/ui/chart"
-import { useState } from "react"
 
 // Sample progress data for charts
 const progressData = [
@@ -45,13 +46,27 @@ const skillsData = [
 ]
 
 export default function StudentDashboardPage() {
+  const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
   const [selectedTimeframe, setSelectedTimeframe] = useState("6months")
+
+  useEffect(() => {
+    const storedUser = getUserData()
+    if (storedUser) {
+      setUser(storedUser)
+      console.log("User ID here:", storedUser.userId) // Safely print userId
+    } else {
+      console.log("No user data found")
+    }
+  }, [])
+  
+
+
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Welcome, Arjun!</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Welcome, {user ? user.userName : "Student"}!</h2>
           <p className="text-muted-foreground">Track your progress and stay connected with your teachers.</p>
         </div>
         <div className="flex gap-2">
