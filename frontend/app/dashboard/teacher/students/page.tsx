@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -11,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/components/language-provider"
+import { getUserData } from "@/utils/auth" // Import getUserData function
+import { useEffect, useState } from "react"
 import {
   ResponsiveContainer,
   BarChart,
@@ -55,6 +56,44 @@ export default function TeacherStudentsPage() {
   const [courseFilter, setCourseFilter] = useState("all")
   const [statusFilter, setStatusFilter] = useState("all")
   const [viewMode, setViewMode] = useState("all")
+  const [students, setStudents] = useState<{ student_id: number; name: string; program_id: string; program_name: string; status:string; email:string}[]>([]);
+  const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedUser = getUserData();
+    if (storedUser) {
+      setUser(storedUser);
+      console.log("User ID here:", storedUser.userId);
+    } else {
+      console.log("No user data found");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user?.userId) return; // Prevent fetching if user is null
+
+    setLoading(true);
+    fetch(`http://127.0.0.1:5000/educators/students/${user.userId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setStudents(data.students || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching students:", err);
+        setError("Failed to load students");
+        setLoading(false);
+      });
+  }, [user?.userId]); // Runs when `user.userId` changes
+
+
 
   // Filter students based on search query and filters
   const filteredStudents = students.filter(
@@ -62,7 +101,7 @@ export default function TeacherStudentsPage() {
       (searchQuery === "" ||
         student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         student.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
-      (courseFilter === "all" || student.course === courseFilter) &&
+      (courseFilter === "all" || student.program_name === courseFilter) &&
       (statusFilter === "all" || student.status === statusFilter),
   )
 
@@ -157,7 +196,7 @@ export default function TeacherStudentsPage() {
             <CardContent>
               <div className="space-y-6">
                 {filteredStudents.map((student) => (
-                  <StudentRow key={student.id} student={student} />
+                  <StudentRow key={student.student_id} student={student} />
                 ))}
               </div>
             </CardContent>
@@ -178,10 +217,10 @@ export default function TeacherStudentsPage() {
                       (searchQuery === "" ||
                         student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         student.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                      (courseFilter === "all" || student.course === courseFilter),
+                      (courseFilter === "all" || student.program_name === courseFilter),
                   )
                   .map((student) => (
-                    <StudentRow key={student.id} student={student} />
+                    <StudentRow key={student.student_id} student={student} />
                   ))}
               </div>
             </CardContent>
@@ -202,10 +241,10 @@ export default function TeacherStudentsPage() {
                       (searchQuery === "" ||
                         student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
                         student.email.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                      (courseFilter === "all" || student.course === courseFilter),
+                      (courseFilter === "all" || student.program_name === courseFilter),
                   )
                   .map((student) => (
-                    <StudentRow key={student.id} student={student} />
+                    <StudentRow key={student.student_id} student={student} />
                   ))}
               </div>
             </CardContent>
@@ -495,13 +534,14 @@ export default function TeacherStudentsPage() {
   )
 }
 
-function StudentRow({ student }: { student: (typeof students)[0] }) {
+// function StudentRow({ student }: { student: (typeof students)[0] }) {
+  function StudentRow({ student }: { student: { student_id: number; name: string; program_id: string; program_name: string; status: string; email: string } }) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-4 border rounded-lg">
       <div className="flex items-center gap-4">
         <Avatar className="h-10 w-10">
-          <AvatarImage src={student.avatar} />
-          <AvatarFallback>{student.initials}</AvatarFallback>
+          <AvatarImage src="/placeholder.svg?height=40&width=40" />
+          <AvatarFallback>"AB"</AvatarFallback>
         </Avatar>
         <div>
           <div className="font-medium">{student.name}</div>
@@ -512,14 +552,14 @@ function StudentRow({ student }: { student: (typeof students)[0] }) {
       <div className="flex flex-col md:flex-row items-start md:items-center gap-4 md:gap-8">
         <div>
           <div className="text-sm font-medium">Course</div>
-          <div className="text-sm text-muted-foreground">{student.course}</div>
+          <div className="text-sm text-muted-foreground">{student.program_name}</div>
         </div>
 
         <div>
           <div className="text-sm font-medium">Progress</div>
           <div className="flex items-center gap-2">
-            <Progress value={student.progress} className="h-2 w-24" />
-            <span className="text-sm text-muted-foreground">{student.progress}%</span>
+            <Progress value={75} className="h-2 w-24" />
+            <span className="text-sm text-muted-foreground">"75"%</span>
           </div>
         </div>
 
@@ -527,7 +567,7 @@ function StudentRow({ student }: { student: (typeof students)[0] }) {
           <div className="text-sm font-medium">Last Active</div>
           <div className="text-sm text-muted-foreground flex items-center">
             <Clock className="mr-1 h-3 w-3" />
-            {student.lastActive}
+            "Today"
           </div>
         </div>
 
@@ -539,7 +579,7 @@ function StudentRow({ student }: { student: (typeof students)[0] }) {
 
       <div className="flex gap-2 mt-4 md:mt-0">
         <Button variant="outline" size="sm" asChild>
-          <Link href={`/dashboard/teacher/students/${student.id}`}>View Profile</Link>
+          <Link href={`/dashboard/teacher/students/${student.student_id}`}>View Profile</Link>
         </Button>
         <Button variant="outline" size="sm">
           <MessageSquare className="mr-2 h-4 w-4" />
@@ -582,96 +622,96 @@ function StatusBadge({ status }: { status: string }) {
 // Sample data
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE", "#00C49F"]
 
-const students = [
-  {
-    id: "1",
-    name: "Arjun Patel",
-    email: "arjun.p@example.com",
-    course: "Digital Literacy",
-    progress: 85,
-    lastActive: "Today",
-    status: "active",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "AP",
-  },
-  {
-    id: "2",
-    name: "Meera Singh",
-    email: "meera.s@example.com",
-    course: "Digital Literacy",
-    progress: 72,
-    lastActive: "Yesterday",
-    status: "active",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "MS",
-  },
-  {
-    id: "3",
-    name: "Vikram Malhotra",
-    email: "vikram.m@example.com",
-    course: "Digital Literacy",
-    progress: 45,
-    lastActive: "3 days ago",
-    status: "at-risk",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "VM",
-  },
-  {
-    id: "4",
-    name: "Priya Sharma",
-    email: "priya.s@example.com",
-    course: "Microsoft Office",
-    progress: 90,
-    lastActive: "Today",
-    status: "active",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "PS",
-  },
-  {
-    id: "5",
-    name: "Rahul Kumar",
-    email: "rahul.k@example.com",
-    course: "Microsoft Office",
-    progress: 60,
-    lastActive: "2 days ago",
-    status: "active",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "RK",
-  },
-  {
-    id: "6",
-    name: "Neha Gupta",
-    email: "neha.g@example.com",
-    course: "Internet Safety",
-    progress: 35,
-    lastActive: "5 days ago",
-    status: "at-risk",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "NG",
-  },
-  {
-    id: "7",
-    name: "Amit Verma",
-    email: "amit.v@example.com",
-    course: "Internet Safety",
-    progress: 20,
-    lastActive: "1 week ago",
-    status: "at-risk",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "AV",
-  },
-  {
-    id: "8",
-    name: "Sanjay Patel",
-    email: "sanjay.p@example.com",
-    course: "Digital Literacy",
-    progress: 10,
-    lastActive: "2 weeks ago",
-    status: "inactive",
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "SP",
-  },
-]
+// const students = [
+//   {
+//     id: "1",
+//     name: "Arjun Patel",
+//     email: "arjun.p@example.com",
+//     course: "Digital Literacy",
+//     progress: 85,
+//     lastActive: "Today",
+//     status: "active",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "AP",
+//   },
+//   {
+//     id: "2",
+//     name: "Meera Singh",
+//     email: "meera.s@example.com",
+//     course: "Digital Literacy",
+//     progress: 72,
+//     lastActive: "Yesterday",
+//     status: "active",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "MS",
+//   },
+//   {
+//     id: "3",
+//     name: "Vikram Malhotra",
+//     email: "vikram.m@example.com",
+//     course: "Digital Literacy",
+//     progress: 45,
+//     lastActive: "3 days ago",
+//     status: "at-risk",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "VM",
+//   },
+//   {
+//     id: "4",
+//     name: "Priya Sharma",
+//     email: "priya.s@example.com",
+//     course: "Microsoft Office",
+//     progress: 90,
+//     lastActive: "Today",
+//     status: "active",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "PS",
+//   },
+//   {
+//     id: "5",
+//     name: "Rahul Kumar",
+//     email: "rahul.k@example.com",
+//     course: "Microsoft Office",
+//     progress: 60,
+//     lastActive: "2 days ago",
+//     status: "active",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "RK",
+//   },
+//   {
+//     id: "6",
+//     name: "Neha Gupta",
+//     email: "neha.g@example.com",
+//     course: "Internet Safety",
+//     progress: 35,
+//     lastActive: "5 days ago",
+//     status: "at-risk",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "NG",
+//   },
+//   {
+//     id: "7",
+//     name: "Amit Verma",
+//     email: "amit.v@example.com",
+//     course: "Internet Safety",
+//     progress: 20,
+//     lastActive: "1 week ago",
+//     status: "at-risk",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "AV",
+//   },
+//   {
+//     id: "8",
+//     name: "Sanjay Patel",
+//     email: "sanjay.p@example.com",
+//     course: "Digital Literacy",
+//     progress: 10,
+//     lastActive: "2 weeks ago",
+//     status: "inactive",
+//     avatar: "/placeholder.svg?height=40&width=40",
+//     initials: "SP",
+//   },
+// ]
 
 const coursePerformanceData = [
   { name: "Digital Literacy", attendance: 85, assignments: 78, assessments: 82 },

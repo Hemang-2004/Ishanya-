@@ -1,18 +1,61 @@
+"use client"
+
 import type React from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { getUserData } from "@/utils/auth" // Import getUserData function
+import { useEffect, useState } from "react"
 import { Users, Calendar, MessageSquare, ClipboardList, Download, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import Link from "next/link"
 
 export default function TeacherDashboardPage() {
+  const [students, setStudents] = useState<{ student_id: number; name: string; program_id: string;program_name: string }[]>([]);
+  const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedUser = getUserData();
+    if (storedUser) {
+      setUser(storedUser);
+      console.log("User ID here:", storedUser.userId);
+    } else {
+      console.log("No user data found");
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!user?.userId) return; // Prevent fetching if user is null
+
+    setLoading(true);
+    fetch(`http://127.0.0.1:5000/educators/students/${user.userId}`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        setStudents(data.students || []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Error fetching students:", err);
+        setError("Failed to load students");
+        setLoading(false);
+      });
+  }, [user?.userId]); // Runs when `user.userId` changes
+
+
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Welcome, Priya!</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Welcome{user ? ", " + user.userName : ""}!</h2>
           <p className="text-muted-foreground">Manage your students and track their progress.</p>
         </div>
         <div className="flex gap-2">
@@ -31,7 +74,7 @@ export default function TeacherDashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total Students"
-          value="24"
+          value={students.length.toString()}
           description="+3 from last month"
           trend="up"
           icon={<Users className="h-4 w-4 text-muted-foreground" />}
@@ -72,7 +115,7 @@ export default function TeacherDashboardPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            {/* <div className="space-y-4">
               <StudentRow
                 name="Arjun Patel"
                 course="Digital Literacy"
@@ -105,7 +148,21 @@ export default function TeacherDashboardPage() {
                 avatar="/placeholder.svg?height=40&width=40"
                 initials="PS"
               />
+            </div> */}
+            <div className="space-y-4">
+              {students.map((student) => (
+                <StudentRow
+                  key={student.student_id}
+                  name={student.name} // Display name from API
+                  course={student.program_name}
+                  progress={85}
+                  lastActive="Today"
+                avatar="/placeholder.svg?height=40&width=40"
+                initials="PS"
+                />
+              ))}
             </div>
+
           </CardContent>
         </Card>
 
