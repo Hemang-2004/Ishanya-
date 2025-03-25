@@ -154,6 +154,7 @@ class Feedback(db.Model):
 
     StudentID = db.Column(db.Integer, db.ForeignKey('student.StudentID'), primary_key=True)
     EducatorID = db.Column(db.String(6), db.ForeignKey('educator.EducatorID'), primary_key=True)
+    Term = db.Column(db.Integer, primary_key=True)
     # Text fields
     Comments = db.Column(db.Text)
     # Strengths = db.Column(db.Text)
@@ -164,7 +165,6 @@ class Feedback(db.Model):
     # Integer rating fields
     TPS = db.Column(db.Integer)
     Attendance = db.Column(db.Integer)
-    Term = db.Column(db.Integer)
     # OrganizationPlanning = db.Column(db.Integer)
     # TimeManagement = db.Column(db.Integer)
     # TaskInitiationCompletion = db.Column(db.Integer)
