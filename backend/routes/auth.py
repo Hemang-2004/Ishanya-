@@ -240,3 +240,4 @@ def parse_resume_api():
             return jsonify({"error": str(e)}), 500
 
     return jsonify({"error": "Invalid file type"}), 400
+
