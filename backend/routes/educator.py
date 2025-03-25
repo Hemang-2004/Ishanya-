@@ -255,7 +255,38 @@ def get_all_educators():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@educator_bp.route('/get_student_report_status', methods=['GET'])
+def get_student_report_status():
+    educator_id = request.args.get("EducatorID")
     
+    if not educator_id:
+        return jsonify({"error": "EducatorID is required"}), 400
+
+    # Fetch students under the given educator
+    students = Student.query.filter_by(PrimaryEducatorID=educator_id).all()
+
+    result = []
+    
+    for student in students:
+        student_id = student.StudentID
+        student_name = student.FirstName + ' ' + student.LastName
+        
+
+        # Query the Feedback table to check for Term 1 and Term 2
+        feedback_terms = {fb.Term for fb in Feedback.query.filter_by(StudentID=student_id).all()}
+
+        # Create status entries for both terms
+        for term in [1, 2]:  # Checking for Term 1 and Term 2
+            status = "complete" if term in feedback_terms else "pending"
+            result.append({
+                "StudentID": student_id,
+                "Term": term,
+                "Status": status,
+                "StudentName": student_name
+            })
+
+    return jsonify(result), 200
 
 # @educator_bp.route('/students/<int:educator_id>', methods=['GET'])
 # def get_students_for_educator(educator_id):

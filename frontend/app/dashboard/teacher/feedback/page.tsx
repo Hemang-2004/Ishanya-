@@ -1,36 +1,86 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { Search, Filter, FileText, Eye, PlusCircle, Download } from "lucide-react"
+import { Search, Filter, FileText, Eye, PlusCircle } from "lucide-react"
 import { useRouter } from "next/navigation"
-import Link from "next/link"
+import { getUserData } from "@/utils/auth"
 
 export default function TeacherReportsPage() {
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedType, setSelectedType] = useState("pending")
+  const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
+  const [reports, setReports] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  // Filter function for feedback items
-  const filteredItems = feedbackItems.filter((item) => {
-    // Filter by search term
+  // Load user data
+  useEffect(() => {
+    const storedUser = getUserData()
+    if (storedUser) {
+      setUser(storedUser)
+      console.log("User ID:", storedUser.userId)
+    } else {
+      console.log("No user data found")
+    }
+  }, [])
+
+  // Fetch reports from API
+  useEffect(() => {
+    if (!user) return
+
+    const fetchReports = async () => {
+      try {
+        setLoading(true)
+        console.log("Fetching reports for User ID:", user.userId)
+        const response = await fetch(`http://127.0.0.1:5000/educators/get_student_report_status?EducatorID=${user.userId}`)
+        const data = await response.json()
+        console.log("API Response:", data) // Log API response
+        setReports(data)
+      } catch (err) {
+        setError("Failed to fetch reports")
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchReports()
+  }, [user])
+
+  useEffect(() => {
+    console.log("Updated Reports:", reports)
+  }, [reports])
+
+  // **Filter reports based on search and selectedType**
+  const filteredItems = reports.filter((item) => {
+    console.log("Filtering Item:", item)
+
+    // Ensure properties exist, avoiding undefined errors
+    const studentName = item.StudentName || ""
+    const assignment = item.assignment || ""
+    const status = item.Status ? item.Status.toLowerCase() : ""
+
+    // Match search term
     const matchesSearch =
-      item.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.assignment.toLowerCase().includes(searchTerm.toLowerCase())
+      studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      assignment.toLowerCase().includes(searchTerm.toLowerCase())
 
-    // Filter by type
+    // Match report type
     const matchesType =
       selectedType === "all" ||
-      (selectedType === "pending" && !item.hasReport) ||
-      (selectedType === "completed" && item.hasReport)
+      (selectedType === "pending" && status === "pending") ||
+      (selectedType === "completed" && status === "completed")
 
     return matchesSearch && matchesType
   })
+
+  console.log("Filtered Reports:", filteredItems) // Log final filtered list
 
   return (
     <div className="space-y-6">
@@ -39,17 +89,10 @@ export default function TeacherReportsPage() {
           <h2 className="text-2xl font-bold tracking-tight">Student Feedback</h2>
           <p className="text-muted-foreground">Provide feedback on student assignments and assessments</p>
         </div>
-        <Button
-          className="bg-secondary hover:bg-secondary/90"
-          onClick={() => router.push("/dashboard/teacher/reports")}
-        >
+        <Button className="bg-secondary hover:bg-secondary/90" onClick={() => router.push("/dashboard/teacher/reports")}>
           <FileText className="mr-2 h-4 w-4" />
           Manage Assessment Reports
         </Button>
-      </div>
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Student Assessment Reports</h2>
-        <p className="text-muted-foreground">Create and manage assessment reports for your students</p>
       </div>
 
       <Card>
@@ -85,60 +128,51 @@ export default function TeacherReportsPage() {
             <div className="rounded-md border">
               <div className="p-4 border-b bg-muted/50 flex items-center">
                 <div className="w-1/3 font-medium">Student</div>
-                <div className="w-1/3 font-medium">Program</div>
+                <div className="w-1/3 font-medium">Term</div>
                 <div className="w-1/6 font-medium">Status</div>
                 <div className="w-1/6 font-medium text-right">Action</div>
               </div>
 
-              {filteredItems.length > 0 ? (
-                filteredItems.map((item) => (
-                  <div key={item.id} className="p-4 border-b flex items-center">
+              {loading ? (
+                <div className="p-8 text-center">Loading...</div>
+              ) : error ? (
+                <div className="p-8 text-center text-red-500">{error}</div>
+              ) : filteredItems.length > 0 ? (
+                filteredItems.map((item, index) => (
+                  <div key={index} className="p-4 border-b flex items-center">
                     <div className="w-1/3">
                       <div className="flex items-center gap-3">
                         <Avatar>
-                          <AvatarImage src={item.avatar} />
-                          <AvatarFallback>{item.initials}</AvatarFallback>
+                          <AvatarImage src={item.avatar || "/placeholder.svg"} />
+                          <AvatarFallback>{item.initials || "?"}</AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-medium">{item.studentName}</div>
-                          <div className="text-sm text-muted-foreground">{item.course}</div>
+                          <div className="font-medium">{item.StudentName}</div>
+                          {/* <div className="text-sm text-muted-foreground">Term {item.Term}</div> Added Term here */}
                         </div>
                       </div>
                     </div>
                     <div className="w-1/3">
                       <div className="font-medium">{item.assignment}</div>
-                      <div className="text-sm text-muted-foreground">{item.type}</div>
+                      <div className="text-sm text-muted-foreground">Term {item.Term}</div>
                     </div>
                     <div className="w-1/6">
-                      <div>
-                        <Badge variant={item.hasReport ? "secondary" : "outline"}>
-                          {item.hasReport ? "Has Report" : "Needs Report"}
-                        </Badge>
-                      </div>
+                      <Badge variant={item.Status === "completed" ? "secondary" : "outline"}>
+                        {item.Status === "completed" ? "Has Report" : "Needs Report"}
+                      </Badge>
                     </div>
                     <div className="w-1/6 text-right">
-                      {item.hasReport ? (
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => router.push(`/dashboard/teacher/reports/view/${item.id}`)}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View
-                          </Button>
-                          <Button size="sm" variant="outline">
-                            <Download className="h-4 w-4" />
-                          </Button>
-                        </div>
+                      {item.Status === "completed" ? (
+                        <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teacher/reports/view/${index}`)}>
+                          <Eye className="h-4 w-4 mr-1" />
+                          View
+                        </Button>
                       ) : (
                         <Button
                           size="sm"
                           className="bg-secondary hover:bg-secondary/90"
                           onClick={() =>
-                            router.push(
-                              `/dashboard/teacher/reports/create?studentId=${item.id}&studentName=${encodeURIComponent(item.studentName)}`,
-                            )
+                            router.push(`/dashboard/teacher/reports/create?studentId=${item.StudentID}&studentName=${encodeURIComponent(item.StudentName)}`)
                           }
                         >
                           <PlusCircle className="h-4 w-4 mr-1" />
@@ -148,6 +182,51 @@ export default function TeacherReportsPage() {
                     </div>
                   </div>
                 ))
+
+                // filteredItems.map((item) => (
+                //   <div key={item.StudentID} className="p-4 border-b flex items-center">
+                //     <div className="w-1/3">
+                //       <div className="flex items-center gap-3">
+                //         <Avatar>
+                //           <AvatarImage src={item.avatar || "/placeholder.svg"} />
+                //           <AvatarFallback>{item.initials || "?"}</AvatarFallback>
+                //         </Avatar>
+                //         <div>
+                //           <div className="font-medium">{item.StudentName}</div>
+                //           <div className="text-sm text-muted-foreground">{item.course}</div>
+                //         </div>
+                //       </div>
+                //     </div>
+                //     <div className="w-1/3">
+                //       <div className="font-medium">{item.assignment}</div>
+                //       <div className="text-sm text-muted-foreground">{item.type}</div>
+                //     </div>
+                //     <div className="w-1/6">
+                //       <Badge variant={item.Status === "completed" ? "secondary" : "outline"}>
+                //         {item.Status === "completed" ? "Has Report" : "Needs Report"}
+                //       </Badge>
+                //     </div>
+                //     <div className="w-1/6 text-right">
+                //       {item.Status === "completed" ? (
+                //         <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teacher/reports/view/${item.StudentID}`)}>
+                //           <Eye className="h-4 w-4 mr-1" />
+                //           View
+                //         </Button>
+                //       ) : (
+                //         <Button
+                //           size="sm"
+                //           className="bg-secondary hover:bg-secondary/90"
+                //           onClick={() =>
+                //             router.push(`/dashboard/teacher/reports/create?studentId=${item.StudentID}&studentName=${encodeURIComponent(item.StudentName)}`)
+                //           }
+                //         >
+                //           <PlusCircle className="h-4 w-4 mr-1" />
+                //           Create Report
+                //         </Button>
+                //       )}
+                //     </div>
+                //   </div>
+                // ))
               ) : (
                 <div className="p-8 text-center text-muted-foreground">No students found matching your filters.</div>
               )}
@@ -155,126 +234,6 @@ export default function TeacherReportsPage() {
           </Tabs>
         </CardContent>
       </Card>
-
-      <Card>
-        <CardHeader>
-          <CardTitle>Recent Reports</CardTitle>
-          <CardDescription>Recently created or updated assessment reports</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentReports.map((report) => (
-              <div key={report.id} className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0">
-                <div className="flex items-center gap-4">
-                  <div className="bg-primary/10 p-2 rounded-full">
-                    <FileText className="h-5 w-5 text-primary" />
-                  </div>
-                  <div>
-                    <div className="font-medium">
-                      {report.studentName} - {report.term}
-                    </div>
-                    <div className="text-sm text-muted-foreground">Created on {report.date}</div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/dashboard/teacher/reports/view/${report.id}`}>View</Link>
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    <Download className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
-
-            <Button variant="outline" className="w-full" asChild>
-              <Link href="/dashboard/teacher/reports">View All Reports</Link>
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   )
 }
-
-// Sample data
-const feedbackItems = [
-  {
-    id: "1",
-    studentName: "Arjun Patel",
-    course: "Digital Literacy",
-    assignment: "Digital Literacy Program",
-    type: "Term 2",
-    submittedDate: "Mar 20, 2023",
-    hasReport: true,
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "AP",
-  },
-  {
-    id: "2",
-    studentName: "Meera Singh",
-    course: "Digital Literacy",
-    assignment: "Digital Literacy Program",
-    type: "Term 2",
-    submittedDate: "Mar 19, 2023",
-    hasReport: false,
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "MS",
-  },
-  {
-    id: "3",
-    studentName: "Vikram Malhotra",
-    course: "Digital Literacy",
-    assignment: "Digital Literacy Program",
-    type: "Term 2",
-    submittedDate: "Mar 15, 2023",
-    hasReport: false,
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "VM",
-  },
-  {
-    id: "4",
-    studentName: "Rahul Verma",
-    course: "Digital Literacy",
-    assignment: "Digital Literacy Program",
-    type: "Term 1",
-    submittedDate: "Mar 10, 2023",
-    hasReport: true,
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "RV",
-  },
-  {
-    id: "5",
-    studentName: "Neha Gupta",
-    course: "Digital Literacy",
-    assignment: "Digital Literacy Program",
-    type: "Term 1",
-    submittedDate: "Mar 5, 2023",
-    hasReport: true,
-    avatar: "/placeholder.svg?height=40&width=40",
-    initials: "NG",
-  },
-]
-
-// Sample data for recent reports
-const recentReports = [
-  {
-    id: "1",
-    studentName: "Arjun Patel",
-    term: "Term 2",
-    date: "Dec 15, 2024",
-  },
-  {
-    id: "4",
-    studentName: "Rahul Verma",
-    term: "Term 1",
-    date: "Aug 20, 2024",
-  },
-  {
-    id: "5",
-    studentName: "Neha Gupta",
-    term: "Term 1",
-    date: "Aug 18, 2024",
-  },
-]
-
