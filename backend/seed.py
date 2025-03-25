@@ -80,6 +80,7 @@ with app.app_context():
             LastName=fake.last_name(),
             Gender=random.choice(['M', 'F']),
             DateOfBirth=fake.date_of_birth(minimum_age=5, maximum_age=18),
+            DateOfJoining=fake.date_between(start_date='-5y', end_date='-1y'),
             EmailID=fake.unique.email(),
             ProgramID=program.ProgramID,
             PrimaryEducatorID=primary_educator.EducatorID,

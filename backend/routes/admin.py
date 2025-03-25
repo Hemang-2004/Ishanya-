@@ -6,6 +6,38 @@ from utils import *
 
 admin_bp = Blueprint("admin", __name__)
 
+@admin_bp.route('/get-all-students', methods=['GET'])
+def get_all_students():
+    students = db.session.query(
+        Student.StudentID,
+        Student.FirstName,
+        Student.LastName,
+        Student.EmailID,
+        Student.Status,
+        Student.DateOfJoining,
+        Program.ProgramName,
+        Educator.Name.label('PrimaryEducatorName')
+    ).join(Program, Student.ProgramID == Program.ProgramID)\
+     .outerjoin(Educator, Student.PrimaryEducatorID == Educator.EducatorID)\
+     .all()
+
+    result = []
+
+    for s in students:
+        student_info = {
+            "StudentID": s.StudentID,
+            "Name": f"{s.FirstName} {s.LastName}",
+            "Email": s.EmailID,
+            "Program": s.ProgramName,
+            "Status": s.Status,
+            "DateJoined": s.DateOfJoining.strftime("%b %d, %Y") if s.DateOfJoining else None,
+            "PrimaryEducator": s.PrimaryEducatorName
+        }
+
+        result.append(student_info)
+
+    return jsonify(result)
+
 @admin_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     return jsonify({
