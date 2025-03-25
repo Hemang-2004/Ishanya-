@@ -290,10 +290,6 @@ export default function SchedulerScreen() {
             contentContainerStyle={styles.eventsList}
           />
         </View>
-
-        <TouchableOpacity style={styles.addButton}>
-          <MaterialIcons name="add" size={24} color="#fff" />
-        </TouchableOpacity>
       </SafeAreaView>
     </ImageBackground>
   )
@@ -423,22 +419,6 @@ const styles = StyleSheet.create({
     color: "#666",
     marginLeft: 5,
     fontFamily: "JosefinSans-Regular",
-  },
-  addButton: {
-    position: "absolute",
-    right: 20,
-    bottom: 80,
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "#408c4c",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 5,
   },
   modalOverlay: {
     flex: 1,
