@@ -48,6 +48,9 @@ class Educator(UserMixin, db.Model):
     def get_id(self):
         return self.EducatorID
 
+    def get_name(self):
+        return self.Name
+
     def set_password(self, password):
         self.Password = bcrypt.generate_password_hash(password).decode('utf-8')
 
@@ -102,6 +105,9 @@ class Student(UserMixin, db.Model):
 
     def get_id(self):
         return str(self.StudentID)
+    
+    def get_name(self):
+        return self.FirstName
 
     def set_password(self, password):
         self.Password = bcrypt.generate_password_hash(password).decode('utf-8')
