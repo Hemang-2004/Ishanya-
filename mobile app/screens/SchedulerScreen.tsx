@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { View, Text, StyleSheet, TouchableOpacity, FlatList, ImageBackground } from "react-native"
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ImageBackground, Modal, PanResponder, Animated, ScrollView } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { MaterialIcons } from "@expo/vector-icons"
 
@@ -12,7 +12,7 @@ const MONTH = CURRENT_DATE.toLocaleString("default", { month: "long" })
 const YEAR = CURRENT_DATE.getFullYear()
 
 
-// Generate dates for the current week
+// Generate dates for the current week and beyond
 const generateWeekDates = () => {
   const dates = []
   const today = new Date()
@@ -22,14 +22,16 @@ const generateWeekDates = () => {
   const sunday = new Date(today)
   sunday.setDate(today.getDate() - day)
 
-  // Generate dates for the week
-  for (let i = 0; i < 7; i++) {
+  // Generate dates for the week and beyond (up to 60 days from today)
+  for (let i = 0; i < 60; i++) {
     const date = new Date(sunday)
     date.setDate(sunday.getDate() + i)
     dates.push({
       id: i.toString(),
-      day: DAYS[i],
+      day: DAYS[date.getDay()],
       date: date.getDate(),
+      month: date.getMonth(),
+      year: date.getFullYear(),
       isToday:
         date.getDate() === today.getDate() &&
         date.getMonth() === today.getMonth() &&
@@ -74,17 +76,109 @@ const EVENTS = [
 
 export default function SchedulerScreen() {
   const [selectedDate, setSelectedDate] = useState(CURRENT_DATE.getDate())
+  const [selectedMonth, setSelectedMonth] = useState(CURRENT_DATE.getMonth())
+  const [selectedYear, setSelectedYear] = useState(CURRENT_DATE.getFullYear())
+  const [showDropdown, setShowDropdown] = useState(false)
+  const [currentMonth, setCurrentMonth] = useState(CURRENT_DATE.getMonth())
+  const [currentYear, setCurrentYear] = useState(CURRENT_DATE.getFullYear())
   const weekDates = generateWeekDates()
+
+  const panResponder = PanResponder.create({
+    onStartShouldSetPanResponder: () => true,
+    onMoveShouldSetPanResponder: () => true,
+    onPanResponderRelease: (_, gestureState) => {
+      if (Math.abs(gestureState.dx) > 50) {
+        if (gestureState.dx > 0) {
+          // Swipe right - previous month
+          if (currentMonth === 0) {
+            setCurrentMonth(11)
+            setCurrentYear(currentYear - 1)
+          } else {
+            setCurrentMonth(currentMonth - 1)
+          }
+        } else {
+          // Swipe left - next month
+          if (currentMonth === 11) {
+            setCurrentMonth(0)
+            setCurrentYear(currentYear + 1)
+          } else {
+            setCurrentMonth(currentMonth + 1)
+          }
+        }
+      }
+    },
+  })
+
+  const getDaysInMonth = (month: number, year: number) => {
+    return new Date(year, month + 1, 0).getDate()
+  }
+
+  const getFirstDayOfMonth = (month: number, year: number) => {
+    return new Date(year, month, 1).getDay()
+  }
+
+  const handleTodayPress = () => {
+    setShowDropdown(true)
+    setCurrentMonth(CURRENT_DATE.getMonth())
+    setCurrentYear(CURRENT_DATE.getFullYear())
+  }
+
+  const handleDateSelect = (date: number, month: number, year: number) => {
+    setSelectedDate(date)
+    setSelectedMonth(month)
+    setSelectedYear(year)
+    setShowDropdown(false)
+  }
+
+  const renderCalendarDays = () => {
+    const daysInMonth = getDaysInMonth(currentMonth, currentYear)
+    const firstDay = getFirstDayOfMonth(currentMonth, currentYear)
+    const days = []
+
+    // Add empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<View key={`empty-${i}`} style={styles.dropdownDateItem} />)
+    }
+
+    // Add days of the month
+    for (let i = 1; i <= daysInMonth; i++) {
+      const isToday = i === CURRENT_DATE.getDate() && 
+                      currentMonth === CURRENT_DATE.getMonth() && 
+                      currentYear === CURRENT_DATE.getFullYear()
+      
+      days.push(
+        <TouchableOpacity
+          key={i.toString()}
+          style={[
+            styles.dropdownDateItem,
+            isToday && styles.dropdownTodayItem,
+            i === selectedDate && styles.dropdownSelectedItem
+          ]}
+          onPress={() => handleDateSelect(i, currentMonth, currentYear)}
+        >
+          <Text style={[
+            styles.dropdownDateText,
+            isToday && styles.dropdownTodayText,
+            i === selectedDate && styles.dropdownSelectedText
+          ]}>
+            {i}
+          </Text>
+        </TouchableOpacity>
+      )
+    }
+
+    return days
+  }
 
   const renderDateItem = ({ item }) => (
     <TouchableOpacity
-      style={[styles.dateItem, item.isToday && styles.todayItem, item.date === selectedDate && styles.selectedDateItem]}
-      onPress={() => setSelectedDate(item.date)}
+      style={[styles.dateItem, item.isToday && styles.todayItem, item.date === selectedDate && item.month === selectedMonth && styles.selectedDateItem]}
+      onPress={() => handleDateSelect(item.date, item.month, item.year)}
     >
-      <Text style={[styles.dayText, (item.isToday || item.date === selectedDate) && styles.selectedDayText]}>
+      <Text style={[styles.dayText, (item.isToday || (item.date === selectedDate && item.month === selectedMonth)) && styles.selectedDayText]}>
         {item.day}
       </Text>
-      <Text style={[styles.dateText, (item.isToday || item.date === selectedDate) && styles.selectedDayText]}>
+      <Text style={[styles.dateText, (item.isToday || (item.date === selectedDate && item.month === selectedMonth)) && styles.selectedDayText]}>
         {item.date}
       </Text>
     </TouchableOpacity>
@@ -114,14 +208,65 @@ export default function SchedulerScreen() {
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
-            {MONTH} {YEAR}
+            {CURRENT_DATE.toLocaleString("default", { month: "long", day: "numeric", year: "numeric" })}
           </Text>
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity style={styles.iconButton} onPress={handleTodayPress}>
               <MaterialIcons name="today" size={24} color="#408c4c" />
             </TouchableOpacity>
           </View>
         </View>
+
+        <Modal
+          visible={showDropdown}
+          transparent={true}
+          animationType="fade"
+          onRequestClose={() => setShowDropdown(false)}
+        >
+          <TouchableOpacity 
+            style={styles.modalOverlay} 
+            activeOpacity={1} 
+            onPress={() => setShowDropdown(false)}
+          >
+            <View style={styles.dropdownCalendar} {...panResponder.panHandlers}>
+              <View style={styles.dropdownHeader}>
+                <TouchableOpacity onPress={() => {
+                  if (currentMonth === 0) {
+                    setCurrentMonth(11)
+                    setCurrentYear(currentYear - 1)
+                  } else {
+                    setCurrentMonth(currentMonth - 1)
+                  }
+                }}>
+                  <MaterialIcons name="chevron-left" size={24} color="#408c4c" />
+                </TouchableOpacity>
+                <Text style={styles.dropdownTitle}>
+                  {new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })} {currentYear}
+                </Text>
+                <TouchableOpacity onPress={() => {
+                  if (currentMonth === 11) {
+                    setCurrentMonth(0)
+                    setCurrentYear(currentYear + 1)
+                  } else {
+                    setCurrentMonth(currentMonth + 1)
+                  }
+                }}>
+                  <MaterialIcons name="chevron-right" size={24} color="#408c4c" />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.dropdownDays}>
+                {DAYS.map(day => (
+                  <Text key={day} style={styles.dropdownDayHeader}>{day}</Text>
+                ))}
+              </View>
+              <ScrollView style={styles.dropdownScrollView} showsVerticalScrollIndicator={false}>
+                <View style={styles.dropdownDates}>
+                  {renderCalendarDays()}
+                </View>
+              </ScrollView>
+            </View>
+          </TouchableOpacity>
+        </Modal>
 
         <View style={styles.calendarContainer}>
           <FlatList
@@ -136,7 +281,7 @@ export default function SchedulerScreen() {
 
         <View style={styles.eventsContainer}>
           <Text style={styles.eventsTitle}>
-            Schedule for {MONTH} {selectedDate}
+            Schedule for {new Date(selectedYear, selectedMonth).toLocaleString("default", { month: "long" })} {selectedDate}
           </Text>
           <FlatList
             data={EVENTS}
@@ -294,6 +439,83 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.3,
     shadowRadius: 4,
     elevation: 5,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  dropdownHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  dropdownCalendar: {
+    backgroundColor: "#FFF8DC",
+    padding: 20,
+    borderRadius: 10,
+    width: "90%",
+    maxHeight: "80%",
+    borderWidth: 1,
+    borderColor: "#D2B48C",
+  },
+  dropdownTitle: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    marginBottom: 10,
+    fontFamily: "JosefinSans-Regular",
+  },
+  dropdownDays: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 10,
+  },
+  dropdownDayHeader: {
+    width: "14.28%",
+    fontSize: 14,
+    color: "#666",
+    fontFamily: "JosefinSans-Regular",
+    textAlign: "center",
+  },
+  dropdownScrollView: {
+    maxHeight: 400,
+  },
+  dropdownDates: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    paddingBottom: 10,
+  },
+  dropdownDateItem: {
+    width: "14.28%",
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    marginBottom: 5,
+    borderRadius: 5,
+    backgroundColor: "#FFFAF0",
+    borderWidth: 1,
+    borderColor: "#D2B48C",
+  },
+  dropdownTodayItem: {
+    backgroundColor: "#408c4c",
+  },
+  dropdownSelectedItem: {
+    backgroundColor: "#8B4513",
+  },
+  dropdownDateText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
+    fontFamily: "JosefinSans-Regular",
+  },
+  dropdownTodayText: {
+    color: "#fff",
+  },
+  dropdownSelectedText: {
+    color: "#fff",
   },
 })
 
