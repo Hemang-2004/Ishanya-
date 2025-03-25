@@ -264,3 +264,5 @@ class Admin(db.Model):
     def get_id(self):
         """Return the admin's unique identifier"""
         return self.AdminID
+    def get_name(self):
+        return self.AdminName

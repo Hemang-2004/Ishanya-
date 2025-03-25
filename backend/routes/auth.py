@@ -30,10 +30,6 @@ def login():
     if role != 'admin' and user and (user.IsRegistered is None or user.IsRegistered is False):
         return jsonify({"error": "You will be allowed to login once the admin has registered you."}), 403
 
-    # # Ensure IsRegistered is True
-    # print(email)
-    # print(user.get_id())
-    # print(user.check_password(password))
     if user:
         if user.check_password(password):
             token = create_access_token(identity={"id": user.get_id(), "role": role})

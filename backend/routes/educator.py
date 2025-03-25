@@ -216,22 +216,54 @@ def get_all_educators():
 
     
 
+# @educator_bp.route('/students/<int:educator_id>', methods=['GET'])
+# def get_students_for_educator(educator_id):
+#     try:
+#         students = Student.query.filter(Student.PrimaryEducatorID == educator_id).all()
+#         print(students)
+#         if not students:
+#             return jsonify({"message": "No students found"}), 404
+
+#         student_list = [{
+#             "student_id": student.StudentID,
+#             "name": f"{student.FirstName} {student.LastName}",
+#             "program_id": student.ProgramID,
+#         } for student in students]
+
+#         return jsonify({"educator_id": educator_id, "students": student_list}), 200
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
+    
 @educator_bp.route('/students/<int:educator_id>', methods=['GET'])
 def get_students_for_educator(educator_id):
     try:
         students = Student.query.filter(Student.PrimaryEducatorID == educator_id).all()
+        
         if not students:
             return jsonify({"message": "No students found"}), 404
 
-        student_list = [{
-            "student_id": student.StudentID,
-            "name": f"{student.FirstName} {student.LastName}"
-        } for student in students]
+        # Creating the student list with program names
+        student_list = []
+        for student in students:
+            # Fetch the program name from the Program table
+            program = Program.query.filter_by(ProgramID=student.ProgramID).first()
+            program_name = program.ProgramName if program else "Unknown Program"
+            status = 'active' if student.Status == 'Active' or student.Status == 'Graduated' else 'at-risk'
+
+            student_data = {
+                "student_id": student.StudentID,
+                "email": student.EmailID,
+                "name": f"{student.FirstName} {student.LastName}",
+                "program_id": student.ProgramID,
+                "program_name": program_name,  # Adding the program name to the student data
+                "status": status  # Adding the student's status (active or at-risk)
+            }
+            student_list.append(student_data)
 
         return jsonify({"educator_id": educator_id, "students": student_list}), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-    
+
 
 @educator_bp.route('/send-message', methods=['POST'])
 def send_message():
