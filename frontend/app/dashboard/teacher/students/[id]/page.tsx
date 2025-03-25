@@ -13,6 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { FileText, MessageSquare, Phone, Mail, MapPin, Send, Download, Upload } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 // Mock student data
 const studentsData = {
@@ -59,6 +60,7 @@ export default function StudentDetailPage() {
   const params = useParams()
   const studentId = params.id as string
   const student = studentsData[studentId]
+  const router = useRouter()
 
   const [feedbackText, setFeedbackText] = useState("")
   const [messageText, setMessageText] = useState("")
@@ -171,6 +173,7 @@ export default function StudentDetailPage() {
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="attendance">Attendance</TabsTrigger>
           <TabsTrigger value="feedback">Feedback</TabsTrigger>
+          <TabsTrigger value="reports">Reports</TabsTrigger>
           <TabsTrigger value="messages">Messages</TabsTrigger>
         </TabsList>
 
@@ -309,6 +312,71 @@ export default function StudentDetailPage() {
                   software concepts. He actively participated in class discussions and helped other students. Areas for
                   improvement include time management during practical exercises.
                 </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="reports" className="space-y-4">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <div>
+                <CardTitle>Assessment Reports</CardTitle>
+                <CardDescription>View and manage assessment reports for {student.name}</CardDescription>
+              </div>
+              <Button
+                className="bg-secondary hover:bg-secondary/90"
+                onClick={() =>
+                  router.push(
+                    `/dashboard/teacher/reports/create?studentId=${student.id}&studentName=${encodeURIComponent(student.name)}`,
+                  )
+                }
+              >
+                <FileText className="mr-2 h-4 w-4" />
+                Create New Report
+              </Button>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Term 2 Assessment Report</div>
+                      <div className="text-sm text-muted-foreground">December 15, 2024</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/teacher/reports/view/${student.id}`}>View</Link>
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between p-4 border rounded-md">
+                  <div className="flex items-center gap-4">
+                    <div className="bg-primary/10 p-2 rounded-full">
+                      <FileText className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <div className="font-medium">Term 1 Assessment Report</div>
+                      <div className="text-sm text-muted-foreground">August 20, 2024</div>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button variant="outline" size="sm" asChild>
+                      <Link href={`/dashboard/teacher/reports/view/${student.id}`}>View</Link>
+                    </Button>
+                    <Button variant="outline" size="sm">
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

@@ -177,6 +177,7 @@ export default function TeacherDashboardPage() {
               <TabsTrigger value="feedback">Feedback</TabsTrigger>
               <TabsTrigger value="assignments">Assignments</TabsTrigger>
               <TabsTrigger value="messages">Messages</TabsTrigger>
+              <TabsTrigger value="reports">Reports</TabsTrigger>
             </TabsList>
 
             <TabsContent value="feedback" className="space-y-4">
@@ -292,6 +293,72 @@ export default function TeacherDashboardPage() {
 
               <Button className="w-full" variant="outline" asChild>
                 <Link href="/dashboard/teacher/messages">View All Messages</Link>
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="reports" className="space-y-4">
+              <div className="rounded-md border">
+                <div className="p-4 border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                        <AvatarFallback>AP</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Arjun Patel</div>
+                        <div className="text-sm text-muted-foreground">Digital Literacy - Term 2 Assessment</div>
+                      </div>
+                    </div>
+                    <Button size="sm" className="bg-secondary hover:bg-secondary/90" asChild>
+                      <Link href="/dashboard/teacher/reports/view/1">View Report</Link>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4 border-b">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                        <AvatarFallback>MS</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Meera Singh</div>
+                        <div className="text-sm text-muted-foreground">Digital Literacy - Term 2 Assessment</div>
+                      </div>
+                    </div>
+                    <Button size="sm" className="bg-secondary hover:bg-secondary/90" asChild>
+                      <Link href="/dashboard/teacher/reports/create?studentId=2&studentName=Meera%20Singh">
+                        Create Report
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Avatar>
+                        <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                        <AvatarFallback>VM</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">Vikram Malhotra</div>
+                        <div className="text-sm text-muted-foreground">Digital Literacy - Term 2 Assessment</div>
+                      </div>
+                    </div>
+                    <Button size="sm" className="bg-secondary hover:bg-secondary/90" asChild>
+                      <Link href="/dashboard/teacher/reports/create?studentId=3&studentName=Vikram%20Malhotra">
+                        Create Report
+                      </Link>
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <Button className="w-full" variant="outline" asChild>
+                <Link href="/dashboard/teacher/feedback">Manage All Reports</Link>
               </Button>
             </TabsContent>
           </Tabs>

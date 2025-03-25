@@ -10,7 +10,6 @@ import { Progress } from "@/components/ui/progress"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { useRouter } from "next/navigation"
-import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/components/language-provider"
 import Link from "next/link"
 import {
@@ -22,8 +21,6 @@ import {
   Download,
   FileText,
   BarChart3,
-  LineChart,
-  PieChart,
   ArrowUpRight,
   ArrowDownRight,
   Bell,
@@ -31,15 +28,58 @@ import {
   CheckCircle2,
   Clock,
   UserCheck,
+  ArrowRight,
 } from "lucide-react"
+import {
+  LineChart as RechartsLineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  PieChart as RechartsPieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts"
+import { ChartTooltip } from "@/components/ui/chart"
+
+// Sample data for charts
+const studentGrowthData = [
+  { name: "Jan", students: 120 },
+  { name: "Feb", students: 145 },
+  { name: "Mar", students: 190 },
+  { name: "Apr", students: 210 },
+  { name: "May", students: 250 },
+  { name: "Jun", students: 280 },
+]
+
+const programDistributionData = [
+  { name: "Digital Literacy", value: 45 },
+  { name: "Vocational", value: 30 },
+  { name: "Leadership", value: 25 },
+]
+
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE"]
+
+const attendanceData = [
+  { name: "Jan", attendance: 85 },
+  { name: "Feb", attendance: 75 },
+  { name: "Mar", attendance: 90 },
+  { name: "Apr", attendance: 80 },
+  { name: "May", attendance: 70 },
+  { name: "Jun", attendance: 85 },
+]
 
 export default function AdminDashboardPage() {
   const router = useRouter()
   const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState("month")
   const [programFilter, setProgramFilter] = useState("all")
-  const [dashboardData, setDashboardData] = useState<any>(null)
-
+  const [dashboardData, setDashboardData] = useState<any>(null);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -62,7 +102,6 @@ export default function AdminDashboardPage() {
           <p className="text-muted-foreground">Welcome back! Here's what's happening at Ishanya Connect</p>
         </div>
         <div className="flex items-center gap-2">
-          <LanguageSwitcher />
           <Button variant="outline">
             <Download className="mr-2 h-4 w-4" />
             Export Report
@@ -139,7 +178,6 @@ export default function AdminDashboardPage() {
         <MetricCard
           title="Completion Rate"
           value={dashboardData?.completion_rate?.toString() + "%"}
-
           change="+5%"
           trend="up"
           description="vs. previous period"
@@ -167,7 +205,22 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <StudentGrowthChart />
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsLineChart data={studentGrowthData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Line
+                    type="monotone"
+                    dataKey="students"
+                    stroke="hsl(var(--primary))"
+                    strokeWidth={2}
+                    activeDot={{ r: 8 }}
+                    name="Students"
+                  />
+                </RechartsLineChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -181,7 +234,26 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ProgramDistributionChart />
+              <ResponsiveContainer width="100%" height="100%">
+                <RechartsPieChart>
+                  <Pie
+                    data={programDistributionData}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {programDistributionData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<ChartTooltip />} />
+                  <Legend />
+                </RechartsPieChart>
+              </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>
@@ -257,7 +329,150 @@ export default function AdminDashboardPage() {
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <AttendanceChart />
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={attendanceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis domain={[0, 100]} />
+                  <Tooltip content={<ChartTooltip />} />
+                  <Bar dataKey="attendance" fill="hsl(var(--primary))" name="Attendance %" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="grid gap-4 md:grid-cols-7">
+        <Card className="md:col-span-4">
+          <CardHeader>
+            <CardTitle>Recent Assessment Reports</CardTitle>
+            <CardDescription>Latest student assessment reports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback>AP</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">Arjun Patel</div>
+                    <div className="text-sm text-muted-foreground">Digital Literacy - Term 2 • Dec 15, 2024</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/admin/reports/student/1">View</Link>
+                  </Button>
+                  <Button size="sm">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback>RV</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">Rahul Verma</div>
+                    <div className="text-sm text-muted-foreground">Digital Literacy - Term 1 • Aug 20, 2024</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/admin/reports/student/4">View</Link>
+                  </Button>
+                  <Button size="sm">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback>NG</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">Neha Gupta</div>
+                    <div className="text-sm text-muted-foreground">Digital Literacy - Term 1 • Aug 18, 2024</div>
+                  </div>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href="/dashboard/admin/reports/student/5">View</Link>
+                  </Button>
+                  <Button size="sm">
+                    <Download className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/dashboard/admin/reports/index">
+                  View All Reports
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="md:col-span-3">
+          <CardHeader>
+            <CardTitle>Students Needing Reports</CardTitle>
+            <CardDescription>Students without current term assessment reports</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback>MS</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">Meera Singh</div>
+                    <div className="text-sm text-muted-foreground">Digital Literacy - Term 2</div>
+                  </div>
+                </div>
+                <Button size="sm" className="bg-secondary hover:bg-secondary/90" asChild>
+                  <Link href="/dashboard/admin/reports/create?studentId=2&studentName=Meera%20Singh">
+                    Create Report
+                  </Link>
+                </Button>
+              </div>
+
+              <div className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src="/placeholder.svg?height=40&width=40" />
+                    <AvatarFallback>VM</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-medium">Vikram Malhotra</div>
+                    <div className="text-sm text-muted-foreground">Digital Literacy - Term 2</div>
+                  </div>
+                </div>
+                <Button size="sm" className="bg-secondary hover:bg-secondary/90" asChild>
+                  <Link href="/dashboard/admin/reports/create?studentId=3&studentName=Vikram%20Malhotra">
+                    Create Report
+                  </Link>
+                </Button>
+              </div>
+
+              <Button variant="outline" className="w-full" asChild>
+                <Link href="/dashboard/admin/reports/index">
+                  Manage All Reports
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
             </div>
           </CardContent>
         </Card>
@@ -272,7 +487,10 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {registrationRequests.map((request) => (
-                <div key={request.id} className="flex items-center justify-between p-4 border rounded-md">
+                <div
+                  key={request.id}
+                  className="flex items-center justify-between p-4 border rounded-md hover:bg-muted/50 transition-colors"
+                >
                   <div className="flex items-center gap-3">
                     <Avatar>
                       <AvatarImage src={request.avatar} />
@@ -294,7 +512,10 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
               <Button variant="outline" className="w-full" asChild>
-                <Link href="/dashboard/admin/registration-requests">View All Requests</Link>
+                <Link href="/dashboard/admin/registration-requests">
+                  View All Requests
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
               </Button>
             </div>
           </CardContent>
@@ -351,7 +572,10 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="space-y-4">
               {upcomingEvents.map((event) => (
-                <div key={event.id} className="flex items-start gap-3 p-3 border rounded-md">
+                <div
+                  key={event.id}
+                  className="flex items-start gap-3 p-3 border rounded-md hover:bg-muted/50 transition-colors"
+                >
                   <div className="bg-primary/10 p-2 rounded-full">
                     <Calendar className="h-5 w-5 text-primary" />
                   </div>
@@ -423,86 +647,6 @@ function MetricCard({ title, value, change, trend, description, icon }: MetricCa
         </p>
       </CardContent>
     </Card>
-  )
-}
-
-function StudentGrowthChart() {
-  return (
-    <div className="relative h-full w-full">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <LineChart className="h-16 w-16 text-muted-foreground/50" />
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 h-[60%] bg-gradient-to-t from-transparent to-transparent">
-        <div
-          className="h-full w-full bg-gradient-to-t from-primary/10 to-transparent rounded-md"
-          style={{
-            clipPath:
-              "polygon(0 100%, 10% 80%, 20% 90%, 30% 70%, 40% 60%, 50% 50%, 60% 55%, 70% 45%, 80% 40%, 90% 30%, 100% 40%, 100% 100%, 0 100%)",
-          }}
-        ></div>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 flex justify-between px-4 pb-4 text-xs text-muted-foreground">
-        <span>Jan</span>
-        <span>Feb</span>
-        <span>Mar</span>
-        <span>Apr</span>
-        <span>May</span>
-        <span>Jun</span>
-      </div>
-    </div>
-  )
-}
-
-function ProgramDistributionChart() {
-  return (
-    <div className="relative h-full w-full flex items-center justify-center">
-      <PieChart className="h-16 w-16 text-muted-foreground/50 absolute" />
-      <div className="w-[200px] h-[200px] rounded-full border-8 border-primary/20 relative">
-        <div className="absolute inset-0 border-8 border-transparent border-t-secondary rounded-full transform rotate-[45deg]"></div>
-        <div className="absolute inset-0 border-8 border-transparent border-r-green-500 rounded-full transform rotate-[145deg]"></div>
-        <div className="absolute inset-0 border-8 border-transparent border-b-blue-500 rounded-full transform rotate-[245deg]"></div>
-      </div>
-      <div className="absolute bottom-0 w-full flex justify-around text-xs text-muted-foreground">
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-secondary rounded-full mr-1"></div>
-          <span>Digital Literacy (45%)</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-green-500 rounded-full mr-1"></div>
-          <span>Vocational (30%)</span>
-        </div>
-        <div className="flex items-center">
-          <div className="w-3 h-3 bg-blue-500 rounded-full mr-1"></div>
-          <span>Leadership (25%)</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function AttendanceChart() {
-  return (
-    <div className="relative h-full w-full">
-      <div className="absolute inset-0 flex items-center justify-center">
-        <BarChart3 className="h-16 w-16 text-muted-foreground/50" />
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 h-[70%] flex items-end justify-around px-4 gap-2">
-        <div className="w-full h-[85%] bg-primary/20 rounded-t-md"></div>
-        <div className="w-full h-[75%] bg-primary/20 rounded-t-md"></div>
-        <div className="w-full h-[90%] bg-primary/20 rounded-t-md"></div>
-        <div className="w-full h-[80%] bg-secondary/60 rounded-t-md"></div>
-        <div className="w-full h-[70%] bg-primary/20 rounded-t-md"></div>
-        <div className="w-full h-[85%] bg-primary/20 rounded-t-md"></div>
-      </div>
-      <div className="absolute bottom-0 left-0 right-0 flex justify-around px-4 pb-4 text-xs text-muted-foreground">
-        <span>Jan</span>
-        <span>Feb</span>
-        <span>Mar</span>
-        <span>Apr</span>
-        <span>May</span>
-        <span>Jun</span>
-      </div>
-    </div>
   )
 }
 

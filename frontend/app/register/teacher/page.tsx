@@ -14,7 +14,6 @@ import { useToast } from "@/components/ui/use-toast"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { FileUploader } from "@/components/file-uploader"
-import { Checkbox } from "@/components/ui/checkbox"
 
 export default function TeacherRegistrationPage() {
   const router = useRouter()
@@ -75,7 +74,6 @@ export default function TeacherRegistrationPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    
     // Simulate registration process
     // setTimeout(() => {
     //   setIsLoading(false)
@@ -89,42 +87,39 @@ export default function TeacherRegistrationPage() {
     // }, 1500)
 
     try {
-      const formDataToSend = new FormData();
+      const formDataToSend = new FormData()
       Object.entries(formData).forEach(([key, value]) => {
         if (value && value instanceof File) {
-          formDataToSend.append(key, value); // Append files
+          formDataToSend.append(key, value) // Append files
         } else if (value) {
-          formDataToSend.append(key, String(value)); // Append non-file values
+          formDataToSend.append(key, String(value)) // Append non-file values
         }
-      });
-      console.log(formDataToSend);
-      const response = await fetch(
-        "http://localhost:5000/auth/register/educator",
-        {
-          method: "POST",
-          body: formDataToSend,
-        }
-      );
+      })
+      console.log(formDataToSend)
+      const response = await fetch("http://localhost:5000/auth/register/educator", {
+        method: "POST",
+        body: formDataToSend,
+      })
 
-      const result = await response.json();
+      const result = await response.json()
 
       if (response.ok) {
         toast({
           title: "Registration successful",
           description: "Your registration has been submitted successfully.",
-        });
-        router.push("/registration-success");
+        })
+        router.push("/registration-success")
       } else {
-        throw new Error(result.message || "Something went wrong");
+        throw new Error(result.message || "Something went wrong")
       }
     } catch (error) {
       toast({
         title: "Registration failed",
         description: (error as Error).message,
         variant: "destructive",
-      });
+      })
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
   }
 
@@ -156,76 +151,75 @@ export default function TeacherRegistrationPage() {
               Complete the form below to register as an Educator or a staff member at Ishanya Foundation
             </CardDescription>
           </CardHeader>
-            <CardContent className="space-y-4">
-              {step === 1 && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="FirstName">First Name*</Label>
-                      <Input
-                        id="FirstName"
-                        name="FirstName"
-                        value={formData.FirstName}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="LastName">Last Name*</Label>
-                      <Input id="LastName" name="LastName" value={formData.LastName} onChange={handleChange} required />
-                    </div>
-                  </div>
+          <CardContent className="space-y-4">
+            {step === 1 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="Email">Email*</Label>
+                    <Label htmlFor="FirstName">First Name*</Label>
                     <Input
-                      id="Email"
-                      name="Email"
-                      type="Email"
-                      value={formData.Email}
+                      id="FirstName"
+                      name="FirstName"
+                      value={formData.FirstName}
                       onChange={handleChange}
                       required
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="Password">Password*</Label>
-                    <Input
-                      id="Password"
-                      name="Password"
-                      type="Password"
-                      value={formData.Password}
-                      onChange={handleChange}
-                      required
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Password must be at least 8 characters long with a mix of letters, numbers, and symbols.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="Phone">Phone Number</Label>
-                    <Input id="Phone" name="Phone" type="tel" value={formData.Phone} onChange={handleChange} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="WorkLocation">Work Location</Label>
-                    <Textarea id="WorkLocation" name="WorkLocation" value={formData.WorkLocation} onChange={handleChange} required />
+                    <Label htmlFor="LastName">Last Name*</Label>
+                    <Input id="LastName" name="LastName" value={formData.LastName} onChange={handleChange} required />
                   </div>
                 </div>
-              )}
+                <div className="space-y-2">
+                  <Label htmlFor="Email">Email*</Label>
+                  <Input id="Email" name="Email" type="Email" value={formData.Email} onChange={handleChange} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="Password">Password*</Label>
+                  <Input
+                    id="Password"
+                    name="Password"
+                    type="Password"
+                    value={formData.Password}
+                    onChange={handleChange}
+                    required
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Password must be at least 8 characters long with a mix of letters, numbers, and symbols.
+                  </p>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="Phone">Phone Number</Label>
+                  <Input id="Phone" name="Phone" type="tel" value={formData.Phone} onChange={handleChange} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="WorkLocation">Work Location</Label>
+                  <Textarea
+                    id="WorkLocation"
+                    name="WorkLocation"
+                    value={formData.WorkLocation}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+              </div>
+            )}
 
-              {step === 2 && (
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="DateOfBirth">Date of Birth*</Label>
-                      <Input
-                        id="DateOfBirth"
-                        name="DateOfBirth"
-                        type="date"
-                        value={formData.DateOfBirth}
-                        onChange={handleChange}
-                        required
-                      />
-                    </div>
-                    {/* <div className="space-y-2">
+            {step === 2 && (
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="DateOfBirth">Date of Birth*</Label>
+                    <Input
+                      id="DateOfBirth"
+                      name="DateOfBirth"
+                      type="date"
+                      value={formData.DateOfBirth}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  {/* <div className="space-y-2">
                       <Label htmlFor="gender">Gender*</Label>
                       <Select
                         defaultValue={formData.gender}
@@ -242,26 +236,26 @@ export default function TeacherRegistrationPage() {
                         </SelectContent>
                       </Select>
                     </div> */}
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="HighEducationQualification">Highest Qualification*</Label>
-                    <Select
-                      defaultValue={formData.HighEducationQualification}
-                      onValueChange={(value) => handleSelectChange("HighEducationQualification", value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select qualification" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="high-school">High School</SelectItem>
-                        <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
-                        <SelectItem value="masters">Master's Degree</SelectItem>
-                        <SelectItem value="phd">PhD</SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  {/* <div className="space-y-2">
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="HighEducationQualification">Highest Qualification*</Label>
+                  <Select
+                    defaultValue={formData.HighEducationQualification}
+                    onValueChange={(value) => handleSelectChange("HighEducationQualification", value)}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select qualification" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high-school">High School</SelectItem>
+                      <SelectItem value="bachelors">Bachelor's Degree</SelectItem>
+                      <SelectItem value="masters">Master's Degree</SelectItem>
+                      <SelectItem value="phd">PhD</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                {/* <div className="space-y-2">
                     <Label htmlFor="specialization">Specialization/Subject*</Label>
                     <Input
                       id="specialization"
@@ -318,40 +312,40 @@ export default function TeacherRegistrationPage() {
                       ))}
                     </div>
                   </div> */}
-                   <div className="space-y-2">
-                    <Label>Resume/CV*</Label>
-                    <FileUploader
-                      onFileChange={(file) => handleFileChange("resume", file)}
-                      accept=".pdf,.doc,.docx"
-                      maxSize={5}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Upload your resume or CV. Max size: 5MB. Formats: PDF, DOC, DOCX.
-                    </p>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Photo*</Label>
-                    <FileUploader
-                      onFileChange={(file) => handleFileChange("photo", file)}
-                      accept=".jpg,.jpeg,.png"
-                      maxSize={2}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Upload a recent passport-sized photo. Max size: 2MB. Formats: JPG, PNG.
-                    </p>
-                  </div>
-                  <div className="rounded-lg bg-secondary/50 p-4 text-sm">
-                    <p className="font-medium mb-2">Important Note:</p>
-                    <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
-                      <li>All registrations require admin approval before activation.</li>
-                      <li>You will receive an Email notification once your registration is approved.</li>
-                      <li>Please ensure all information provided is accurate and documents are clearly visible.</li>
-                      <li>Background verification may be conducted for all teaching positions.</li>
-                    </ul>
-                  </div>
+                <div className="space-y-2">
+                  <Label>Resume/CV*</Label>
+                  <FileUploader
+                    onFileChange={(file) => handleFileChange("resume", file)}
+                    accept=".pdf,.doc,.docx"
+                    maxSize={5}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload your resume or CV. Max size: 5MB. Formats: PDF, DOC, DOCX.
+                  </p>
                 </div>
-              )}
-{/* 
+                <div className="space-y-2">
+                  <Label>Photo*</Label>
+                  <FileUploader
+                    onFileChange={(file) => handleFileChange("photo", file)}
+                    accept=".jpg,.jpeg,.png"
+                    maxSize={2}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Upload a recent passport-sized photo. Max size: 2MB. Formats: JPG, PNG.
+                  </p>
+                </div>
+                <div className="rounded-lg bg-secondary/50 p-4 text-sm">
+                  <p className="font-medium mb-2">Important Note:</p>
+                  <ul className="list-disc pl-5 space-y-1 text-muted-foreground">
+                    <li>All registrations require admin approval before activation.</li>
+                    <li>You will receive an Email notification once your registration is approved.</li>
+                    <li>Please ensure all information provided is accurate and documents are clearly visible.</li>
+                    <li>Background verification may be conducted for all teaching positions.</li>
+                  </ul>
+                </div>
+              </div>
+            )}
+            {/* 
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="space-y-2">
@@ -449,43 +443,41 @@ export default function TeacherRegistrationPage() {
                   </div>
                 </div>
               )} */}
-            </CardContent>
-            <CardFooter className="flex flex-col space-y-4">
-              <div className="w-full flex justify-between">
-                {step > 1 && (
-                  <Button type="button" variant="outline" onClick={prevStep}>
-                    Previous
-                  </Button>
-                )}
-                {step < 2 ? (
-                  <Button type="button" className={`${step > 1 ? "ml-auto" : "w-full"}`} onClick={nextStep}>
-                    Next
-                  </Button>
-                ) : (
-                  <form onSubmit={handleSubmit}>
+          </CardContent>
+          <CardFooter className="flex flex-col space-y-4">
+            <div className="w-full flex justify-between">
+              {step > 1 && (
+                <Button type="button" variant="outline" onClick={prevStep}>
+                  Previous
+                </Button>
+              )}
+              {step < 2 ? (
+                <Button type="button" className={`${step > 1 ? "ml-auto" : "w-full"}`} onClick={nextStep}>
+                  Next
+                </Button>
+              ) : (
+                <form onSubmit={handleSubmit}>
                   <Button type="submit" className="ml-auto" disabled={isLoading}>
                     {isLoading ? "Submitting..." : "Submit Registration"}
                   </Button>
-                  </form>
-
-
-                )}
+                </form>
+              )}
+            </div>
+            <div className="w-full flex justify-between items-center pt-2">
+              <div className="text-sm text-muted-foreground">Step {step} of 2</div>
+              <div className="flex gap-1">
+                {[1, 2].map((s) => (
+                  <div key={s} className={`h-2 w-8 rounded-full ${s === step ? "bg-primary" : "bg-muted"}`} />
+                ))}
               </div>
-              <div className="w-full flex justify-between items-center pt-2">
-                <div className="text-sm text-muted-foreground">Step {step} of 2</div>
-                <div className="flex gap-1">
-                  {[1, 2].map((s) => (
-                    <div key={s} className={`h-2 w-8 rounded-full ${s === step ? "bg-primary" : "bg-muted"}`} />
-                  ))}
-                </div>
-              </div>
-              <div className="text-center text-sm pt-4">
-                Already have an account?{" "}
-                <Link href="/login" className="text-primary hover:underline">
-                  Login here
-                </Link>
-              </div>
-            </CardFooter>
+            </div>
+            <div className="text-center text-sm pt-4">
+              Already have an account?{" "}
+              <Link href="/login" className="text-primary hover:underline">
+                Login here
+              </Link>
+            </div>
+          </CardFooter>
         </Card>
       </div>
     </div>

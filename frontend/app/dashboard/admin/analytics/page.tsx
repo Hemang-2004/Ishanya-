@@ -434,8 +434,8 @@ export default function AnalyticsPage() {
                     <h3 className="font-medium">Success Factor</h3>
                   </div>
                   <p className="text-sm text-muted-foreground">
-                    Students with regular attendance ( `&gt;`85%) are 3x more likely to complete their programs successfully.
-                    Focus on attendance improvement.
+                    Students with regular attendance ( `&gt;`85%) are 3x more likely to complete their programs
+                    successfully. Focus on attendance improvement.
                   </p>
                 </div>
               </div>

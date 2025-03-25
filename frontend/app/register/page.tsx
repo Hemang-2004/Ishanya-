@@ -23,34 +23,7 @@ export default function RegisterPage() {
     setDocument(file)
   }
 
-  // const handleContinue = () => {
-  //   if (!document) {
-  //     toast({
-  //       title: "Document required",
-  //       description: "Please upload a valid identification document to continue.",
-  //       variant: "destructive",
-  //     })
-  //     return
-  //   }
-
-  //   setIsUploading(true)
-
-  //   // Simulate document processing
-  //   setTimeout(() => {
-  //     setIsUploading(false)
-
-  //     // Redirect based on selected role
-  //     if (documentType === "student") {
-  //       router.push("/register/student")
-  //     } else if (documentType === "teacher") {
-  //       router.push("/register/teacher")
-  //     } else if (documentType === "volunteer") {
-  //       router.push("/register/volunteer")
-  //     }
-  //   }, 1500)
-  // }
-
-  const handleContinue = async () => {
+  const handleContinue = () => {
     if (!document) {
       toast({
         title: "Document required",
@@ -62,44 +35,19 @@ export default function RegisterPage() {
 
     setIsUploading(true)
 
-    const formData = new FormData()
-    formData.append("file", document)
-
-    try {
-      const response = await fetch("http://localhost:5000/auth/parse_aadhar", {
-        method: "POST",
-        body: formData,
-      })
-
-      if (!response.ok) {
-        throw new Error("Failed to process document")
-      }
-
-      const extractedData = await response.json()
-      console.log("Extracted Data:", extractedData)
-
-      let targetPath = "/register"
-      if (documentType === "student") {
-        targetPath = "/register/student"
-      } else if (documentType === "teacher") {
-        targetPath = "/register/teacher"
-      } else if (documentType === "volunteer") {
-        targetPath = "/register/volunteer"
-      }
-
-      const queryString = new URLSearchParams(extractedData).toString()
-      console.log(`${targetPath}?${queryString}`);
-      // Navigate with extracted data
-      router.push(`${targetPath}?${queryString}`)
-    } catch (error) {
-      toast({
-        title: "Upload failed",
-        description: "Could not process the document. Please try again.",
-        variant: "destructive",
-      })
-    } finally {
+    // Simulate document processing
+    setTimeout(() => {
       setIsUploading(false)
-    }
+
+      // Redirect based on selected role
+      if (documentType === "student") {
+        router.push("/register/student")
+      } else if (documentType === "teacher") {
+        router.push("/register/teacher")
+      } else if (documentType === "volunteer") {
+        router.push("/register/volunteer")
+      }
+    }, 1500)
   }
 
   return (
@@ -133,7 +81,7 @@ export default function RegisterPage() {
                     onFileChange={handleDocumentUpload}
                     accept=".jpg,.jpeg,.png,.pdf"
                     maxSize={5}
-                    // className="h-64"
+                    className="h-64"
                   />
                   <p className="text-xs text-muted-foreground text-center">
                     Supported formats: JPG, PNG, PDF (Max size: 5MB)
