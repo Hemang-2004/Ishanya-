@@ -229,16 +229,17 @@ export default function SchedulerScreen() {
   )
 
   const renderEventItem = ({ item }: { item: Event }) => (
-    <View style={[styles.eventItem, { borderLeftColor: item.color }]}>
+    <TouchableOpacity 
+      style={[styles.eventItem, { borderLeftColor: item.color }]}
+      onPress={() => handleEventExpand(item.id)}
+    >
       <View style={styles.eventHeader}>
         <Text style={styles.eventTitle}>{item.title}</Text>
-        <TouchableOpacity onPress={() => handleEventExpand(item.id)}>
-          <MaterialIcons 
-            name={expandedEventId === item.id ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-            size={24} 
-            color="#666" 
-          />
-        </TouchableOpacity>
+        <MaterialIcons 
+          name={expandedEventId === item.id ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+          size={24} 
+          color="#666" 
+        />
       </View>
       <View style={styles.eventDetails}>
         <View style={styles.eventDetail}>
@@ -279,7 +280,7 @@ export default function SchedulerScreen() {
           </View>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   )
 
   return (

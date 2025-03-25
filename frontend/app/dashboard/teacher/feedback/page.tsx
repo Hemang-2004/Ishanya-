@@ -75,7 +75,7 @@ export default function TeacherReportsPage() {
     const matchesType =
       selectedType === "all" ||
       (selectedType === "pending" && status === "pending") ||
-      (selectedType === "completed" && status === "completed")
+      (selectedType === "complete" && status === "complete")
 
     return matchesSearch && matchesType
   })
@@ -106,7 +106,7 @@ export default function TeacherReportsPage() {
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
                 <TabsTrigger value="pending">Needs Report</TabsTrigger>
-                <TabsTrigger value="completed">Has Report</TabsTrigger>
+                <TabsTrigger value="complete">Has Report</TabsTrigger>
               </TabsList>
               <div className="flex items-center gap-2">
                 <div className="relative">
@@ -157,12 +157,12 @@ export default function TeacherReportsPage() {
                       <div className="text-sm text-muted-foreground">Term {item.Term}</div>
                     </div>
                     <div className="w-1/6">
-                      <Badge variant={item.Status === "completed" ? "secondary" : "outline"}>
-                        {item.Status === "completed" ? "Has Report" : "Needs Report"}
+                      <Badge variant={item.Status === "complete" ? "secondary" : "outline"}>
+                        {item.Status === "complete" ? "Has Report" : "Needs Report"}
                       </Badge>
                     </div>
                     <div className="w-1/6 text-right">
-                      {item.Status === "completed" ? (
+                      {item.Status === "complete" ? (
                         <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teacher/reports/view/${index}`)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
