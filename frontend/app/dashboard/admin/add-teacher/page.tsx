@@ -79,20 +79,47 @@ export default function AddTeacherPage() {
     })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsSubmitting(true)
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const formDataToSend = new FormData();
+    formDataToSend.append("FirstName", formData.firstName);
+    formDataToSend.append("LastName", formData.lastName);
+    formDataToSend.append("Email", formData.email);
+    formDataToSend.append("Phone", formData.phone);
+    formDataToSend.append("DateOfBirth", formData.dateOfBirth);
+    // formDataToSend.append("Designation", formData.designation || "");
+    // formDataToSend.append("ProgramID", selectedProgram);
+    formDataToSend.append("IsRegistered", "1"); // Always set to "1"
+    formDataToSend.append("Password", "1234"); // You might want to use actual user input
+    formDataToSend.append("Status", "Active");
+  
+    if (formData.photo) {
+      formDataToSend.append("photo", formData.photo);
+    }
+  
+    if (formData.resume) {
+      formDataToSend.append("resume", formData.resume);
+    }
+  
+    try {
+      const response = await fetch("http://localhost:5000/auth/register/educator", {
+        method: "POST",
+        body: formDataToSend, // Browser handles Content-Type
+      });
+  
+      const result = await response.json();
+      if (response.ok) {
+        console.log("Educator registered successfully:", result);
+        router.push("/dashboard/admin"); // Redirect to admin dashboard
+      } else {
+        console.error("Registration failed:", result);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false)
-      toast({
-        title: "Teacher added successfully",
-        description: `${formData.firstName} ${formData.lastName} has been added to the system.`,
-      })
-      router.push("/dashboard/admin/staff")
-    }, 1500)
-  }
 
   const handleDocumentUpload = (file: File | null) => {
     if (file) {
