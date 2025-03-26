@@ -525,3 +525,43 @@ def get_programs():
         return jsonify({"success": True, "programs": programs_list}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@admin_bp.route('/get-students-per-program', methods=['GET'])
+def get_students_per_program():
+    try:
+        print(('here'))
+        # Query to count students grouped by ProgramID and Status
+        results = (
+            db.session.query(
+                Student.ProgramID,
+                Program.ProgramName,
+                Student.Status,
+                func.count(Student.StudentID).label('count')
+            )
+            .join(Program, Student.ProgramID == Program.ProgramID)
+            .group_by(Student.ProgramID, Student.Status)
+            .all()
+        )
+        print(results)
+        # Organize results into a dictionary
+        data = {}
+        for program_id, program_name, status, count in results:
+            if program_id not in data:
+                data[program_id] = {
+                    "ProgramID": program_id,
+                    "ProgramName": program_name,
+                    "Active": 0,
+                    "Graduated": 0,
+                    "Discontinued": 0
+                }
+            if status.lower() == "active":
+                data[program_id]["Active"] = count
+            elif status.lower() == "graduated":
+                data[program_id]["Graduated"] = count
+            elif status.lower() == "discontinued":
+                data[program_id]["Discontinued"] = count
+
+        return jsonify(list(data.values())), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

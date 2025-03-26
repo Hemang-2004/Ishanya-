@@ -173,53 +173,23 @@ class Feedback(db.Model):
     Term = db.Column(db.Integer, primary_key=True)
     # Text fields
     Comments = db.Column(db.Text)
-    # Strengths = db.Column(db.Text)
-    # Weaknesses = db.Column(db.Text)
-
-
-
     # Integer rating fields
     TPS = db.Column(db.Integer)
     Attendance = db.Column(db.Integer)
-    # OrganizationPlanning = db.Column(db.Integer)
-    # TimeManagement = db.Column(db.Integer)
-    # TaskInitiationCompletion = db.Column(db.Integer)
-    # SelfCareIndependence = db.Column(db.Integer)
-    # PeerInteraction = db.Column(db.Integer)
-    # EmpathyPerspectiveTaking = db.Column(db.Integer)
-    # FocusAttention = db.Column(db.Integer)
-    # CuriosityInquiry = db.Column(db.Integer)
-    # PersistenceProblemSolving = db.Column(db.Integer)
-    # CommunicationSkills = db.Column(db.Integer)
-    # ArtisticExpression = db.Column(db.Integer)
-    # MovementPlay = db.Column(db.Integer)
-
     FeedbackMetrics = db.Column(db.Text, nullable=True)  # Storing JSON as a string
+    AIInsights = db.Column(db.Text, nullable=True)
 
     def __init__(self, StudentID, EducatorID, Comments=None,
-                 TPS=None, Attendance=None, Term=None, FeedbackMetrics=None):
+                 TPS=None, Attendance=None, Term=None, FeedbackMetrics=None, AIInsights=None):
         
         self.StudentID = StudentID
         self.EducatorID = EducatorID
         self.Comments = Comments
         self.Term = Term
-        # self.Strengths = Strengths
-        # self.Weaknesses = Weaknesses
         self.TPS = TPS
         self.Attendance = Attendance
-        # self.OrganizationPlanning = OrganizationPlanning
-        # self.TimeManagement = TimeManagement
-        # self.TaskInitiationCompletion = TaskInitiationCompletion
-        # self.SelfCareIndependence = SelfCareIndependence
-        # self.PeerInteraction = PeerInteraction
-        # self.EmpathyPerspectiveTaking = EmpathyPerspectiveTaking
-        # self.FocusAttention = FocusAttention
-        # self.CuriosityInquiry = CuriosityInquiry
-        # self.PersistenceProblemSolving = PersistenceProblemSolving
-        # self.CommunicationSkills = CommunicationSkills
-        # self.ArtisticExpression = ArtisticExpression
-        # self.MovementPlay = MovementPlay
         self.FeedbackMetrics = json.dumps(FeedbackMetrics) if FeedbackMetrics else json.dumps({})  # Ensure JSON format
+        self.AIInsights = AIInsights
 
     def to_dict(self):
         return {
@@ -231,19 +201,8 @@ class Feedback(db.Model):
             "TPS": self.TPS,
             "Attendance": self.Attendance,
             "Term": self.Term,
-            # "OrganizationPlanning": self.OrganizationPlanning,
-            # "TimeManagement": self.TimeManagement,
-            # "TaskInitiationCompletion": self.TaskInitiationCompletion,
-            # "SelfCareIndependence": self.SelfCareIndependence,
-            # "PeerInteraction": self.PeerInteraction,
-            # "EmpathyPerspectiveTaking": self.EmpathyPerspectiveTaking,
-            # "FocusAttention": self.FocusAttention,
-            # "CuriosityInquiry": self.CuriosityInquiry,
-            # "PersistenceProblemSolving": self.PersistenceProblemSolving,
-            # "CommunicationSkills": self.CommunicationSkills,
-            # "ArtisticExpression": self.ArtisticExpression,
-            # "MovementPlay": self.MovementPlay,
             "FeedbackMetrics": json.loads(self.FeedbackMetrics) if self.FeedbackMetrics else {},
+            "AIInsights": self.AIInsights
         }
 
 
