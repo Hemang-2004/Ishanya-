@@ -12,3 +12,4 @@ pydantic
 faker
 flask_cors
 pdf2image
+gunicorn
