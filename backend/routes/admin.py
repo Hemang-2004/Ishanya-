@@ -3,8 +3,88 @@ from sqlalchemy import text
 from flask import Blueprint, request, jsonify
 from models import Educator, Program, Student, db, Admin
 from utils import *
+from werkzeug.utils import secure_filename
+import pandas as pd
+import bcrypt
+
 
 admin_bp = Blueprint("admin", __name__)
+
+
+ALLOWED_COLUMNS = {
+    'FirstName', 'LastName', 'DateOfBirth', 'Gender', 'EmailID', 'ProgramID',
+    'DateOfJoining', 'ContactNumber', 'ParentsEmail', 'Address'
+}
+
+# Route to handle bulk upload
+def convert_date(date_value):
+    """ Converts a date value to a Python date object (YYYY-MM-DD format) """
+    if pd.isna(date_value):  # Handle missing values
+        return None
+    if isinstance(date_value, int):  # If the date is stored as an integer (e.g., 20230901)
+        date_value = str(date_value)  # Convert to string
+    if isinstance(date_value, str):
+        try:
+            return datetime.strptime(date_value, "%Y-%m-%d").date()  # Convert to date object
+        except ValueError:
+            return None  # Invalid date format, return None
+    return None  # Default return for unexpected types
+
+def hash_password(password):
+    """Hashes a password using bcrypt."""
+    salt = bcrypt.gensalt()  # Generate a salt
+    hashed_password = bcrypt.hashpw(password.encode('utf-8'), salt)  # Hash password
+    return hashed_password.decode('utf-8')  # Convert bytes to string
+
+@admin_bp.route('/upload_students', methods=['POST'])
+def upload_students():
+    if 'file' not in request.files:
+        return jsonify({'error': 'No file part'}), 400
+
+    file = request.files['file']
+    if file.filename == '':
+        return jsonify({'error': 'No selected file'}), 400
+
+    if file and (file.filename.endswith('.xlsx') or file.filename.endswith('.csv')):
+        filename = secure_filename(file.filename)
+
+        if file.filename.endswith('.xlsx'):
+            df = pd.read_excel(file)
+        else:
+            df = pd.read_csv(file)
+
+        df = df[list(ALLOWED_COLUMNS.intersection(df.columns))]
+
+        if df.empty:
+            return jsonify({'error': 'No valid columns found in the file'}), 400
+
+        students = []
+        for _, row in df.iterrows():
+            student = Student(
+                FirstName=row.get('FirstName'),
+                LastName=row.get('LastName'),
+                DateOfBirth=convert_date(row.get('DateOfBirth')),  # Convert to date object
+                Gender=row.get('Gender'),
+                EmailID=row.get('EmailID'),
+                ProgramID=row.get('ProgramID'),
+                DateOfJoining=convert_date(row.get('DateOfJoining')),  # Convert to date object
+                ContactNumber=row.get('ContactNumber'),
+                ParentsEmail=row.get('ParentsEmail'),
+                Address=row.get('Address'),
+                Password=hash_password("Default@123")
+            )
+            students.append(student)
+
+        try:
+            db.session.bulk_save_objects(students)
+            db.session.commit()
+            return jsonify({'message': 'Students added successfully'}), 200
+        except Exception as e:
+            db.session.rollback()
+            return jsonify({'error': str(e)}), 500
+
+    return jsonify({'error': 'Invalid file format. Only .xlsx and .csv allowed'}), 400
+
 
 @admin_bp.route("/get-feedback-report/<int:studentid>/<int:term>", methods=["GET"])
 def get_report(studentid, term):
