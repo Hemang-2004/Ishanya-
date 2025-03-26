@@ -557,7 +557,7 @@ export default function CustomMetricsPage() {
                             <Tooltip />
                             <Legend />
                             <Line type="monotone" dataKey="value" name={selectedMetricObj.name} stroke="#8884d8" />
-                          ReLineChart>
+                          <ReLineChart>
                         </ResponsiveContainer>
                       )}
                     </div>

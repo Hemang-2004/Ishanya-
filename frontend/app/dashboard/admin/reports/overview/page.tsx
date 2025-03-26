@@ -257,5 +257,48 @@ export default function AdminReportsOverviewPage() {
                           <a href={`/dashboard/admin/reports/student/${report.id}`}>View</a>
                         </Button>
                         
-\
+                        <Button variant="outline" size="sm" asChild>
+                          <a href={`/dashboard/admin/reports/student/${report.id}/edit`}>Edit</a> 
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="communication" className="space-y-4 mt-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Communication Skills</CardTitle>
+                <CardDescription>Communication skill scores for all students</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="h-[300px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={communicationSkillsData}>
+                      <CartesianGrid strokeDasharray="3 3" />
+                      <XAxis dataKey="subject" />
+                      <YAxis domain={[0, 5]} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "rgba(255, 255, 255, 0.9)",
+                          borderRadius: "6px",
+                          border: "1px solid #e2e8f0",
+                        }}
+                      />
+                      <Legend />
+                      <Line type="monotone" dataKey="average" stroke="#8884d8" activeDot={{ r: 8 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  )
+}
 
