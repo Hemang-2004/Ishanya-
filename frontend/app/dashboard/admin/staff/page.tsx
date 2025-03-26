@@ -44,6 +44,10 @@ import { LanguageSwitcher } from "@/components/language-switcher";
 import Link from "next/link";
 
 export default function StaffPage() {
+  interface Program {
+    ProgramID: string;
+    ProgramName: string;
+  }
 
   interface Educator  {
     id: number;
@@ -58,7 +62,7 @@ export default function StaffPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [staffData, setStaffData] =useState<Educator[]>([]); 
-  const [programs, setPrograms] = useState<{ ProgramID: string; ProgramName: string }[]>([]);
+const [programs, setPrograms] = useState<Program[]>([]);
   const [selectedProgram, setSelectedProgram] = useState("all")
   
 
@@ -79,17 +83,42 @@ export default function StaffPage() {
     fetchEducators();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchPrograms = async () => {
+  //     try {
+  //       const response = await fetch(
+  //         "http://localhost:5000/admins/get-all-programs"
+  //       );
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch programs");
+  //       }
+  //       const programs = await response.json();
+  //       setPrograms(programs);
+  //     } catch (error) {
+  //       console.error("Error fetching programs:", error);
+  //     }
+  //   };
+
+  //   fetchPrograms();
+  // }, []);
+
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await fetch(
-          "http://localhost:5000/admins/get-all-programs"
-        );
+        const response = await fetch("http://localhost:5000/admins/get_all_programs");
         if (!response.ok) {
           throw new Error("Failed to fetch programs");
         }
-        const programs = await response.json();
-        setPrograms(programs);
+        const data = await response.json();
+        console.log("programs", data)
+        if (data.programs) {
+          const formattedPrograms = data.programs.map((program: any) => ({
+            ProgramID: program.ProgramID.toString(),
+            ProgramName: program.ProgramName
+          }));
+
+          setPrograms(formattedPrograms);
+        }
       } catch (error) {
         console.error("Error fetching programs:", error);
       }

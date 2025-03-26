@@ -13,9 +13,13 @@ with app.app_context():
 
     # --- Add Programs ---
     programs = [
-        Program(ProgramName='Autism Support'),
-        Program(ProgramName='Speech Therapy'),
-        Program(ProgramName='Occupational Therapy'),
+        Program(ProgramName='Autism Support', Description='Support for children with Autism Spectrum Disorder', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Speech Therapy', Description='Speech therapy for children with speech disorders', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Occupational Therapy', Description='Occupational therapy for children with motor skill disorders', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Cognitive Development', Description='Cognitive development program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Reading & Writing', Description='Reading and writing program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Mathematics', Description='Mathematics program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Science', Description='Science program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
     ]
     db.session.add_all(programs)
     db.session.commit()

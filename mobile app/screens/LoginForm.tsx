@@ -29,7 +29,7 @@ export default function LoginForm() {
   const [errors, setErrors] = useState<FormErrors>({})
   const [loading, setLoading] = useState(false)
 
-  const apiUrl = "http://192.168.109.54:5000/auth/login" // Update with your IP address
+  const apiUrl = "http://172.16.156.52:5000/auth/login" // Update with your IP address
 
   const handleInputChange = (field, value) => {
     if (field === "name" || field === "email") {
@@ -42,7 +42,7 @@ export default function LoginForm() {
     }
   }
 
-  const API_URL = "http://192.168.109.54:5000/auth/login" // Replace with your IP address
+  const API_URL = "http://172.16.156.52:5000/auth/login" // Replace with your IP address
   
 async function handleLogin() {
   if (!formData.email || !formData.password) {
