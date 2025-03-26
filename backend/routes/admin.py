@@ -71,7 +71,9 @@ def upload_students():
                 ContactNumber=row.get('ContactNumber'),
                 ParentsEmail=row.get('ParentsEmail'),
                 Address=row.get('Address'),
-                Password=hash_password("Default@123")
+                Password=hash_password("Default@123"),
+                IsRegistered=1,
+                Status="Active"
             )
             students.append(student)
 
@@ -81,6 +83,7 @@ def upload_students():
             return jsonify({'message': 'Students added successfully'}), 200
         except Exception as e:
             db.session.rollback()
+            print(str(e))
             return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file format. Only .xlsx and .csv allowed'}), 400

@@ -47,6 +47,8 @@ import {
 } from "recharts"
 import { ChartTooltip } from "@/components/ui/chart"
 
+import { useRef } from "react"
+
 // Sample data for charts
 const studentGrowthData = [
   { name: "Jan", students: 120 },
@@ -75,31 +77,60 @@ const attendanceData = [
 ]
 
 export default function AdminDashboardPage() {
-  const router = useRouter()
-  const { t } = useLanguage()
-  const [timeRange, setTimeRange] = useState("month")
-  const [programFilter, setProgramFilter] = useState("all")
+  const router = useRouter();
+  const { t } = useLanguage();
+  const [timeRange, setTimeRange] = useState("month");
+  const [programFilter, setProgramFilter] = useState("all");
   const [dashboardData, setDashboardData] = useState<any>(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/admins/dashboard")
-        const data = await response.json()
-        setDashboardData(data)
-      } catch (error) {
-        console.error("API fetch error:", error)
-      }
-    }
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    fetchData()
-  }, [])
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/admins/dashboard");
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("API fetch error:", error);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Uploading file...");
+    if (!event.target.files) return;
+
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:5000/admins/upload_students", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log("File uploaded successfully");
+        fetchDashboardData(); // Fetch updated data after upload
+      } else {
+        console.error("File upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Admin Dashboard</h2>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening at Ishanya Connect</p>
+          <p className="text-muted-foreground">
+            Welcome back! Here's what's happening at Ishanya Connect
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
@@ -110,10 +141,23 @@ export default function AdminDashboardPage() {
             <UserPlus className="mr-2 h-4 w-4" />
             Add Student
           </Button>
+          {/* New Upload Button */}
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Bulk Upload
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileUpload}
+          />
         </div>
       </div>
-
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+    {/* </div> */}
+     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
