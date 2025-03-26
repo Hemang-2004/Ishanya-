@@ -102,7 +102,7 @@ export default function RegistrationForm() {
         })
 
         // Send the request to the API
-        const response = await fetch("http://192.168.109.54:5000/auth/parse_aadhar", {
+        const response = await fetch("http://172.16.156.52:5000/auth/parse_aadhar", {
           method: "POST",
           body: formData,
           headers: {
@@ -286,94 +286,37 @@ export default function RegistrationForm() {
   }
   const navigation = useNavigation()
 
+  // Replace the entire handleSubmit function with this optimized version
   const handleSubmit = async () => {
     if (validateForm()) {
       try {
-        // Create FormData object for form-data submission (not multipart/form-data)
+        // Create FormData object for form-data submission
         const formDataToSend = new FormData()
 
-        // Add required fields with EXACT field names expected by the backend
+        // Add only the required fields with EXACT field names expected by the backend
         formDataToSend.append("FirstName", formData.firstName)
         formDataToSend.append("LastName", formData.lastName)
         formDataToSend.append("Gender", formData.gender)
         formDataToSend.append("EmailID", formData.email)
         formDataToSend.append("Password", formData.password)
 
-        // Add optional fields if they exist
-        if (formData.dob) formDataToSend.append("DateOfBirth", formatDate(formData.dob))
-        if (formData.contact) formDataToSend.append("ContactNumber", formData.contact)
-        if (formData.address) formDataToSend.append("Address", formData.address)
-        if (formData.transportNeeded) formDataToSend.append("Transport", formData.transportNeeded)
-        if (formData.currentLevel) formDataToSend.append("CurrentLevel", formData.currentLevel)
-        if (formData.status) formDataToSend.append("Status", formData.status)
-        if (formData.primaryDiagnosis) formDataToSend.append("PrimaryDiagnosis", formData.primaryDiagnosis)
-        if (formData.comorbidity) formDataToSend.append("Comorbidity", formData.comorbidity)
-        if (formData.bloodGroup) formDataToSend.append("BloodGroup", formData.bloodGroup)
-        if (formData.allergies) formDataToSend.append("Allergies", formData.allergies)
-        if (formData.learningStyle) formDataToSend.append("LearningStyle", formData.learningStyle)
-        if (formData.communicationStyle)
-          formDataToSend.append("PreferredCommunicationStyle", formData.communicationStyle)
-        if (formData.parentIncome) formDataToSend.append("ParentAnnualIncome", formData.parentIncome)
-
-        // Add appointment details
-        if (formData.appointmentDate) formDataToSend.append("AppointmentDate", formatDate(formData.appointmentDate))
-        if (formData.appointmentTime)
-          formDataToSend.append("AppointmentTime", formatTime(formData.appointmentTime, true))
-
-        // Add file uploads if they exist
-        if (formData.udidDocument) {
-          const fileName = formData.udidDocument.split("/").pop() || "udid_document"
-          formDataToSend.append("UDID", {
-            uri: formData.udidDocument,
-            type: "application/pdf",
-            name: fileName,
-          })
-        }
-
-        if (formData.aadharCard) {
-          const fileName = formData.aadharCard.split("/").pop() || "aadhar_card"
-          formDataToSend.append("idProof", {
-            uri: formData.aadharCard,
-            type: "image/jpeg",
-            name: fileName,
-          })
-        }
-
-        if (formData.medicalCertificate) {
-          const fileName = formData.medicalCertificate.split("/").pop() || "medical_certificate"
-          formDataToSend.append("MedicalCertificate", {
-            uri: formData.medicalCertificate,
-            type: "application/pdf",
-            name: fileName,
-          })
-        }
-
-        if (formData.photo) {
-          const fileName = formData.photo.split("/").pop() || "photo.jpg"
-          formDataToSend.append("Photo", {
-            uri: formData.photo,
-            type: "image/jpeg",
-            name: fileName,
-          })
-        }
-
         // Log the form data for debugging
         console.log("Sending form data to backend:", JSON.stringify(formDataToSend))
 
         // Make the API request to your Flask backend
-        const response = await fetch("http://192.168.109.54:5000/auth/register/student", {
+        const response = await fetch("http://172.16.156.52:5000/auth/register/student", {
           method: "POST",
           body: formDataToSend,
         })
 
         // Parse the response
         const responseData = await response.json()
+        console.log("Response status:", response.status)
+        console.log("API Response:", responseData)
 
         if (response.ok) {
           Alert.alert("Success", "Registration successful!")
-          console.log("API Response:", responseData)
-
-          // ✅ Navigate to Home after successful registration
+          // Navigate to Home after successful registration
           navigation.navigate("RegistrationSuccess")
         } else {
           Alert.alert("Error", responseData.error || "Failed to register. Please try again.")
@@ -1123,4 +1066,3 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
 })
-

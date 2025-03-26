@@ -62,7 +62,6 @@ def add_program():
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
-# ✅ Fetch All Programs
 @admin_bp.route("/get_all_programs", methods=["GET"])
 def get_all_programs():
     """API to get all programs"""
@@ -212,7 +211,7 @@ def get_all_students():
 
         result.append(student_info)
         
-    print(result)
+    # print(result)
     return jsonify(result)
 
 @admin_bp.route('/dashboard', methods=['GET'])

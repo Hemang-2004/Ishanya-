@@ -19,7 +19,10 @@ import { Badge } from "@/components/ui/badge"
 import { useRouter } from "next/navigation"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import Link from "next/link"
-
+interface Program {
+  ProgramID: string;
+  ProgramName: string;
+}
 interface Student {
   id: string;
   name: string;
@@ -36,7 +39,7 @@ export default function StudentsPage() {
   const [selectedStatus, setSelectedStatus] = useState("all")
   const [selectedProgram, setSelectedProgram] = useState("all")
   const [students, setStudents] = useState<Student[]>([]); 
-  const [programs, setPrograms] = useState([])
+  const [programs, setPrograms] = useState<Program[]>([]);
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -56,15 +59,39 @@ export default function StudentsPage() {
     fetchStudents();
   }, []);
 
+  // useEffect(() => {
+  //   const fetchPrograms = async () => {
+  //     try {
+  //       const response = await fetch("http://localhost:5000/admins/get-all-programs");
+  //       if (!response.ok) {
+  //         throw new Error("Failed to fetch programs");
+  //       }
+  //       const programs = await response.json(); 
+  //       setPrograms(programs);
+  //     } catch (error) {
+  //       console.error("Error fetching programs:", error);
+  //     }
+  //   };
+
+  //   fetchPrograms();
+  // }, []);
   useEffect(() => {
     const fetchPrograms = async () => {
       try {
-        const response = await fetch("http://localhost:5000/admins/get-all-programs");
+        const response = await fetch("http://localhost:5000/admins/get_all_programs");
         if (!response.ok) {
           throw new Error("Failed to fetch programs");
         }
-        const programs = await response.json(); 
-        setPrograms(programs);
+        const data = await response.json();
+        
+        if (data.programs) {
+          const formattedPrograms = data.programs.map((program: any) => ({
+            ProgramID: program.ProgramID.toString(),
+            ProgramName: program.ProgramName
+          }));
+
+          setPrograms(formattedPrograms);
+        }
       } catch (error) {
         console.error("Error fetching programs:", error);
       }
@@ -73,6 +100,7 @@ export default function StudentsPage() {
     fetchPrograms();
   }, []);
 
+  console.log(programs)
   // Filter function for students
   const filteredStudents = students.filter((student) => {
     // Filter by search term
@@ -178,8 +206,8 @@ export default function StudentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {students.length > 0 ? (
-                      students.map((student) => (
+                    {filteredStudents.length > 0 ? (
+                      filteredStudents.map((student) => (
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
