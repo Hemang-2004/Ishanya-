@@ -137,7 +137,7 @@ export default function AddStudentPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
+    const today = new Date().toISOString().split("T")[0];  
     const formDataToSend = new FormData();
     formDataToSend.append("FirstName", formData.firstName);
     formDataToSend.append("LastName", formData.lastName);
@@ -153,7 +153,7 @@ export default function AddStudentPage() {
     formDataToSend.append("PrimaryEducatorID", selectedEducator);
     formDataToSend.append("Password", "1234");
     formDataToSend.append("Status", "Active");
-
+    formDataToSend.append("DateOfJoining", today);
     if (formData.photo) {
       formDataToSend.append("photo", formData.photo);
     }

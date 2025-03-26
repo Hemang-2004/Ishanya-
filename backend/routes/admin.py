@@ -62,7 +62,6 @@ def add_program():
         return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 
-# ✅ Fetch All Programs
 @admin_bp.route("/get_all_programs", methods=["GET"])
 def get_all_programs():
     """API to get all programs"""
@@ -212,12 +211,13 @@ def get_all_students():
 
         result.append(student_info)
         
-    print(result)
+    # print(result)
     return jsonify(result)
 
 @admin_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     return jsonify({
+        "student_performance": student_performance(),
         "num_registered_students": num_registered_students(),
         "num_dropouts": num_dropouts(),
         "monthwise_enrolment": monthwise_enrolment(),
@@ -525,3 +525,43 @@ def get_programs():
         return jsonify({"success": True, "programs": programs_list}), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
+
+@admin_bp.route('/get-students-per-program', methods=['GET'])
+def get_students_per_program():
+    try:
+        print(('here'))
+        # Query to count students grouped by ProgramID and Status
+        results = (
+            db.session.query(
+                Student.ProgramID,
+                Program.ProgramName,
+                Student.Status,
+                func.count(Student.StudentID).label('count')
+            )
+            .join(Program, Student.ProgramID == Program.ProgramID)
+            .group_by(Student.ProgramID, Student.Status)
+            .all()
+        )
+        print(results)
+        # Organize results into a dictionary
+        data = {}
+        for program_id, program_name, status, count in results:
+            if program_id not in data:
+                data[program_id] = {
+                    "ProgramID": program_id,
+                    "ProgramName": program_name,
+                    "Active": 0,
+                    "Graduated": 0,
+                    "Discontinued": 0
+                }
+            if status.lower() == "active":
+                data[program_id]["Active"] = count
+            elif status.lower() == "graduated":
+                data[program_id]["Graduated"] = count
+            elif status.lower() == "discontinued":
+                data[program_id]["Discontinued"] = count
+
+        return jsonify(list(data.values())), 200
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -26,12 +26,32 @@ import {
   Area,
 } from "recharts"
 
+// export default function ReportsPage() {
+//   const { t } = useLanguage()
+//   const [timeRange, setTimeRange] = useState("year")
+//   const [programFilter, setProgramFilter] = useState("all")
+//   const [reportType, setReportType] = useState("overview")
+
+
 export default function ReportsPage() {
+  console.log("ReportsPage rendering") // Debug: Check if the component renders
+  
   const { t } = useLanguage()
   const [timeRange, setTimeRange] = useState("year")
   const [programFilter, setProgramFilter] = useState("all")
   const [reportType, setReportType] = useState("overview")
+  const [programData, setProgramData] = useState([]) // Store API data
+  const [loading, setLoading] = useState(true)
+      
+  const programEffectivenessData = programData.map((program) => ({
+    name: program.ProgramName,
+    Active: program.Active, // Using "Active" for completion
+    Graduated: program.Graduated, // Using "Graduated" for employment
+    Discontinued: program.Discontinued, // Using "Discontinued" for satisfaction
+  }))
+  
 
+  
   // Filter data based on selected filters
   const filteredData = {
     studentGrowth: studentGrowthData.filter(
@@ -46,6 +66,36 @@ export default function ReportsPage() {
       (item) => programFilter === "all" || item.name.toLowerCase().includes(programFilter.toLowerCase()),
     ),
   }
+  
+  useEffect(() => {
+    console.log("useEffect triggered") // Debug: Check if useEffect is running
+    
+    const fetchData = async () => {
+      try {
+        console.log("Fetching data...") // Debug: Check if the fetch function is called
+        const response = await fetch("http://127.0.0.1:5000/admins/get-students-per-program")
+
+        if (!response.ok) throw new Error("Failed to fetch data")
+        
+        const data = await response.json()
+        setProgramData(data)
+        console.log("Data fetched successfully:", data) // Debug: Check fetched data
+      } catch (error) {
+        console.error("Error fetching data:", error)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, []) // Runs only once when the component mounts
+
+  if (typeof window === "undefined") {
+    console.log("Component is rendering on the server") // Debug: SSR issue
+  } else {
+    console.log("Component is rendering on the client")
+  }
+
 
   return (
     <div className="space-y-6">
@@ -366,9 +416,9 @@ export default function ReportsPage() {
                         }}
                       />
                       <Legend />
-                      <Bar dataKey="completion" fill="#8884d8" />
-                      <Bar dataKey="employment" fill="#82ca9d" />
-                      <Bar dataKey="satisfaction" fill="#ffc658" />
+                      <Bar dataKey="Active" fill="#8884d8" />
+                      <Bar dataKey="Graduated" fill="#82ca9d" />
+                      <Bar dataKey="Discontinued" fill="#ffc658" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -563,13 +613,13 @@ const performanceData = [
   { name: "Financial Literacy", score: 75, average: 68 },
 ]
 
-const programEffectivenessData = [
-  { name: "Digital Literacy", completion: 85, employment: 70, satisfaction: 90 },
-  { name: "Vocational Training", completion: 78, employment: 85, satisfaction: 82 },
-  { name: "Community Leadership", completion: 82, employment: 65, satisfaction: 88 },
-  { name: "Health & Wellness", completion: 88, employment: 60, satisfaction: 92 },
-  { name: "Financial Literacy", completion: 75, employment: 72, satisfaction: 80 },
-]
+// const programEffectivenessData = [
+//   { name: "Digital Literacy", completion: 85, employment: 70, satisfaction: 90 },
+//   { name: "Vocational Training", completion: 78, employment: 85, satisfaction: 82 },
+//   { name: "Community Leadership", completion: 82, employment: 65, satisfaction: 88 },
+//   { name: "Health & Wellness", completion: 88, employment: 60, satisfaction: 92 },
+//   { name: "Financial Literacy", completion: 75, employment: 72, satisfaction: 80 },
+// ]
 
 const resourceAllocationData = [
   { name: "Digital Literacy", value: 1250000 },

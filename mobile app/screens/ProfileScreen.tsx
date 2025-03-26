@@ -334,6 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 216, 112, 0.9)",
     borderBottomWidth: 1,
     borderBottomColor: "#D2B48C",
+    marginTop: -29,
   },
   headerTitle: {
     fontSize: 20,

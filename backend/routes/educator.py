@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from models import Chat, Feedback, Program, Student, db, Educator
 from datetime import datetime, timezone
 import json
+from ai_insights import get_insights
 
 educator_bp = Blueprint("educator", __name__)
 
@@ -242,6 +243,11 @@ def submit_feedback():
             FeedbackMetrics=feedback_metrics
         )
 
+        report_dict = new_feedback.to_dict()
+        insights = get_insights(str(report_dict))
+        new_feedback.AIInsights = insights
+
+
         db.session.add(new_feedback)
         db.session.commit()
 
@@ -358,30 +364,29 @@ def get_students_for_educator(educator_id):
         return jsonify({"error": str(e)}), 500
 
 
-@educator_bp.route('/send-message', methods=['POST'])
-def send_message():
-    try:
-        data = request.get_json()
-        student_id = data.get('student_id')
-        educator_id = data.get('educator_id')
-        message = data.get('message')
+# @educator_bp.route('/send-message', methods=['POST'])
+# def send_message():
+#     try:
+#         data = request.get_json()
+#         student_id = data.get('student_id')
+#         educator_id = data.get('educator_id')
+#         message = data.get('message')
 
-        if not student_id or not educator_id or not message:
-            return jsonify({"error": "Missing required fields"}), 400
+#         if not student_id or not educator_id or not message:
+#             return jsonify({"error": "Missing required fields"}), 400
 
-        new_message = Chat(
-            StudentID=student_id,
-            EducatorID=educator_id,
-            Message=message,
-            DateTime=datetime.now(timezone.utc)
-        )
+#         new_message = Chat(
+#             StudentID=student_id,
+#             EducatorID=educator_id,
+#             Message=message,
+#             DateTime=datetime.now(timezone.utc)
+#         )
 
-        db.session.add(new_message)
-        db.session.commit()
+#         db.session.add(new_message)
+#         db.session.commit()
 
-        return jsonify({"message": "Message sent successfully"}), 201
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#         return jsonify({"message": "Message sent successfully"}), 201
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
     
-
 

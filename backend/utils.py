@@ -144,3 +144,33 @@ def monthwise_enrolment():
     ]
 
     return data
+
+def student_performance():
+    results = (
+        db.session.query(
+            Program.ProgramName,
+            Feedback.Term,
+            func.avg(Feedback.TPS).label("avg_tps")
+        )
+        .join(Student, Student.ProgramID == Program.ProgramID)
+        .join(Feedback, Feedback.StudentID == Student.StudentID)
+        .filter(Feedback.Term.in_([1, 2])) 
+        .group_by(Program.ProgramName, Feedback.Term)
+        .all()
+    )
+
+    program_scores = {}
+
+    for program_name, term, avg_tps in results:
+        if program_name not in program_scores:
+            program_scores[program_name] = {"name": program_name, "term1": None, "term2": None}
+
+        if term == 1:
+            program_scores[program_name]["term1"] = round(avg_tps, 2)
+        elif term == 2:
+            program_scores[program_name]["term2"] = round(avg_tps, 2)
+
+    return [
+        program for program in program_scores.values() 
+        if program["term1"] is not None and program["term2"] is not None
+    ]

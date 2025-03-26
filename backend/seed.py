@@ -1,91 +1,87 @@
 from app import db, app
-from models import Program, Educator, Student, Admin
-from faker import Faker
+from models import Program, Educator, Student, Admin, Feedback
 from datetime import date, timedelta
 import random
 
 with app.app_context():
-    fake = Faker()
-
     # Reset the database (optional but good for dev)
     db.drop_all()
     db.create_all()
 
     # --- Add Programs ---
     programs = [
-        Program(ProgramName='Autism Support', Description='Support for children with Autism Spectrum Disorder', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Speech Therapy', Description='Speech therapy for children with speech disorders', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Occupational Therapy', Description='Occupational therapy for children with motor skill disorders', Category='Special Needs', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Cognitive Development', Description='Cognitive development program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Reading & Writing', Description='Reading and writing program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Mathematics', Description='Mathematics program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
-        Program(ProgramName='Science', Description='Science program for children', Category='Child Development', Status='Active', Capacity=20, StartDate=date.today(), EndDate=date.today() + timedelta(days=365)),
+        Program(ProgramName='Sameti', Description='A program focused on pre-academic skills and socialization for children, fostering engagement and foundational learning.'),
+        Program(ProgramName='Sattva', Description='A holistic program emphasizing communication, functional academics, and socio-behavioral development.'),
+        Program(ProgramName='Siddhi', Description='An intensive cognitive and academic program designed to enhance memory, reasoning, and general awareness.'),
+        Program(ProgramName='Shaale', Description='A structured academic program that prioritizes subject proficiency and effective study habits.'),
+        Program(ProgramName='Sutantra', Description='A digital literacy program covering basic computing, cybersecurity, and financial literacy skills.'),
+        Program(ProgramName='Spruha', Description='A comprehensive development program targeting cognitive skills, communication, and functional life skills.')
     ]
     db.session.add_all(programs)
     db.session.commit()
 
     # --- Add Educators ---
+    educator_names = [
+        "Amit Sharma", "Priya Iyer", "Rajesh Kumar", "Sunita Rao", "Vikram Singh",
+        "Neha Verma", "Arjun Patel", "Meera Nair", "Ravi Shankar", "Pooja Joshi"
+    ]
     educators = []
-    for _ in range(10):
+    for name in educator_names:
         program = random.choice(programs)
+        email = name.lower().replace(" ", "_") + "@school.edu"
         educator = Educator(
-            Name=fake.name(),
-            Email=fake.unique.email(),
+            Name=name,
+            Email=email,
             ProgramID=program.ProgramID,
             Designation=random.choice(['Special Educator', 'Therapist', 'Trainer']),
-            Phone=fake.msisdn()[:10],
+            Phone=str(random.randint(7000000000, 9999999999)),
             HighEducationQualification=random.choice(['B.Ed', 'M.Ed', 'MA Psychology', 'Diploma']),
-            DateOfBirth=fake.date_of_birth(minimum_age=25, maximum_age=50),
-            DateOfJoining=fake.date_between(start_date='-5y', end_date='-1y'),
+            DateOfBirth=date.today() - timedelta(days=random.randint(9000, 18000)),
+            DateOfJoining=date.today() - timedelta(days=random.randint(100, 365)),
             Status='Active',
             Tenure=random.randint(1, 5),
-            WorkLocation=fake.city(),
-            EmergencyContactName=fake.name(),
-            EmergencyContactNumber=fake.msisdn()[:10],
+            WorkLocation=random.choice(['Mumbai', 'Delhi', 'Bangalore', 'Chennai', 'Kolkata']),
+            EmergencyContactName=random.choice(educator_names),
+            EmergencyContactNumber=str(random.randint(7000000000, 9999999999)),
             BloodGroup=random.choice(['A+', 'B+', 'O+', 'AB+']),
             IsRegistered=True,
             Password='temp123'
         )
         educator.set_password('password123')
         educators.append(educator)
-
-    db.session.add_all(educators)
-    db.session.commit()
-
-
-    # --- Add Admin Users ---
-    admins = [
-        Admin(
-            AdminName="Super Admin",
-            Email="admin@example.com",
-            PasswordHash="admin123"
-        ),
-        Admin(
-            AdminName="Support Admin",
-            Email="support@example.com",
-            PasswordHash="support123"
-        )
-    ]
     
-    for admin in admins:
-        admin.set_password('test123')
-        
-    db.session.add_all(admins)
+    db.session.add_all(educators)
     db.session.commit()
 
     # --- Add Students ---
     students = []
-    for _ in range(20):
+
+    FirstNames = [
+        "Aarav", "Vihaan", "Ishaan", "Rohan", "Arjun", "Reyansh", "Advait", "Dhruv", "Kabir", "Neil",
+        "Anaya", "Myra", "Siya", "Ira", "Aadhya", "Kiara", "Tara", "Riya", "Saanvi", "Meera"
+    ]
+
+    LastNames = [
+        "Kumar", "Sharma", "Verma", "Singh", "Gupta", "Mishra", "Reddy", "Nair", "Bose", "Mehta",
+        "Iyer", "Chopra", "Menon", "Banerjee", "Joshi", "Patel", "Das", "Pillai", "Malhotra", "Desai"
+    ]
+
+    Genders = [
+        "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male",
+        "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female"
+    ]
+
+    for i in range(20):
         program = random.choice(programs)
         primary_educator = random.choice(educators)
         secondary_educator = random.choice(educators)
         student = Student(
-            FirstName=fake.first_name(),
-            LastName=fake.last_name(),
-            Gender=random.choice(['M', 'F']),
-            DateOfBirth=fake.date_of_birth(minimum_age=5, maximum_age=18),
-            DateOfJoining=fake.date_between(start_date='-5y', end_date='-1y'),
-            EmailID=fake.unique.email(),
+            FirstName=FirstNames[i],
+            LastName=LastNames[i],
+            Gender=Genders[i],
+            DateOfBirth=date.today() - timedelta(days=random.randint(2000, 6000)),
+            DateOfJoining=date.today() - timedelta(days=random.randint(100, 365)),
+            EmailID=f"{FirstNames[i].lower()}.{LastNames[i].lower()}@school.edu",
             ProgramID=program.ProgramID,
             PrimaryEducatorID=primary_educator.EducatorID,
             SecondaryEducatorID=secondary_educator.EducatorID if secondary_educator != primary_educator else None,
@@ -93,9 +89,9 @@ with app.app_context():
             IsRegistered=True,
             Password='temp123',
             CurrentLevel=random.choice(['Beginner', 'Intermediate', 'Advanced']),
-            ContactNumber=fake.msisdn()[:10],
-            ParentsEmail=fake.email(),
-            Address=fake.address(),
+            ContactNumber=str(random.randint(7000000000, 9999999999)),
+            ParentsEmail=f"parent{i+1}@school.edu",
+            Address="123 Learning Street, India",
             PreferredLanguage=random.choice(['English', 'Hindi', 'Tamil', 'Telugu']),
             LearningStyle=random.choice(['Visual', 'Auditory', 'Kinesthetic']),
             PreferredCommunicationStyle=random.choice(['Verbal', 'Non-verbal']),
@@ -103,8 +99,59 @@ with app.app_context():
         )
         student.set_password('password123')
         students.append(student)
-
+    
     db.session.add_all(students)
     db.session.commit()
 
-    print("Faker mock data seeded successfully!")
+    # --- Add Feedback ---
+    feedback_entries = []
+    feedback_metrics = ["general", "communication", "cognition", "academics", "functional", "extracurricular", "strengths"]
+    for student in students:
+        feedback = Feedback(
+            StudentID=student.StudentID,
+            EducatorID=student.PrimaryEducatorID,
+            Term=1,
+            Comments=f"Good progress in {random.choice(feedback_metrics)} skills. Needs improvement in {random.choice(feedback_metrics)}.",
+            TPS=random.randint(1, 5),
+            Attendance=random.randint(30, 59),
+            FeedbackMetrics="{" + ", ".join([f'\"{metric}\": {random.randint(1, 5)}' for metric in feedback_metrics]) + "}",
+            AIInsights=f"AI suggests focusing on {random.choice(feedback_metrics)} for better results."
+        )
+        feedback_entries.append(feedback)
+        
+        # Some students receive feedback for Term 2
+        if random.choice([True, False]):
+            feedback2 = Feedback(
+                StudentID=student.StudentID,
+                EducatorID=student.PrimaryEducatorID,
+                Term=2,
+                Comments=f"Significant improvement in {random.choice(feedback_metrics)}. Can enhance {random.choice(feedback_metrics)} further.",
+                TPS=random.randint(1, 5),
+                Attendance=random.randint(30, 59),
+                FeedbackMetrics="{" + ", ".join([f'\"{metric}\": {random.randint(1, 5)}' for metric in feedback_metrics]) + "}",
+                AIInsights=f"AI suggests continued focus on {random.choice(feedback_metrics)}."
+            )
+            feedback_entries.append(feedback2)
+    
+    db.session.add_all(feedback_entries)
+    db.session.commit()
+
+    # --- Add Admins ---
+    admins = [
+        Admin(
+            AdminName="Admin1",
+            Email="admin1@example.com"
+        ),
+        Admin(
+            AdminName="Admin2",
+            Email="admin2@example.com"
+        )
+    ]
+
+    for admin in admins:
+        admin.set_password("password123")
+
+    db.session.add_all(admins)
+    db.session.commit()
+
+    print("Database seeded successfully with programs, educators, students, and feedback!")

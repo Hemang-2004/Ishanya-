@@ -1,5 +1,5 @@
 "use client";
-
+import ReactMarkdown from "react-markdown"
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -34,6 +34,7 @@ import {
 
 // Mock report data - in a real app, this would come from your API
 const mockReportData = {
+  AIInsights: "",
   TPS: 2,
   EducatorID: "1",
   studentName: "Arjun Patel",
@@ -345,7 +346,7 @@ export default function AdminStudentReportPage() {
     const fetchFeedbackReport = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/admins/get-feedback-report/${studentid}/2`
+          `http://127.0.0.1:5000/admins/get-feedback-report/${studentid}/1`
         );
 
         if (!response.ok) {
@@ -353,6 +354,7 @@ export default function AdminStudentReportPage() {
         }
 
         const data = await response.json();
+        console.log(data);
         setReportData(flattenAndCapitalizeKeys(data));
         setReport(flattenAndCapitalizeKeys(data));
 
@@ -516,12 +518,12 @@ export default function AdminStudentReportPage() {
         </div>
       </div>
 
-      <Tabs defaultValue="overview" className="space-y-4 print:block">
-        <TabsList className="grid grid-cols-2 md:grid-cols-4 w-full print:hidden">
+      <Tabs defaultValue="overview" className="space-y-3 print:block">
+        <TabsList className="grid grid-cols-2 md:grid-cols-3 w-full print:hidden">
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="details">Report Details</TabsTrigger>
-          <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
-          <TabsTrigger value="analytics">Analytics</TabsTrigger>
+          <TabsTrigger value="progress">AI Insights</TabsTrigger>
+          {/* <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
         </TabsList>
 
         {/* Overview Tab */}
@@ -1174,319 +1176,18 @@ export default function AdminStudentReportPage() {
 
         {/* Progress Tracking Tab */}
         <TabsContent value="progress">
-          <div className="grid grid-cols-1 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Communication Skills Progress</CardTitle>
-                <CardDescription>
-                  Tracking improvement over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ReLineChart
-                      data={progressData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis domain={[0, 5]} />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        type="monotone"
-                        dataKey="FollowingInstructions"
-                        name="Following Instructions"
-                        stroke="#8884d8"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="PoliteWords"
-                        name="Polite Words"
-                        stroke="#82ca9d"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="AskingQuestions"
-                        name="Asking Questions"
-                        stroke="#ffc658"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Conversation"
-                        name="Conversation"
-                        stroke="#ff8042"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Describing"
-                        name="Describing"
-                        stroke="#0088fe"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="Commenting"
-                        name="Commenting"
-                        stroke="#00c49f"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="EmotionalCommunication"
-                        name="Emotional Communication"
-                        stroke="#ffbb28"
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="SentenceFormation"
-                        name="Sentence Formation"
-                        stroke="#ff8042"
-                      />
-                    </ReLineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
+          {/* {report.AIInsights} */}
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Attendance Tracking</CardTitle>
-                <CardDescription>
-                  Monitoring attendance over time
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="h-[300px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <ReLineChart
-                      data={attendanceData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 10 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis yAxisId="left" orientation="left" />
-                      <YAxis
-                        yAxisId="right"
-                        orientation="right"
-                        domain={[0, 100]}
-                      />
-                      <Tooltip />
-                      <Legend />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="present"
-                        name="Days Present"
-                        stroke="#8884d8"
-                      />
-                      <Line
-                        yAxisId="left"
-                        type="monotone"
-                        dataKey="absent"
-                        name="Days Absent"
-                        stroke="#ff8042"
-                      />
-                      <Line
-                        yAxisId="right"
-                        type="monotone"
-                        dataKey="percentage"
-                        name="Attendance %"
-                        stroke="#82ca9d"
-                      />
-                    </ReLineChart>
-                  </ResponsiveContainer>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        {/* Analytics Tab */}
-        <TabsContent value="analytics">
           <Card>
             <CardHeader>
-              <CardTitle>Skill Area Comparison</CardTitle>
-              <CardDescription>
-                Analyzing strengths and areas for improvement
-              </CardDescription>
+              <CardTitle>AI Insights</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div>
-                  <h3 className="font-medium mb-2">Communication Skills</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>Average Score:</span>
-                      <span className="font-medium">
-                        {(
-                          (report.FollowingInstructions +
-                            report.PoliteWords +
-                            report.AskingQuestions +
-                            report.Conversation +
-                            report.Describing +
-                            report.Commenting +
-                            report.EmotionalCommunication +
-                            report.SentenceFormation) /
-                          8
-                        ).toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Strengths:</span>
-                      <span className="font-medium">
-                        Following Instructions, Sentence Formation
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Areas for Improvement:</span>
-                      <span className="font-medium">
-                        Asking Questions, Conversation, Commenting
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Progress from Previous Term:</span>
-                      <Badge className="bg-green-500">+0.5 points</Badge>
-                    </div>
-                  </div>
-                </div>
+              <CardContent className="space-y-4">
 
-                <div>
-                  <h3 className="font-medium mb-2">Cognition Skills</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>Average Score:</span>
-                      <span className="font-medium">
-                        {(
-                          (report.Prediction +
-                            report.LogicalSequencing +
-                            report.ProblemSolving +
-                            report.CauseEffect +
-                            report.DecisionMaking +
-                            report.OddOneOut) /
-                          6
-                        ).toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Strengths:</span>
-                      <span className="font-medium">
-                        Prediction, Logical Sequencing, Cause & Effect
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Areas for Improvement:</span>
-                      <span className="font-medium">Problem-Solving</span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Progress from Previous Term:</span>
-                      <Badge className="bg-green-500">+0.5 points</Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Functional Skills</h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span>Average Score:</span>
-                      <span className="font-medium">
-                        {(
-                          (report.CopyingDrawing +
-                            report.Pasting +
-                            report.Folding +
-                            report.Cutting +
-                            report.KitchenUtensils +
-                            report.Ingredients +
-                            report.Pouring +
-                            report.Scooping +
-                            report.PersonalHygiene +
-                            report.FoldingClothes +
-                            report.FillingWater +
-                            report.Packing +
-                            report.Wiping +
-                            report.GroupActivities) /
-                          14
-                        ).toFixed(1)}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Strengths:</span>
-                      <span className="font-medium">
-                        Copying & Drawing, Kitchen Skills
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Areas for Improvement:</span>
-                      <span className="font-medium">
-                        Personal Hygiene, Cutting, Folding
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span>Progress from Previous Term:</span>
-                      <Badge className="bg-green-500">+0.4 points</Badge>
-                    </div>
-                  </div>
-                </div>
-
-                <div>
-                  <h3 className="font-medium mb-2">Recommendations</h3>
-                  <div className="space-y-2">
-                    <div className="p-4 border rounded-md">
-                      <p className="font-medium">Communication Focus Areas:</p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>
-                          Continue practicing conversation initiation with peers
-                        </li>
-                        <li>
-                          Provide more opportunities to ask questions in
-                          different contexts
-                        </li>
-                        <li>
-                          Encourage commenting on everyday objects and events
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="p-4 border rounded-md">
-                      <p className="font-medium">Cognition Focus Areas:</p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>
-                          Introduce more complex problem-solving activities
-                        </li>
-                        <li>
-                          Continue building on strengths in prediction and
-                          logical sequencing
-                        </li>
-                        <li>
-                          Incorporate more real-world problem-solving scenarios
-                        </li>
-                      </ul>
-                    </div>
-
-                    <div className="p-4 border rounded-md">
-                      <p className="font-medium">
-                        Functional Skills Focus Areas:
-                      </p>
-                      <ul className="list-disc pl-5 mt-2 space-y-1">
-                        <li>
-                          Develop a consistent personal hygiene routine with
-                          visual supports
-                        </li>
-                        <li>
-                          Provide more practice with scissors and cutting
-                          activities
-                        </li>
-                        <li>
-                          Continue origami activities to improve folding skills
-                        </li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
+          <ReactMarkdown>{report.AIInsights}</ReactMarkdown>
+          </CardContent>
           </Card>
-        </TabsContent>
+          </TabsContent>
       </Tabs>
     </div>
   );

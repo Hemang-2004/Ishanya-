@@ -79,19 +79,23 @@ def register_educator():
                 elif field == "IsRegistered":
                     IsRegistered = data[field] == "1"
                     setattr(educator, field, IsRegistered)
+                elif field == "DateOfJoining":
+                    date_of_joining_str = request.form.get("DateOfJoining")  
+                    date_of_joining = datetime.strptime(date_of_joining_str, "%Y-%m-%d").date()
+                    setattr(educator, field, date_of_joining)
                 else:
                     setattr(educator, field, data[field])
             else:
                 setattr(educator, field, None)
 
         # Handle File Uploads
-        if resume_file and allowed_file_CV(resume_file.filename):
+        if resume_file and allowed_file(resume_file.filename):
             resume_filename = secure_filename(resume_file.filename)
             resume_path = os.path.join(UPLOAD_FOLDER, resume_filename)
             resume_file.save(resume_path)
             educator.CVFilePath = resume_path  # Save path in DB
 
-        if photo_file and allowed_file_aadhar(photo_file.filename):
+        if photo_file and allowed_file(photo_file.filename):
             photo_filename = secure_filename(photo_file.filename)
             photo_path = os.path.join(UPLOAD_FOLDER, photo_filename)
             photo_file.save(photo_path)
@@ -128,13 +132,13 @@ def register_student():
         )
         student.set_password(data["Password"])
 
-        if id_proof_file and allowed_file_CV(id_proof_file.filename):
+        if id_proof_file and allowed_file(id_proof_file.filename):
             id_proof_filename = secure_filename(id_proof_file.filename)
             id_proof_path = os.path.join(UPLOAD_FOLDER, id_proof_filename)
             id_proof_file.save(id_proof_path)
             student.AadharFilePath = id_proof_path  # Save file path in DB
 
-        if photo_file and allowed_file_aadhar(photo_file.filename):
+        if photo_file and allowed_file(photo_file.filename):
             photo_filename = secure_filename(photo_file.filename)
             photo_path = os.path.join(UPLOAD_FOLDER, photo_filename)
             photo_file.save(photo_path)
@@ -157,6 +161,10 @@ def register_student():
                     setattr(student, field, datetime.strptime(data[field], "%Y-%m-%d").date())
                 elif field == "ParentAnnualIncome":
                     setattr(student, field, int(data[field]))
+                elif field == "DateOfJoining":
+                    date_of_joining_str = request.form.get("DateOfJoining")  
+                    date_of_joining = datetime.strptime(date_of_joining_str, "%Y-%m-%d").date()
+                    setattr(student, field, date_of_joining)
                 elif field == "IsRegistered":
                     IsRegistered = data[field] == "1"
                     setattr(student, field, IsRegistered)
