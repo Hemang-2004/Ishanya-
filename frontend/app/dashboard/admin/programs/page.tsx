@@ -58,23 +58,47 @@ export default function ProgramsPage() {
     return matchesSearch && matchesStatus
   })
 
-  const handleAddProgram = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real app, you would send this to an API
-    console.log("Adding new program:", newProgramData)
-
-    // Reset form and close dialog
-    setNewProgramData({
-      name: "",
-      description: "",
-      category: "education",
-      startDate: "",
-      endDate: "",
-      status: "active",
-      capacity: "",
-    })
-    setIsAddProgramDialogOpen(false)
-  }
+  const handleAddProgram = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    // Create FormData object
+    const programData = {
+      ProgramName: newProgramData.name, // Match API expected field
+    };
+  
+    try {
+      const response = await fetch("http://localhost:5000/admins/add_program", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(programData),
+      });
+  
+      const result = await response.json();
+      
+      if (response.ok) {
+        console.log("Program added successfully:", result);
+        
+        // Reset form
+        setNewProgramData({
+          name: "",
+          description: "",
+          category: "education",
+          startDate: "",
+          endDate: "",
+          status: "active",
+          capacity: "",
+        });
+  
+        setIsAddProgramDialogOpen(false); // Close modal
+      } else {
+        console.error("Error adding program:", result.error);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target

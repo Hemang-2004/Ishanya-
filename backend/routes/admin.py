@@ -10,6 +10,33 @@ import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
 
+@admin_bp.route("/add_program", methods=["POST"])
+def add_program():
+    """API to add a new Program"""
+    try:
+        data = request.get_json()
+
+        # Validate input
+        if not data or "ProgramName" not in data or not data["ProgramName"].strip():
+            return jsonify({"error": "ProgramName is required"}), 400
+
+        # Check if program already exists
+        existing_program = Program.query.filter_by(ProgramName=data["ProgramName"]).first()
+        if existing_program:
+            return jsonify({"error": "Program with this name already exists"}), 409
+
+        # Create new Program instance
+        new_program = Program(ProgramName=data["ProgramName"].strip())
+
+        # Add to database
+        db.session.add(new_program)
+        db.session.commit()
+
+        return jsonify({"message": "Program added successfully!", "ProgramID": new_program.ProgramID}), 201
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+    
 
 ALLOWED_COLUMNS = {
     'FirstName', 'LastName', 'DateOfBirth', 'Gender', 'EmailID', 'ProgramID',
