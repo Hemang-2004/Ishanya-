@@ -55,6 +55,13 @@ export default function ReportsPage() {
     }
   };
       
+  const programEffectivenessData = programData.map((program) => ({
+    name: program.ProgramName,
+    Active: program.Active, // Using "Active" for completion
+    Graduated: program.Graduated, // Using "Graduated" for employment
+    Discontinued: program.Discontinued, // Using "Discontinued" for satisfaction
+  }))
+  
   // Filter data based on selected filters
   const filteredData = {
     studentGrowth: studentGrowthData.filter(
@@ -442,4 +449,3 @@ const savedCustomReports = [
     date: "Apr 15, 2023",
   },
 ]
-
