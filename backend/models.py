@@ -14,6 +14,22 @@ class Program(db.Model):
     students = db.relationship('Student', backref='program', lazy=True)
     assessments = db.relationship('Assessment', backref='suggested_program', lazy=True)
 
+# class Program(db.Model):
+#     __tablename__ = 'program'
+    
+#     ProgramID = db.Column(db.Integer, primary_key=True)
+#     ProgramName = db.Column(db.String(20), nullable=False)
+#     Description = db.Column(db.Text, nullable=True)
+#     Category = db.Column(db.String(20), nullable=False, default="education")
+#     StartDate = db.Column(db.Date, nullable=True)
+#     EndDate = db.Column(db.Date, nullable=True)
+#     Status = db.Column(db.String(20), nullable=False, default="active")
+#     Capacity = db.Column(db.Integer, nullable=True)
+
+#     educators = db.relationship('Educator', backref='program', lazy=True)
+#     students = db.relationship('Student', backref='program', lazy=True)
+#     assessments = db.relationship('Assessment', backref='suggested_program', lazy=True)
+
 
 class Educator(UserMixin, db.Model):
     __tablename__ = 'educator'
