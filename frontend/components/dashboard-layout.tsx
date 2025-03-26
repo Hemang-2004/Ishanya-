@@ -98,7 +98,7 @@ export function DashboardLayout({
         return [
           { name: "Dashboard", href: "/dashboard/student", icon: Home },
           {
-            name: "My Courses",
+            name: "My Programs",
             href: "/dashboard/student/courses",
             icon: BookOpen,
           },
@@ -113,16 +113,16 @@ export function DashboardLayout({
             icon: FileText,
             badge: 2,
           },
-          {
-            name: "Reports",
-            href: "/dashboard/student/reports",
-            icon: BarChart3,
-          },
-          {
-            name: "Schedule",
-            href: "/dashboard/student/schedule",
-            icon: Calendar,
-          },
+          // {
+          //   name: "Reports",
+          //   href: "/dashboard/student/reports",
+          //   icon: BarChart3,
+          // },
+          // {
+          //   name: "Schedule",
+          //   href: "/dashboard/student/schedule",
+          //   icon: Calendar,
+          // },
           {
             name: "Messages",
             href: "/dashboard/student/messages",
@@ -148,11 +148,11 @@ export function DashboardLayout({
             href: "/dashboard/teacher/students",
             icon: Users,
           },
-          {
-            name: t("Progress Reports"),
-            href: "/dashboard/teacher/reports",
-            icon: GraduationCap,
-          },
+          // {
+          //   name: t("Progress Reports"),
+          //   href: "/dashboard/teacher/reports",
+          //   icon: GraduationCap,
+          // },
           {
             name: t("Assignments"),
             href: "/dashboard/teacher/assignments",
@@ -163,11 +163,11 @@ export function DashboardLayout({
             href: "/dashboard/teacher/feedback",
             icon: ClipboardList,
           },
-          {
-            name: t("Schedule"),
-            href: "/dashboard/teacher/schedule",
-            icon: Calendar,
-          },
+          // {
+          //   name: t("Schedule"),
+          //   href: "/dashboard/teacher/schedule",
+          //   icon: Calendar,
+          // },
           {
             name: t("Messages"),
             href: "/dashboard/teacher/messages",

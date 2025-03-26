@@ -295,6 +295,9 @@ export default function AdminStudentReportPage() {
   const [TotalWorkingDays, setTotalWorkingDays] = useState(63);
   const params = useParams(); // Get dynamic route params
   const studentid = params?.id; // Extract parameters from URL
+  const searchParams = useSearchParams();
+  // const studentid = searchParams.get("studentid");
+  const term = searchParams.get("term");
   console.log(studentid);
   const [educatorId, setEducatorId] = useState("");
   const [programName, setProgramName] = useState<string | null>(null);
@@ -346,7 +349,7 @@ export default function AdminStudentReportPage() {
     const fetchFeedbackReport = async () => {
       try {
         const response = await fetch(
-          `http://127.0.0.1:5000/admins/get-feedback-report/${studentid}/1`
+          `http://127.0.0.1:5000/admins/get-feedback-report/${studentid}/${term}`
         );
 
         if (!response.ok) {

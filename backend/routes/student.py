@@ -126,8 +126,8 @@ def get_student_program(student_id):
             "ProgramName": student.program.ProgramName,
             "ProgramID": student.program.ProgramID,
             "ProgramDescription": student.program.Description,
-            "StartDate": student.program.StartDate.isoformat(),
-            "EndDate": student.program.EndDate.isoformat(),
+            # "StartDate": student.program.StartDate.isoformat(),
+            # "EndDate": student.program.EndDate.isoformat(),
             "Category": student.program.Category,
             "Status": student.program.Status,
                         })

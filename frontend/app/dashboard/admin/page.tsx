@@ -151,7 +151,7 @@ export default function AdminDashboardPage() {
         </div>
       </div>
     {/* </div> */}
-     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+     {/* <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -160,7 +160,7 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="staff">Staff</TabsTrigger>
           </TabsList>
         </Tabs>
-      </div>
+      </div> */}
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <MetricCard
@@ -325,7 +325,7 @@ export default function AdminDashboardPage() {
                 >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
-                  <YAxis domain={[0, 100]} />
+                  <YAxis domain={[0, 10]} />
                   <Tooltip content={<ChartTooltip />} />
                   <Bar dataKey="value" fill="hsl(var(--primary))" name="Students" />
                 </BarChart>
@@ -337,7 +337,7 @@ export default function AdminDashboardPage() {
           </CardContent>
         </Card>
       </div>
-
+{/* 
       <div className="grid gap-4 md:grid-cols-7">
         <Card className="md:col-span-4">
           <CardHeader>
@@ -608,7 +608,7 @@ export default function AdminDashboardPage() {
             </div>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
     </div>
   )
 }
