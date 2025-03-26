@@ -51,11 +51,8 @@
     "react-day-picker": "8.10.1",
     "react-dom": "^19",
     "react-hook-form": "^7.54.1",
-<<<<<<< HEAD
     "react-native-html-to-pdf": "^0.12.0",
-=======
     "react-markdown": "^10.1.0",
->>>>>>> deea441e3722617f331baa2f483380325d1081ea
     "react-resizable-panels": "^2.1.7",
     "recharts": "latest",
     "sonner": "^1.7.1",

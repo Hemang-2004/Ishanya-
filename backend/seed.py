@@ -114,7 +114,7 @@ with app.app_context():
             Comments=f"Good progress in {random.choice(feedback_metrics)} skills. Needs improvement in {random.choice(feedback_metrics)}.",
             TPS=random.randint(1, 5),
             Attendance=random.randint(30, 59),
-            FeedbackMetrics="{" + ", ".join([f'\"{metric}\": {random.randint(1, 5)}' for metric in feedback_metrics]) + "}",
+            FeedbackMetrics={"Punctuality": "Is on time and regular", "Preparedness": "Yes. Is prepared for sessions", "BehavioralIssues": "erhthituit", "Assistance": "Minimal verbal assistance required", "ParentalSupport": "The home environment is supportive", "CommunicationSkills": {"FollowingInstructions": 5, "PoliteWords": 3.5, "AskingQuestions": 3, "Conversation": 3, "Describing": 4, "Commenting": 3, "EmotionalCommunication": 3.5, "SentenceFormation": 4.5, "Notes": ""}, "CognitionSkills": {"Prediction": 4.5, "LogicalSequencing": 4.5, "ProblemSolving": 4, "CauseEffect": 4.5, "DecisionMaking": 4.5, "OddOneOut": 4.5, "Notes": ""}, "AcademicSkills": {"EnglishReading": "", "EnglishWriting": "", "EVS": "", "Math": ""}, "FunctionalSkills": {"CopyingDrawing": 4.5, "Pasting": 4.5, "Folding": 3.5, "Cutting": 3.5, "KitchenUtensils": 4.5, "Ingredients": 4.5, "Pouring": 4.5, "Scooping": 4.5, "PersonalHygiene": 3, "FoldingClothes": 4.5, "FillingWater": 4.5, "Packing": 4.5, "Wiping": 4.5, "GroupActivities": 4, "Notes": ""}, "Extracurricular": "", "Strengths": "", "LearningEnvironment": ""},
             AIInsights=f"AI suggests focusing on {random.choice(feedback_metrics)} for better results."
         )
         feedback_entries.append(feedback)
@@ -128,7 +128,7 @@ with app.app_context():
                 Comments=f"Significant improvement in {random.choice(feedback_metrics)}. Can enhance {random.choice(feedback_metrics)} further.",
                 TPS=random.randint(1, 5),
                 Attendance=random.randint(30, 59),
-                FeedbackMetrics="{" + ", ".join([f'\"{metric}\": {random.randint(1, 5)}' for metric in feedback_metrics]) + "}",
+                FeedbackMetrics="{" + ", ".join([f'"{metric}": {random.randint(1, 5)}' for metric in feedback_metrics]) + "}",
                 AIInsights=f"AI suggests continued focus on {random.choice(feedback_metrics)}."
             )
             feedback_entries.append(feedback2)
