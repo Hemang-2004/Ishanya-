@@ -184,9 +184,9 @@ export default function ProgramsPage() {
                       <TableHead>Program Name</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Status</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Participants</TableHead>
+                      {/* <TableHead>Progress</TableHead>
+                      <TableHead>Duration</TableHead> */}
+                      <TableHead>Capacity</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -204,7 +204,7 @@ export default function ProgramsPage() {
                           <TableCell>
                             <Badge variant={getStatusBadgeVariant(program.Status)}>{program.Status}</Badge>
                           </TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             <div className="flex items-center gap-2">
                               <Progress value={program.progress} className="h-2 w-[60px]" />
                               <span className="text-sm">{program.progress}%</span>
@@ -215,7 +215,7 @@ export default function ProgramsPage() {
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <span className="text-sm">{program.StartDate}</span>
                             </div>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
@@ -282,9 +282,9 @@ export default function ProgramsPage() {
                     <TableRow>
                       <TableHead>Program Name</TableHead>
                       <TableHead>Category</TableHead>
-                      <TableHead>Progress</TableHead>
-                      <TableHead>Duration</TableHead>
-                      <TableHead>Participants</TableHead>
+                      {/* <TableHead>Progress</TableHead>
+                      <TableHead>Duration</TableHead> */}
+                      <TableHead>Capacity</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -299,7 +299,7 @@ export default function ProgramsPage() {
                           <TableCell>
                             <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             <div className="flex items-center gap-2">
                               <Progress value={program.progress} className="h-2 w-[60px]" />
                               <span className="text-sm">{program.progress}%</span>
@@ -310,7 +310,7 @@ export default function ProgramsPage() {
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <span className="text-sm">{program.StartDate}</span>
                             </div>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
@@ -337,7 +337,7 @@ export default function ProgramsPage() {
                       <TableHead>Program Name</TableHead>
                       <TableHead>Category</TableHead>
                       <TableHead>Start Date</TableHead>
-                      <TableHead>Duration</TableHead>
+                      {/* <TableHead>Duration</TableHead> */}
                       <TableHead>Capacity</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
@@ -354,12 +354,12 @@ export default function ProgramsPage() {
                             <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
                           <TableCell>{program.StartDate}</TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
                               <span className="text-sm">{program.StartDate}</span>
                             </div>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />

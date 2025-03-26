@@ -1,15 +1,16 @@
-import type React from "react"
-import { View, Text, StyleSheet, Pressable } from "react-native"
+import React from "react"
+import { View, Text, StyleSheet, Pressable, Animated } from "react-native"
 import { MaterialIcons } from "@expo/vector-icons"
 
 interface StatsCardProps {
   title: string
-  value: string
-  icon: string
+  value: string | number | Animated.Value
+  icon: keyof typeof MaterialIcons.glyphMap
   color: string
   onPress: () => void
   isSelected: boolean
   showNotification?: boolean
+  animated?: boolean
 }
 
 const StatsCard: React.FC<StatsCardProps> = ({
@@ -20,14 +21,34 @@ const StatsCard: React.FC<StatsCardProps> = ({
   onPress,
   isSelected,
   showNotification = false,
+  animated = false,
 }) => {
+  const displayValue = React.useMemo(() => {
+    if (animated && value instanceof Animated.Value) {
+      return value.interpolate({
+        inputRange: [0, 100],
+        outputRange: ["0", "100"],
+      })
+    }
+    return value.toString()
+  }, [animated, value])
+
   return (
     <Pressable style={[styles.card, isSelected && styles.selectedCard]} onPress={onPress}>
       <View style={[styles.iconContainer, { backgroundColor: color }]}>
         <MaterialIcons name={icon} size={24} color="#fff" />
         {showNotification && <View style={styles.notificationDot} />}
       </View>
-      <Text style={styles.value}>{value}</Text>
+      {animated && value instanceof Animated.Value ? (
+        <Animated.Text style={styles.value}>
+          {value.interpolate({
+            inputRange: [0, 100],
+            outputRange: ["0", "100"],
+          })}
+        </Animated.Text>
+      ) : (
+        <Text style={styles.value}>{value.toString()}</Text>
+      )}
       <Text style={styles.title}>{title}</Text>
     </Pressable>
   )
@@ -36,12 +57,14 @@ const StatsCard: React.FC<StatsCardProps> = ({
 const styles = StyleSheet.create({
   card: {
     width: "48%",
-    backgroundColor: "#fff",
+    backgroundColor: "#FFF8DC",
     borderRadius: 12,
     padding: 15,
     margin: "1%",
     alignItems: "center",
     elevation: 3,
+    borderWidth: 1,
+    borderColor: "#D2B48C",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,

@@ -155,10 +155,10 @@ export default function TeacherDashboardPage() {
                   key={student.student_id}
                   name={student.name} // Display name from API
                   course={student.program_name}
-                  progress={85}
-                  lastActive="Today"
-                avatar="/placeholder.svg?height=40&width=40"
-                initials="PS"
+                  // progress={85}
+                  // lastActive="Today"
+                // avatar="/placeholder.svg?height=40&width=40"
+                // initials="PS"
                 />
               ))}
             </div>
@@ -462,33 +462,33 @@ function StatsCard({
 function StudentRow({
   name,
   course,
-  progress,
-  lastActive,
-  avatar,
-  initials,
+  // progress,
+  // lastActive,
+  // avatar,
+  // initials,
 }: {
   name: string
   course: string
-  progress: number
-  lastActive: string
-  avatar: string
-  initials: string
+  // progress: number
+  // lastActive: string
+  // avatar: string
+  // initials: string
 }) {
   return (
     <div className="flex items-center gap-4">
-      <Avatar>
+      {/* <Avatar>
         <AvatarImage src={avatar} />
         <AvatarFallback>{initials}</AvatarFallback>
-      </Avatar>
+      </Avatar> */}
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between">
           <div className="font-medium truncate">{name}</div>
-          <div className="text-sm text-muted-foreground">{progress}%</div>
+          {/* <div className="text-sm text-muted-foreground">{progress}%</div> */}
         </div>
-        <Progress value={progress} className="h-2 mt-1" />
+        {/* <Progress value={progress} className="h-2 mt-1" /> */}
         <div className="flex items-center justify-between mt-1">
           <div className="text-sm text-muted-foreground">{course}</div>
-          <div className="text-xs text-muted-foreground">Last active: {lastActive}</div>
+          {/* <div className="text-xs text-muted-foreground">Last active: {lastActive}</div> */}
         </div>
       </div>
       <Button variant="ghost" size="sm" asChild>

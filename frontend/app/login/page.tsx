@@ -217,7 +217,7 @@ export default function LoginPage() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="student">Student</SelectItem>
-                      <SelectItem value="teacher">Teacher/Staff</SelectItem>
+                      <SelectItem value="teacher">Educator</SelectItem>
                       <SelectItem value="admin">Administrator</SelectItem>
                     </SelectContent>
                   </Select>

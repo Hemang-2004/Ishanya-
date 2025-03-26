@@ -113,7 +113,7 @@ export default function TeacherStudentsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t("myStudents")}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("My Students")}</h2>
           <p className="text-muted-foreground">Manage and track your students' progress</p>
         </div>
         <div className="flex gap-2">
@@ -141,10 +141,10 @@ export default function TeacherStudentsPage() {
               <Badge className="ml-2 bg-green-500 text-white">{activeStudents.length}</Badge>
             </TabsTrigger>
             <TabsTrigger value="at-risk" className="relative">
-              At Risk
+              Discontinued
               <Badge className="ml-2 bg-red-500 text-white">{atRiskStudents.length}</Badge>
             </TabsTrigger>
-            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            {/* <TabsTrigger value="analytics">Analytics</TabsTrigger> */}
           </TabsList>
 
           <div className="flex gap-2 w-full md:w-auto">
@@ -178,7 +178,7 @@ export default function TeacherStudentsPage() {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="at-risk">At Risk</SelectItem>
+                <SelectItem value="at-risk">Discontinued</SelectItem>
                 <SelectItem value="inactive">Inactive</SelectItem>
               </SelectContent>
             </Select>
@@ -555,19 +555,19 @@ export default function TeacherStudentsPage() {
           <div className="text-sm text-muted-foreground">{student.program_name}</div>
         </div>
 
-        <div>
+        {/* <div>
           <div className="text-sm font-medium">Progress</div>
           <div className="flex items-center gap-2">
             <Progress value={75} className="h-2 w-24" />
             <span className="text-sm text-muted-foreground">75%</span>
           </div>
-        </div>
+        </div> */}
 
         <div>
           <div className="text-sm font-medium">Last Active</div>
           <div className="text-sm text-muted-foreground flex items-center">
             <Clock className="mr-1 h-3 w-3" />
-            "Today"
+            Today
           </div>
         </div>
 
@@ -606,7 +606,7 @@ function StatusBadge({ status }: { status: string }) {
     return (
       <Badge variant="destructive">
         <AlertTriangle className="mr-1 h-3 w-3" />
-        At Risk
+        Discontinued
       </Badge>
     )
   } else {

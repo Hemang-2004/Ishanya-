@@ -788,7 +788,7 @@ export default function GroupChatScreen() {
 
   return (
     <ImageBackground source={require("../assets/images/1.jpg")} style={styles.background} resizeMode="cover">
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['right', 'left', 'bottom']}>
         <View style={styles.header}>
           <TouchableOpacity 
             style={styles.menuButton} 

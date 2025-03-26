@@ -58,6 +58,7 @@ const faqData = [
 
 export default function Dashboard() {
   const scrollY = useRef(new Animated.Value(0)).current
+  const overallProgress = useRef(new Animated.Value(0)).current
   const [showMinHeader, setShowMinHeader] = useState(false)
   const [selectedCard, setSelectedCard] = useState<string | null>(null)
   const [showChatModal, setShowChatModal] = useState(false)
@@ -195,9 +196,30 @@ export default function Dashboard() {
     return () => scrollY.removeAllListeners()
   }, [])
 
+  useEffect(() => {
+    // Animate the overall progress from 0 to 78
+    Animated.timing(overallProgress, {
+      toValue: 78,
+      duration: 1500,
+      useNativeDriver: false,
+    }).start()
+  }, [])
+
   const headerHeight = scrollY.interpolate({
     inputRange: [0, 150],
     outputRange: [120, 60],
+    extrapolate: "clamp",
+  })
+
+  const headerContentOpacity = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [1, 0],
+    extrapolate: "clamp",
+  })
+
+  const minHeaderContentOpacity = scrollY.interpolate({
+    inputRange: [0, 150],
+    outputRange: [0, 1],
     extrapolate: "clamp",
   })
 
@@ -318,33 +340,33 @@ export default function Dashboard() {
       <SafeAreaView style={styles.container}>
         {/* Animated Header */}
         <Animated.View style={[styles.header, { height: headerHeight }]}>
-          {showMinHeader ? (
-            <View style={styles.minHeaderContent}>
-              <Pressable onPress={handleProfilePress}>
+          <Animated.View style={[styles.headerContent, { opacity: headerContentOpacity }]}>
+            <Pressable onPress={handleProfilePress}>
+              <View style={styles.logoContainer}>
                 <View style={styles.logo} />
-              </Pressable>
-              <Text style={styles.welcomeText}>{studentName}</Text>
-            </View>
-          ) : (
-            <View style={styles.headerContent}>
-              <Pressable onPress={handleProfilePress}>
-                <View style={styles.logoContainer}>
-                  <View style={styles.logo} />
-                </View>
-              </Pressable>
-              <View style={styles.welcomeContainer}>
-                <Text style={styles.welcomeText}>Welcome Back, {studentName}!</Text>
-                <Text style={styles.subText}>Track your progress and stay connected.</Text>
               </View>
+            </Pressable>
+            <View style={styles.welcomeContainer}>
+              <Text style={styles.welcomeText}>Welcome Back, {studentName}!</Text>
+              <Text style={styles.subText}>Track your progress and stay connected.</Text>
             </View>
-          )}
-        </Animated.View>
+            <Pressable style={styles.notificationBell} onPress={handleBellPress}>
+              <MaterialIcons name="notifications" size={24} color="#333" />
+              {hasUnreadNotifications && <View style={styles.notificationDot} />}
+            </Pressable>
+          </Animated.View>
 
-        {/* Notification Bell */}
-        <Pressable style={styles.notificationBell} onPress={handleBellPress}>
-          <MaterialIcons name="notifications" size={24} color="#333" />
-          {hasUnreadNotifications && <View style={styles.notificationDot} />}
-        </Pressable>
+          <Animated.View style={[styles.minHeaderContent, { opacity: minHeaderContentOpacity }]}>
+            <Pressable onPress={handleProfilePress}>
+              <View style={styles.logo} />
+            </Pressable>
+            <Text style={styles.minHeaderText}>{studentName}</Text>
+            <Pressable style={styles.notificationBell} onPress={handleBellPress}>
+              <MaterialIcons name="notifications" size={24} color="#333" />
+              {hasUnreadNotifications && <View style={styles.notificationDot} />}
+            </Pressable>
+          </Animated.View>
+        </Animated.View>
 
         {/* Floating Chat Button */}
         <Pressable style={styles.floatingButton} onPress={handleAIChatPress}>
@@ -362,7 +384,7 @@ export default function Dashboard() {
               onPress={() => setSelectedCard(selectedCard === "overallProgress" ? null : "overallProgress")}
             >
               <Text style={[{ fontFamily: "JosefinSans-Regular", fontSize: 14 }]}>Overall Progress</Text>
-              <RadialProgress percentage={78} size={120} strokeWidth={12} color="#408c4c" />
+              <RadialProgress percentage={overallProgress} size={120} strokeWidth={12} color="#408c4c" animated={true} />
             </Pressable>
 
             <StatsCard
@@ -653,28 +675,41 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingTop: -28,
   },
   header: {
-    backgroundColor: "rgba(255, 216, 112, 0.9)", // Semi-transparent gold color
+    backgroundColor: "rgba(255, 216, 112, 0.9)",
     paddingHorizontal: 20,
     justifyContent: "center",
     borderBottomWidth: 1,
-    borderBottomColor: "#D2B48C", // Tan border color
+    borderBottomColor: "#D2B48C",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 5,
+    overflow: 'hidden',
   },
   headerContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 20,
   },
   minHeaderContent: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     paddingHorizontal: 20,
   },
   welcomeContainer: {
@@ -683,6 +718,12 @@ const styles = StyleSheet.create({
   },
   welcomeText: {
     fontSize: 22,
+    fontWeight: "bold",
+    color: "#333",
+    fontFamily: "JosefinSans-Bold",
+  },
+  minHeaderText: {
+    fontSize: 18,
     fontWeight: "bold",
     color: "#333",
     fontFamily: "JosefinSans-Bold",
@@ -701,13 +742,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     backgroundColor: "#fff",
     borderWidth: 1,
-    borderColor: "#D2B48C", // Tan border color
+    borderColor: "#D2B48C",
   },
   notificationBell: {
-    position: "absolute",
-    top: 70,
-    right: 20,
-    zIndex: 10,
+    marginLeft: 15,
+    position: 'relative',
   },
   notificationDot: {
     position: "absolute",
@@ -725,7 +764,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#408c4c", // Green color from registration form
+    backgroundColor: "#408c4c",
     justifyContent: "center",
     alignItems: "center",
     zIndex: 10,
@@ -747,19 +786,19 @@ const styles = StyleSheet.create({
   },
   radialProgressCard: {
     width: "48%",
-    backgroundColor: "#FFF8DC", // Light yellowish background
+    backgroundColor: "#FFF8DC",
     borderRadius: 12,
     padding: 15,
     margin: "1%",
     alignItems: "center",
     elevation: 3,
     borderWidth: 1,
-    borderColor: "#D2B48C", // Tan border color
+    borderColor: "#D2B48C",
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    height: 180, // Fixed height to match other cards
+    height: 180,
   },
   radialProgressTitle: {
     fontSize: 16,
@@ -779,7 +818,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     fontFamily: "JosefinSans-Bold",
     borderBottomWidth: 1,
-    borderBottomColor: "#D2B48C", // Tan border color
+    borderBottomColor: "#D2B48C",
     paddingBottom: 5,
   },
   modalOverlay: {
@@ -927,40 +966,5 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontFamily: "JosefinSans-Bold",
   },
-
-  //faq section trial
-  // faqItem: {
-  //   backgroundColor: "#FFF8DC",
-  //   borderRadius: 12,
-  //   marginBottom: 10,
-  //   padding: 15,
-  //   borderWidth: 1,
-  //   borderColor: "#D2B48C",
-  //   shadowColor: "#000",
-  //   shadowOffset: { width: 0, height: 2 },
-  //   shadowOpacity: 0.1,
-  //   shadowRadius: 4,
-  //   elevation: 3,
-  // },
-  // faqHeader: {
-  //   flexDirection: "row",
-  //   justifyContent: "space-between",
-  //   alignItems: "center",
-  // },
-  // faqQuestion: {
-  //   fontSize: 16,
-  //   fontWeight: "bold",
-  //   color: "#333",
-  //   fontFamily: "JosefinSans-Bold",
-  //   flex: 1,
-  //   marginRight: 10,
-  // },
-  // faqAnswer: {
-  //   fontSize: 14,
-  //   color: "#666",
-  //   marginTop: 10,
-  //   fontFamily: "JosefinSans-Regular",
-  //   lineHeight: 20,
-  // },
 })
 

@@ -35,7 +35,7 @@ export default function StudentCoursesPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight">My Courses</h2>
+        <h2 className="text-2xl font-bold tracking-tight">My Programs</h2>
         <p className="text-muted-foreground">View and manage your enrolled courses</p>
       </div>
 

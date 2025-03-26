@@ -163,7 +163,7 @@ export default function TeacherReportsPage() {
                     </div>
                     <div className="w-1/6 text-right">
                       {item.Status === "complete" ? (
-                        <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teacher/reports/view/${item.StudentID}`)}>
+                        <Button size="sm" variant="outline" onClick={() => router.push(`/dashboard/teacher/reports/view/${item.StudentID}?term=${item.Term}`)}>
                           <Eye className="h-4 w-4 mr-1" />
                           View
                         </Button>
