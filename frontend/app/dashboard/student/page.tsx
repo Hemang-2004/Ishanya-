@@ -66,7 +66,7 @@ export default function StudentDashboardPage() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("userID", user?.userId || ""); // Store user ID in localStorage
+      localStorage.setItem("userID", user?.userId || "1"); // Store user ID in localStorage
     }
   }, [user?.userId]);
   useEffect(() => {
