@@ -1,10 +1,16 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,44 +18,122 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Filter, Download, MoreHorizontal, Edit, Trash, Eye, GraduationCap } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { useRouter } from "next/navigation"
-import { LanguageSwitcher } from "@/components/language-switcher"
-import Link from "next/link"
+} from "@/components/ui/dropdown-menu";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  Search,
+  Filter,
+  Download,
+  MoreHorizontal,
+  Edit,
+  Trash,
+  Eye,
+  GraduationCap,
+} from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useRouter } from "next/navigation";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import Link from "next/link";
 
 export default function StaffPage() {
-  const router = useRouter()
-  const [searchTerm, setSearchTerm] = useState("")
-  const [selectedStatus, setSelectedStatus] = useState("all")
-  const [selectedRole, setSelectedRole] = useState("all")
 
+  interface Educator  {
+    id: number;
+    name: string;
+    email: string;
+    specialization: string;  // This is the Program Name
+    status: string;
+    joined: string;
+    students: number;
+  };
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("all");
+  const [staffData, setStaffData] =useState<Educator[]>([]); 
+  const [programs, setPrograms] = useState<{ ProgramID: string; ProgramName: string }[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState("all")
+  
+
+  useEffect(() => {
+    const fetchEducators = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/educators");
+        if (!response.ok) {
+          throw new Error("Failed to fetch students");
+        }
+        const data: Educator[] = await response.json();
+        setStaffData(data);
+      } catch (error) {
+        console.error("Error fetching students:", error);
+      }
+    };
+
+    fetchEducators();
+  }, []);
+
+  useEffect(() => {
+    const fetchPrograms = async () => {
+      try {
+        const response = await fetch(
+          "http://localhost:5000/admins/get-all-programs"
+        );
+        if (!response.ok) {
+          throw new Error("Failed to fetch programs");
+        }
+        const programs = await response.json();
+        setPrograms(programs);
+      } catch (error) {
+        console.error("Error fetching programs:", error);
+      }
+    };
+
+    fetchPrograms();
+  }, []);
+
+  console.log(staffData);
   // Filter function for staff
   const filteredStaff = staffData.filter((staff) => {
     // Filter by search term
     const matchesSearch =
       staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       staff.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      staff.role.toLowerCase().includes(searchTerm.toLowerCase())
+      staff.specialization.toLowerCase().includes(searchTerm.toLowerCase());
+
 
     // Filter by status
-    const matchesStatus = selectedStatus === "all" || staff.status.toLowerCase() === selectedStatus.toLowerCase()
+    const matchesStatus =
+      selectedStatus === "all" ||
+      staff.status.toLowerCase() === selectedStatus.toLowerCase();
 
     // Filter by role
-    const matchesRole = selectedRole === "all" || staff.role.toLowerCase() === selectedRole.toLowerCase()
+    // const matchesRole =
+    //   selectedRole === "all" ||
+    //   staff.role.toLowerCase() === selectedRole.toLowerCase();
+    const matchesProgram =
+    selectedProgram === "all" ||
+    staff.specialization?.toLowerCase() === String(selectedProgram).toLowerCase();
+  
 
-    return matchesSearch && matchesStatus && matchesRole
-  })
+    return matchesSearch && matchesStatus && matchesProgram
+  });
+
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Staff Management</h2>
-          <p className="text-muted-foreground">Manage teachers and administrative staff</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Educator Management
+          </h2>
+          <p className="text-muted-foreground">Manage teachers</p>
         </div>
         <div className="flex items-center gap-2">
           <LanguageSwitcher />
@@ -59,18 +143,22 @@ export default function StaffPage() {
           </Button>
           <Button onClick={() => router.push("/dashboard/admin/add-teacher")}>
             <GraduationCap className="mr-2 h-4 w-4" />
-            Add Teacher
+            Add Educator
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Staff Directory</CardTitle>
-          <CardDescription>View and manage all teachers and administrative staff</CardDescription>
+          <CardTitle>Educator Directory</CardTitle>
+          <CardDescription>View and manage all educators</CardDescription>
         </CardHeader>
         <CardContent>
-          <Tabs defaultValue="all" className="space-y-4" onValueChange={setSelectedStatus}>
+          <Tabs
+            defaultValue="all"
+            className="space-y-4"
+            onValueChange={setSelectedStatus}
+          >
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <TabsList>
                 <TabsTrigger value="all">All</TabsTrigger>
@@ -89,7 +177,7 @@ export default function StaffPage() {
                     onChange={(e) => setSearchTerm(e.target.value)}
                   />
                 </div>
-                <DropdownMenu>
+                {/* <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="icon">
                       <Filter className="h-4 w-4" />
@@ -123,6 +211,38 @@ export default function StaffPage() {
                       Program Coordinators
                     </DropdownMenuItem>
                   </DropdownMenuContent>
+                </DropdownMenu> */}
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon">
+                      <Filter className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-[200px]">
+                    <DropdownMenuLabel>Filter by Program</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      onClick={() => setSelectedProgram("all")}
+                      className={
+                        selectedProgram === "all" ? "bg-secondary/50" : ""
+                      }
+                    >
+                      All Programs
+                    </DropdownMenuItem>
+                    {programs.map((program) => (
+                      <DropdownMenuItem
+                        key={program.ProgramID}
+                        onClick={() => setSelectedProgram(program.ProgramName)}
+                        className={
+                          selectedProgram === program.ProgramName
+                            ? "bg-secondary/50"
+                            : ""
+                        }
+                      >
+                        {program.ProgramName}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
                 </DropdownMenu>
               </div>
             </div>
@@ -133,8 +253,8 @@ export default function StaffPage() {
                   <TableHeader>
                     <TableRow>
                       <TableHead>Name</TableHead>
-                      <TableHead>Role</TableHead>
-                      <TableHead>Specialization</TableHead>
+                      {/* <TableHead>Role</TableHead> */}
+                      <TableHead>Program</TableHead>
                       <TableHead>Status</TableHead>
                       <TableHead>Joined</TableHead>
                       <TableHead>Students</TableHead>
@@ -147,22 +267,30 @@ export default function StaffPage() {
                         <TableRow key={staff.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
+                              {/* <Avatar>
                                 <AvatarImage src={staff.avatar} />
-                                <AvatarFallback>{staff.initials}</AvatarFallback>
-                              </Avatar>
+                                <AvatarFallback>
+                                  {staff.initials}
+                                </AvatarFallback>
+                              </Avatar> */}
                               <div>
                                 <div className="font-medium">{staff.name}</div>
-                                <div className="text-sm text-muted-foreground">{staff.email}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {staff.email}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell>
+                          {/* <TableCell>
                             <Badge variant="outline">{staff.role}</Badge>
-                          </TableCell>
+                          </TableCell> */}
                           <TableCell>{staff.specialization}</TableCell>
                           <TableCell>
-                            <Badge variant={getStatusBadgeVariant(staff.status)}>{staff.status}</Badge>
+                            <Badge
+                              variant={getStatusBadgeVariant(staff.status)}
+                            >
+                              {staff.status}
+                            </Badge>
                           </TableCell>
                           <TableCell>{staff.joined}</TableCell>
                           <TableCell>{staff.students}</TableCell>
@@ -178,7 +306,9 @@ export default function StaffPage() {
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem asChild>
-                                  <Link href={`/dashboard/admin/staff/${staff.id}`}>
+                                  <Link
+                                    href={`/dashboard/admin/staff/${staff.id}`}
+                                  >
                                     <Eye className="mr-2 h-4 w-4" />
                                     View Profile
                                   </Link>
@@ -199,7 +329,10 @@ export default function StaffPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                        <TableCell
+                          colSpan={7}
+                          className="text-center py-6 text-muted-foreground"
+                        >
                           No staff found matching your filters.
                         </TableCell>
                       </TableRow>
@@ -209,8 +342,10 @@ export default function StaffPage() {
               </div>
               <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredStaff.length}</span> of{" "}
-                  <span className="font-medium">{staffData.length}</span> staff members
+                  Showing{" "}
+                  <span className="font-medium">{filteredStaff.length}</span> of{" "}
+                  <span className="font-medium">{staffData.length}</span>{" "}
+                  educators
                 </div>
                 <Button variant="outline" size="sm">
                   Previous
@@ -241,25 +376,31 @@ export default function StaffPage() {
                         <TableRow key={staff.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
+                              {/* <Avatar>
                                 <AvatarImage src={staff.avatar} />
-                                <AvatarFallback>{staff.initials}</AvatarFallback>
-                              </Avatar>
+                                <AvatarFallback>
+                                  {staff.initials}
+                                </AvatarFallback>
+                              </Avatar> */}
                               <div>
                                 <div className="font-medium">{staff.name}</div>
-                                <div className="text-sm text-muted-foreground">{staff.email}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {staff.email}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{staff.role}</Badge>
+                            <Badge variant="outline">{staff.specialization}</Badge>
                           </TableCell>
                           <TableCell>{staff.specialization}</TableCell>
                           <TableCell>{staff.joined}</TableCell>
                           <TableCell>{staff.students}</TableCell>
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/dashboard/admin/staff/${staff.id}`}>View Profile</Link>
+                              <Link href={`/dashboard/admin/staff/${staff.id}`}>
+                                View Profile
+                              </Link>
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -289,25 +430,31 @@ export default function StaffPage() {
                         <TableRow key={staff.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
+                              {/* <Avatar>
                                 <AvatarImage src={staff.avatar} />
-                                <AvatarFallback>{staff.initials}</AvatarFallback>
-                              </Avatar>
+                                <AvatarFallback>
+                                  {staff.initials}
+                                </AvatarFallback>
+                              </Avatar> */}
                               <div>
                                 <div className="font-medium">{staff.name}</div>
-                                <div className="text-sm text-muted-foreground">{staff.email}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {staff.email}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{staff.role}</Badge>
+                            <Badge variant="outline">{staff.specialization}</Badge>
                           </TableCell>
                           <TableCell>{staff.specialization}</TableCell>
-                          <TableCell>{staff.leavePeriod || "N/A"}</TableCell>
-                          <TableCell>{staff.returnDate || "N/A"}</TableCell>
+                          {/* <TableCell>{staff.leavePeriod || "N/A"}</TableCell>
+                          <TableCell>{staff.returnDate || "N/A"}</TableCell> */}
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/dashboard/admin/staff/${staff.id}`}>View Profile</Link>
+                              <Link href={`/dashboard/admin/staff/${staff.id}`}>
+                                View Profile
+                              </Link>
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -337,25 +484,31 @@ export default function StaffPage() {
                         <TableRow key={staff.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">
-                              <Avatar>
+                              {/* <Avatar>
                                 <AvatarImage src={staff.avatar} />
-                                <AvatarFallback>{staff.initials}</AvatarFallback>
-                              </Avatar>
+                                <AvatarFallback>
+                                  {staff.initials}
+                                </AvatarFallback>
+                              </Avatar> */}
                               <div>
                                 <div className="font-medium">{staff.name}</div>
-                                <div className="text-sm text-muted-foreground">{staff.email}</div>
+                                <div className="text-sm text-muted-foreground">
+                                  {staff.email}
+                                </div>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{staff.role}</Badge>
+                            <Badge variant="outline">{staff.specialization}</Badge>
                           </TableCell>
                           <TableCell>{staff.specialization}</TableCell>
-                          <TableCell>{staff.lastActive || "N/A"}</TableCell>
-                          <TableCell>{staff.inactiveReason || "N/A"}</TableCell>
+                          {/* <TableCell>{staff.lastActive || "N/A"}</TableCell>
+                          <TableCell>{staff.inactiveReason || "N/A"}</TableCell> */}
                           <TableCell className="text-right">
                             <Button variant="outline" size="sm" asChild>
-                              <Link href={`/dashboard/admin/staff/${staff.id}`}>View Profile</Link>
+                              <Link href={`/dashboard/admin/staff/${staff.id}`}>
+                                View Profile
+                              </Link>
                             </Button>
                           </TableCell>
                         </TableRow>
@@ -368,20 +521,20 @@ export default function StaffPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
 // Helper function for status badge variant
 function getStatusBadgeVariant(status: string) {
   switch (status) {
     case "Active":
-      return "success"
+      return "success";
     case "On Leave":
-      return "warning"
+      return "warning";
     case "Inactive":
-      return "destructive"
+      return "destructive";
     default:
-      return "outline"
+      return "outline";
   }
 }
 
@@ -475,5 +628,4 @@ const staffData = [
     avatar: "/placeholder.svg?height=40&width=40",
     initials: "SP",
   },
-]
-
+];

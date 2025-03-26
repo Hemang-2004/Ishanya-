@@ -5,10 +5,31 @@ import json
 
 educator_bp = Blueprint("educator", __name__)
 
+# @educator_bp.route("/", methods=["GET"])
+# def get_educators():
+#     educators = Educator.query.all()
+#     return jsonify([{"id": e.EducatorID, "name": e.Name} for e in educators])
 @educator_bp.route("/", methods=["GET"])
 def get_educators():
     educators = Educator.query.all()
-    return jsonify([{"id": e.EducatorID, "name": e.Name} for e in educators])
+    
+    educators_data = []
+    for e in educators:
+        students_count = (
+            len(e.students_primary) + len(e.students_secondary)
+        )  # Count students under the educator
+
+        educators_data.append({
+            "id": e.EducatorID,
+            "name": e.Name,
+            "email": e.Email,
+            "specialization": e.program.ProgramName if e.program else "N/A",
+            "status": e.Status,
+            "joined": e.DateOfJoining.strftime("%b %d, %Y") if e.DateOfJoining else "N/A",
+            "students": students_count,
+        })
+    # print(educators_data)
+    return jsonify(educators_data)
 
 @educator_bp.route("/<educator_id>", methods=["GET"])
 def get_educator(educator_id):

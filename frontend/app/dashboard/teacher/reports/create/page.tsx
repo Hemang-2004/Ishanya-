@@ -346,31 +346,8 @@ export default function CreateReportPage() {
                   <SelectContent>
                     <SelectItem value="1">Term 1</SelectItem>
                     <SelectItem value="2">Term 2</SelectItem>
-                    <SelectItem value="3">Term 3</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="educatorName">Name of Educator</Label>
-                <Input
-                  id="educatorName"
-                  name="educatorName"
-                  value={formData.educatorName}
-                  onChange={handleInputChange}
-                  placeholder="Enter educator name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="reviewPeriod">Period of Review</Label>
-                <Input
-                  id="reviewPeriod"
-                  name="reviewPeriod"
-                  value={formData.reviewPeriod}
-                  onChange={handleInputChange}
-                  placeholder="e.g., September to December 2024"
-                  required
-                />
               </div>
             </div>
           </CardContent>
