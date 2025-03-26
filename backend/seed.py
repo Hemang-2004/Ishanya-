@@ -3,6 +3,64 @@ from models import Program, Educator, Student, Admin, Feedback
 from datetime import date, timedelta
 import random
 
+feedback_list = []
+
+for _ in range(40):
+    feedback_list.append({
+        "Punctuality": random.choice(["Always on time", "Mostly on time", "Occasionally late", "Needs improvement"]),
+        "Preparedness": random.choice(["Well-prepared for sessions", "Comes prepared but needs reminders", "Sometimes forgets materials", "Needs help organizing"]),
+        "BehavioralIssues": random.choice(["None observed", "Occasionally distracted", "Needs redirection", "Difficulty staying focused"]),
+        "Assistance": random.choice(["Minimal guidance needed", "Requires occasional redirection", "Needs frequent assistance"]),
+        "ParentalSupport": random.choice(["Highly supportive home environment", "Moderate parental involvement", "Limited parental support"]),
+        "CommunicationSkills": {
+            "FollowingInstructions": round(random.uniform(3, 5), 1),
+            "PoliteWords": round(random.uniform(2.5, 5), 1),
+            "AskingQuestions": round(random.uniform(2.5, 5), 1),
+            "Conversation": round(random.uniform(2.5, 5), 1),
+            "Describing": round(random.uniform(3, 5), 1),
+            "Commenting": round(random.uniform(2.5, 5), 1),
+            "EmotionalCommunication": round(random.uniform(3, 5), 1),
+            "SentenceFormation": round(random.uniform(3.5, 5), 1),
+            "Notes": random.choice(["", "Needs improvement in conversation", "Working on sentence formation"])
+        },
+        "CognitionSkills": {
+            "Prediction": round(random.uniform(3.5, 5), 1),
+            "LogicalSequencing": round(random.uniform(3.5, 5), 1),
+            "ProblemSolving": round(random.uniform(3, 5), 1),
+            "CauseEffect": round(random.uniform(3.5, 5), 1),
+            "DecisionMaking": round(random.uniform(3.5, 5), 1),
+            "OddOneOut": round(random.uniform(3.5, 5), 1),
+            "Notes": ""
+        },
+        "AcademicSkills": {
+            "EnglishReading": random.choice(["Good", "Needs improvement", "Excellent", "Average"]),
+            "EnglishWriting": random.choice(["Good", "Needs improvement", "Excellent", "Average"]),
+            "EVS": random.choice(["Good", "Needs improvement", "Excellent", "Average"]),
+            "Math": random.choice(["Good", "Needs improvement", "Excellent", "Average"])
+        },
+        "FunctionalSkills": {
+            "CopyingDrawing": round(random.uniform(3, 5), 1),
+            "Pasting": round(random.uniform(3, 5), 1),
+            "Folding": round(random.uniform(3, 5), 1),
+            "Cutting": round(random.uniform(3, 5), 1),
+            "KitchenUtensils": round(random.uniform(3, 5), 1),
+            "Ingredients": round(random.uniform(3, 5), 1),
+            "Pouring": round(random.uniform(3, 5), 1),
+            "Scooping": round(random.uniform(3, 5), 1),
+            "PersonalHygiene": round(random.uniform(3, 5), 1),
+            "FoldingClothes": round(random.uniform(3, 5), 1),
+            "FillingWater": round(random.uniform(3, 5), 1),
+            "Packing": round(random.uniform(3, 5), 1),
+            "Wiping": round(random.uniform(3, 5), 1),
+            "GroupActivities": round(random.uniform(3, 5), 1),
+            "Notes": ""
+        },
+        "Extracurricular": random.choice(["Enjoys music and dance", "Enjoys storytelling", "Loves sports", "Engages in creative arts", ""]),
+        "Strengths": random.choice(["Good problem-solving skills", "Strong logical reasoning", "Creative thinker", "Good leadership skills", ""]),
+        "LearningEnvironment": random.choice(["Engaged in interactive learning", "Responds well to structured tasks", "Needs more hands-on learning", "Prefers independent work"])
+    })
+
+
 with app.app_context():
     # Reset the database (optional but good for dev)
     db.drop_all()
@@ -58,20 +116,26 @@ with app.app_context():
 
     FirstNames = [
         "Aarav", "Vihaan", "Ishaan", "Rohan", "Arjun", "Reyansh", "Advait", "Dhruv", "Kabir", "Neil",
-        "Anaya", "Myra", "Siya", "Ira", "Aadhya", "Kiara", "Tara", "Riya", "Saanvi", "Meera"
+        "Kunal", "Harsh", "Yash", "Ritik", "Pranav", "Ayaan", "Om", "Shaurya", "Manav", "Aryan",
+        "Anaya", "Myra", "Siya", "Ira", "Aadhya", "Kiara", "Tara", "Riya", "Saanvi", "Meera",
+        "Avni", "Pari", "Charvi", "Jiya", "Mira", "Nisha", "Pihu", "Trisha", "Zara", "Vanya"
     ]
 
     LastNames = [
         "Kumar", "Sharma", "Verma", "Singh", "Gupta", "Mishra", "Reddy", "Nair", "Bose", "Mehta",
-        "Iyer", "Chopra", "Menon", "Banerjee", "Joshi", "Patel", "Das", "Pillai", "Malhotra", "Desai"
+        "Iyer", "Chopra", "Menon", "Banerjee", "Joshi", "Patel", "Das", "Pillai", "Malhotra", "Desai",
+        "Bhat", "Ghosh", "Chatterjee", "Roy", "Dutta", "Saxena", "Sengupta", "Tiwari", "Bajaj", "Bhandari",
+        "Chowdhury", "Kulkarni", "Thakur", "Naidu", "Pandey", "Mahajan", "Jain", "Goel", "Bhattacharya", "Shukla"
     ]
 
     Genders = [
         "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male",
+        "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male",
+        "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female",
         "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female"
     ]
 
-    for i in range(20):
+    for i in range(40):
         program = random.choice(programs)
         primary_educator = random.choice(educators)
         secondary_educator = random.choice(educators)
@@ -114,7 +178,7 @@ with app.app_context():
             Comments=f"Good progress in {random.choice(feedback_metrics)} skills. Needs improvement in {random.choice(feedback_metrics)}.",
             TPS=random.randint(1, 5),
             Attendance=random.randint(30, 59),
-            FeedbackMetrics={"Punctuality": "Is on time and regular", "Preparedness": "Yes. Is prepared for sessions", "BehavioralIssues": "erhthituit", "Assistance": "Minimal verbal assistance required", "ParentalSupport": "The home environment is supportive", "CommunicationSkills": {"FollowingInstructions": 5, "PoliteWords": 3.5, "AskingQuestions": 3, "Conversation": 3, "Describing": 4, "Commenting": 3, "EmotionalCommunication": 3.5, "SentenceFormation": 4.5, "Notes": ""}, "CognitionSkills": {"Prediction": 4.5, "LogicalSequencing": 4.5, "ProblemSolving": 4, "CauseEffect": 4.5, "DecisionMaking": 4.5, "OddOneOut": 4.5, "Notes": ""}, "AcademicSkills": {"EnglishReading": "", "EnglishWriting": "", "EVS": "", "Math": ""}, "FunctionalSkills": {"CopyingDrawing": 4.5, "Pasting": 4.5, "Folding": 3.5, "Cutting": 3.5, "KitchenUtensils": 4.5, "Ingredients": 4.5, "Pouring": 4.5, "Scooping": 4.5, "PersonalHygiene": 3, "FoldingClothes": 4.5, "FillingWater": 4.5, "Packing": 4.5, "Wiping": 4.5, "GroupActivities": 4, "Notes": ""}, "Extracurricular": "", "Strengths": "", "LearningEnvironment": ""},
+            FeedbackMetrics=feedback_list[i],
             AIInsights=f"AI suggests focusing on {random.choice(feedback_metrics)} for better results."
         )
         feedback_entries.append(feedback)
@@ -128,7 +192,7 @@ with app.app_context():
                 Comments=f"Significant improvement in {random.choice(feedback_metrics)}. Can enhance {random.choice(feedback_metrics)} further.",
                 TPS=random.randint(1, 5),
                 Attendance=random.randint(30, 59),
-                FeedbackMetrics={"Punctuality": "Is on time and regular", "Preparedness": "Yes. Is prepared for sessions", "BehavioralIssues": "erhthituit", "Assistance": "Minimal verbal assistance required", "ParentalSupport": "The home environment is supportive", "CommunicationSkills": {"FollowingInstructions": 5, "PoliteWords": 3.5, "AskingQuestions": 3, "Conversation": 3, "Describing": 4, "Commenting": 3, "EmotionalCommunication": 3.5, "SentenceFormation": 4.5, "Notes": ""}, "CognitionSkills": {"Prediction": 4.5, "LogicalSequencing": 4.5, "ProblemSolving": 4, "CauseEffect": 4.5, "DecisionMaking": 4.5, "OddOneOut": 4.5, "Notes": ""}, "AcademicSkills": {"EnglishReading": "", "EnglishWriting": "", "EVS": "", "Math": ""}, "FunctionalSkills": {"CopyingDrawing": 4.5, "Pasting": 4.5, "Folding": 3.5, "Cutting": 3.5, "KitchenUtensils": 4.5, "Ingredients": 4.5, "Pouring": 4.5, "Scooping": 4.5, "PersonalHygiene": 3, "FoldingClothes": 4.5, "FillingWater": 4.5, "Packing": 4.5, "Wiping": 4.5, "GroupActivities": 4, "Notes": ""}, "Extracurricular": "", "Strengths": "", "LearningEnvironment": ""},
+                FeedbackMetrics=feedback_list[i],
                 AIInsights=f"AI suggests continued focus on {random.choice(feedback_metrics)}."
             )
             feedback_entries.append(feedback2)
