@@ -27,10 +27,8 @@ export default function ReportsPage() {
 
       <Tabs defaultValue="overview" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="overview">Overview</TabsTrigger>
-          <TabsTrigger value="stakeholders">Stakeholders</TabsTrigger>
+          <TabsTrigger value="stakeholders">Students</TabsTrigger>
           <TabsTrigger value="programs">Programs</TabsTrigger>
-          <TabsTrigger value="custom">Custom Reports</TabsTrigger>
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">

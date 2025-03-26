@@ -4,27 +4,24 @@ import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { BarChart3, Download, FileText, Filter, PieChart, Share2, TrendingUp, ArrowUpRight } from "lucide-react"
 import { LanguageSwitcher } from "@/components/language-switcher"
 import { useLanguage } from "@/components/language-provider"
 import {
-  ResponsiveContainer,
-  BarChart,
-  Bar,
+  Line,
   XAxis,
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend,
+  ResponsiveContainer,
+  BarChart,
+  Bar,
   PieChart as RePieChart,
   Pie,
   Cell,
-  LineChart,
-  Line,
-  AreaChart,
-  Area,
+  Legend,
 } from "recharts"
+import { ChartTooltip } from "@/components/ui/chart"
 
 // export default function ReportsPage() {
 //   const { t } = useLanguage()
@@ -42,16 +39,22 @@ export default function ReportsPage() {
   const [reportType, setReportType] = useState("overview")
   const [programData, setProgramData] = useState([]) // Store API data
   const [loading, setLoading] = useState(true)
-      
-  const programEffectivenessData = programData.map((program) => ({
-    name: program.ProgramName,
-    Active: program.Active, // Using "Active" for completion
-    Graduated: program.Graduated, // Using "Graduated" for employment
-    Discontinued: program.Discontinued, // Using "Discontinued" for satisfaction
-  }))
-  
+  const [dashboardData, setDashboardData] = useState<any>(null);
 
-  
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/admins/dashboard");
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("API fetch error:", error);
+    }
+  };
+      
   // Filter data based on selected filters
   const filteredData = {
     studentGrowth: studentGrowthData.filter(
@@ -101,7 +104,7 @@ export default function ReportsPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">{t("reports")}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("Reports")}</h2>
           <p className="text-muted-foreground">Generate insights and visualize your impact</p>
         </div>
         <div className="flex gap-2">
@@ -118,206 +121,25 @@ export default function ReportsPage() {
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-        <Tabs defaultValue="overview" className="w-full" onValueChange={setReportType}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
+        <Tabs defaultValue="students" className="w-full" onValueChange={setReportType}>
+          <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="students">Students</TabsTrigger>
             <TabsTrigger value="programs">Programs</TabsTrigger>
-            <TabsTrigger value="custom">Custom Reports</TabsTrigger>
           </TabsList>
-
-          <div className="flex gap-2 w-full md:w-auto mt-4">
-            <Select defaultValue={timeRange} onValueChange={setTimeRange}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select time range" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="month">Last Month</SelectItem>
-                <SelectItem value="quarter">Last Quarter</SelectItem>
-                <SelectItem value="year">Last Year</SelectItem>
-                <SelectItem value="all">All Time</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select defaultValue={programFilter} onValueChange={setProgramFilter}>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Filter by program" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Programs</SelectItem>
-                <SelectItem value="digital">Digital Literacy</SelectItem>
-                <SelectItem value="vocational">Vocational Training</SelectItem>
-                <SelectItem value="community">Community Leadership</SelectItem>
-                <SelectItem value="health">Health & Wellness</SelectItem>
-                <SelectItem value="financial">Financial Literacy</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <TabsContent value="overview" className="space-y-4 mt-4">
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Total Impact</CardTitle>
-                  <TrendingUp className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">2,856</div>
-                  <p className="text-xs text-muted-foreground">Lives impacted across all programs</p>
-                  <div className="mt-2 flex items-center text-xs text-green-500">
-                    <ArrowUpRight className="mr-1 h-3 w-3" />
-                    <span>12% increase</span>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Program Success Rate</CardTitle>
-                  <BarChart3 className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">78%</div>
-                  <p className="text-xs text-muted-foreground">Average completion rate</p>
-                  <div className="mt-2 flex items-center text-xs text-green-500">
-                    <ArrowUpRight className="mr-1 h-3 w-3" />
-                    <span>5% increase</span>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                  <CardTitle className="text-sm font-medium">Reports Generated</CardTitle>
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </CardHeader>
-                <CardContent>
-                  <div className="text-2xl font-bold">124</div>
-                  <p className="text-xs text-muted-foreground">This year</p>
-                  <div className="mt-2 flex items-center text-xs text-green-500">
-                    <ArrowUpRight className="mr-1 h-3 w-3" />
-                    <span>18% increase</span>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Impact by Program</CardTitle>
-                  <CardDescription>Distribution of impact across different programs</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RePieChart>
-                        <Pie
-                          data={filteredData.programDistribution}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {filteredData.programDistribution.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value, name) => [`${value} students`, name]}
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend layout="vertical" verticalAlign="middle" align="right" />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card className="col-span-1">
-                <CardHeader>
-                  <CardTitle>Monthly Progress</CardTitle>
-                  <CardDescription>Program completion trends over time</CardDescription>
-                </CardHeader>
-                <CardContent className="pl-2">
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={filteredData.studentGrowth}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend />
-                        <Line type="monotone" dataKey="completion" stroke="#8884d8" activeDot={{ r: 8 }} />
-                        <Line type="monotone" dataKey="target" stroke="#82ca9d" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recent Reports</CardTitle>
-                <CardDescription>Access your recently generated reports</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {recentReports.map((report) => (
-                    <div
-                      key={report.id}
-                      className="flex items-center justify-between border-b pb-4 last:border-0 last:pb-0"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="rounded-md bg-muted p-2">
-                          <FileText className="h-4 w-4" />
-                        </div>
-                        <div>
-                          <p className="font-medium">{report.title}</p>
-                          <p className="text-sm text-muted-foreground">Generated on {report.date}</p>
-                        </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="ghost" size="sm">
-                          <Share2 className="mr-2 h-4 w-4" />
-                          Share
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           <TabsContent value="students" className="space-y-4 mt-4">
-            <Card>
+            <Card className="md:col-span-3">
               <CardHeader>
-                <CardTitle>Student Growth Trends</CardTitle>
-                <CardDescription>Enrollment and retention metrics over time</CardDescription>
+                <CardTitle>Student Performance</CardTitle>
+                <CardDescription>Improvement in TPS scores</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="h-[400px]">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={studentGrowthData}>
+                <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  {dashboardData?.student_performance && dashboardData.student_performance.length > 0 ? (
+                    <BarChart data={dashboardData.student_performance} layout="vertical">
                       <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
+                      <XAxis type="number" />
+                      <YAxis dataKey="name" type="category" width={120} />
                       <Tooltip
                         contentStyle={{
                           backgroundColor: "rgba(255, 255, 255, 0.9)",
@@ -326,73 +148,16 @@ export default function ReportsPage() {
                         }}
                       />
                       <Legend />
-                      <Area type="monotone" dataKey="students" stackId="1" stroke="#8884d8" fill="#8884d8" />
-                      <Area type="monotone" dataKey="graduates" stackId="2" stroke="#82ca9d" fill="#82ca9d" />
-                      <Area type="monotone" dataKey="dropouts" stackId="3" stroke="#ffc658" fill="#ffc658" />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                      <Bar dataKey="term1" name="Term 1" fill="#8884d8" />
+                      <Bar dataKey="term2" name="Term 2" fill="#82ca9d" />
+                    </BarChart>
+                  ) : (
+                    <p>Loading chart data...</p>
+                  )}
+                </ResponsiveContainer>
                 </div>
               </CardContent>
             </Card>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Student Demographics</CardTitle>
-                  <CardDescription>Distribution by age, gender, and location</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={demographicsData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend />
-                        <Bar dataKey="male" fill="#8884d8" />
-                        <Bar dataKey="female" fill="#82ca9d" />
-                        <Bar dataKey="other" fill="#ffc658" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Student Performance</CardTitle>
-                  <CardDescription>Average scores across different programs</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart data={performanceData} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" />
-                        <YAxis dataKey="name" type="category" />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend />
-                        <Bar dataKey="score" fill="#8884d8" />
-                        <Bar dataKey="average" fill="#82ca9d" />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
           </TabsContent>
 
           <TabsContent value="programs" className="space-y-4 mt-4">
@@ -426,74 +191,73 @@ export default function ReportsPage() {
             </Card>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Resource Allocation</CardTitle>
-                  <CardDescription>How resources are distributed across programs</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <RePieChart>
-                        <Pie
-                          data={resourceAllocationData}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          outerRadius={80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                        >
-                          {resourceAllocationData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                          ))}
-                        </Pie>
-                        <Tooltip
-                          formatter={(value, name) => [`₹${value.toLocaleString()}`, name]}
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend layout="vertical" verticalAlign="middle" align="right" />
-                      </RePieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div>
+        <CardTitle>Program Distribution</CardTitle>
+        <CardDescription>Students enrolled by program</CardDescription>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="h-[300px] w-full">
+        <ResponsiveContainer width="100%" height="100%">
+          {dashboardData?.students_enrolled_programwise?.length > 0 ? (
+            <RePieChart>
+              <Pie
+                data={dashboardData.students_enrolled_programwise}
+                cx="50%"
+                cy="50%"
+                labelLine={false}
+                outerRadius={80}
+                fill="#8884d8"
+                dataKey="value"
+                label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+              >
+                {dashboardData.students_enrolled_programwise.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                ))}
+              </Pie>
+              <Tooltip content={<ChartTooltip />} />
+              <Legend />
+            </RePieChart>
+          ) : (
+            <p>Loading chart data...</p>
+          )}
+        </ResponsiveContainer>
+      </div>
+    </CardContent>
+  </Card>
 
-              <Card>
-                <CardHeader>
-                  <CardTitle>Program Growth</CardTitle>
-                  <CardDescription>Enrollment trends by program</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="h-[300px]">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={programGrowthData}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip
-                          contentStyle={{
-                            backgroundColor: "rgba(255, 255, 255, 0.9)",
-                            borderRadius: "6px",
-                            border: "1px solid #e2e8f0",
-                          }}
-                        />
-                        <Legend />
-                        <Line type="monotone" dataKey="digital" stroke="#8884d8" />
-                        <Line type="monotone" dataKey="vocational" stroke="#82ca9d" />
-                        <Line type="monotone" dataKey="community" stroke="#ffc658" />
-                        <Line type="monotone" dataKey="health" stroke="#ff8042" />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <div>
+        <CardTitle>Impact by Program</CardTitle>
+        <CardDescription>Students graduated programwise</CardDescription>
+      </div>
+    </CardHeader>
+    <CardContent>
+      <div className="h-[300px] w-full">
+        {dashboardData?.students_graduated_programwise?.length > 0 ? (
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart
+              data={dashboardData.students_graduated_programwise}
+              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="name" />
+              <YAxis domain={[0, 100]} />
+              <Tooltip content={<ChartTooltip />} />
+              <Bar dataKey="value" fill="hsl(var(--primary))" name="Students" />
+            </BarChart>
+          </ResponsiveContainer>
+        ) : (
+          <p>Loading chart data...</p>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+</div>
+
           </TabsContent>
 
           <TabsContent value="custom" className="space-y-4 mt-4">

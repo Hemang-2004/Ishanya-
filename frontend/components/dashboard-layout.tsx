@@ -189,7 +189,7 @@ export function DashboardLayout({
             icon: Users,
           },
           {
-            name: t("Staff"),
+            name: t("Educators"),
             href: "/dashboard/admin/staff",
             icon: GraduationCap,
           },
@@ -197,11 +197,6 @@ export function DashboardLayout({
             name: t("Programs"),
             href: "/dashboard/admin/programs",
             icon: Layers,
-          },
-          {
-            name: t("Analytics"),
-            href: "/dashboard/admin/analytics",
-            icon: PieChart,
           },
           {
             name: t("Reports"),

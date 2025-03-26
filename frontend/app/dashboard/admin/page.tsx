@@ -160,32 +160,6 @@ export default function AdminDashboardPage() {
             <TabsTrigger value="staff">Staff</TabsTrigger>
           </TabsList>
         </Tabs>
-
-        <div className="flex gap-2 w-full md:w-auto">
-          <Select defaultValue={timeRange} onValueChange={setTimeRange}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Select time range" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="week">Last Week</SelectItem>
-              <SelectItem value="month">Last Month</SelectItem>
-              <SelectItem value="quarter">Last Quarter</SelectItem>
-              <SelectItem value="year">Last Year</SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select defaultValue={programFilter} onValueChange={setProgramFilter}>
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Filter by program" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Programs</SelectItem>
-              <SelectItem value="digital-literacy">Digital Literacy</SelectItem>
-              <SelectItem value="vocational-training">Vocational Training</SelectItem>
-              <SelectItem value="community-leadership">Community Leadership</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">

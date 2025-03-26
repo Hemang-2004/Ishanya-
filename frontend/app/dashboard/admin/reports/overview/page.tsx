@@ -115,13 +115,6 @@ export default function AdminReportsOverviewPage() {
 
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <Tabs defaultValue="overview" className="w-full" onValueChange={setReportType}>
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="skills">Skill Analysis</TabsTrigger>
-            <TabsTrigger value="progress">Progress Tracking</TabsTrigger>
-            <TabsTrigger value="reports">Recent Reports</TabsTrigger>
-          </TabsList>
-
           <div className="flex gap-2 w-full md:w-auto mt-4">
             <Select defaultValue={timeRange} onValueChange={setTimeRange}>
               <SelectTrigger className="w-[180px]">
