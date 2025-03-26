@@ -26,7 +26,7 @@ const mockReportData = {
     'Student had been dysregulated since the start of the term. Student in the beginning of the term had a habit of peeling the wall and eating it. Verbal reminders like "no wall", "no eating wall" or "spit" were helpful but did not stop the behavior. It was noticed that it was only done to the walls of classroom 1 so we locked the classroom when not in use and confined Student\'s activity and academic hours to classroom 2 and activity hall. The behavior completely reduced over the following weeks and currently it is absent.\nCurrently Student\'s sitting tolerance has improved significantly since last term. First-then strategy which was used before is continued and it still seems to be very effective. Example - "If let\'s complete the worksheet then break time/then trampoline." He is able to be more flexible in his schedule and is able to sit multiple times during the hours to work on academics which wasn\'t present before.\nStudent\'s need for Ipad to eat lunch has been faded off by telling him that "it is out of charge" or "it\'s not working". He now eats independently without watching any media.\nStudent had instances of pooping in the classroom. We noticed the episodes happened after eating lunch. We would verbally prompt him to go to the washroom when we noticed that he was experiencing discomfort (crossing his leg and touching his privates). We realized that the washroom being dark or the toilet seat being misaligned or his inability to clean himself may be the issue. His parents are assisting him to go to the washroom after every lunch break and helping him clean. He is currently able to verbalize his washroom needs, for example "i want washroom" or "washroom".\nStudent\'s AVAZ session has been on pause after he wasn\'t cooperative during his AVAZ classes on Thursday and stopped engaging in school as well. This may have been because Student used to come around 11 am to school after AVAZ classes and would be tired and dysregulated. He used to say "I am so tired" and lay down to sleep. If he was very overwhelmed he would try to bite himself or others. After it was discontinued Student seemed to be more at ease and was able to focus more on academic and non academic activities.',
   assistance: "Minimal verbal assistance required",
   parentalSupport: "The home environment is supportive",
-
+  tps: "4",
   // Communication skills
   followingInstructions: 5,
   politeWords: 3.5,
@@ -198,6 +198,12 @@ export default function ViewReportPage() {
                   <div className="font-medium">Attendance</div>
                   <div>
                     {report.attendance} out of {report.totalWorkingDays} working days
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <div className="font-medium">TPS</div>
+                  <div>
+                    {report.tps} 
                   </div>
                 </div>
                 <div className="space-y-1">

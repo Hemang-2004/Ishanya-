@@ -3,7 +3,7 @@ from models import db, Educator, Student, Admin
 from flask_jwt_extended import create_access_token
 from werkzeug.utils import secure_filename
 import os
-from ocr import parse_aadhar, parse_cv
+from ocr import parse_aadhar, parse_cv, parse_medical_report
 from datetime import datetime, timezone
 
 
@@ -179,18 +179,15 @@ def register_student():
 
 
 UPLOAD_FOLDER = "uploads/"
-ALLOWED_EXTENSIONS_CV = {"pdf", "jpg", "jpeg", "png"}
-ALLOWED_EXTENSIONS_AADHAR = {"jpg", "jpeg", "png"}
+ALLOWED_EXTENSIONS = {"pdf", "jpg", "jpeg", "png"}
 
 
 if not os.path.exists(UPLOAD_FOLDER):
     os.makedirs(UPLOAD_FOLDER)
 
-def allowed_file_CV(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_CV
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-def allowed_file_aadhar(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS_AADHAR
 
 @auth_bp.route("/parse_aadhar", methods=["POST"])
 def parse_aadhar_api():
@@ -202,7 +199,7 @@ def parse_aadhar_api():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    if file and allowed_file_aadhar(file.filename):
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
@@ -227,7 +224,7 @@ def parse_resume_api():
     if file.filename == "":
         return jsonify({"error": "No selected file"}), 400
 
-    if file and allowed_file_CV(file.filename):
+    if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
         file_path = os.path.join(UPLOAD_FOLDER, filename)
         file.save(file_path)
@@ -240,3 +237,29 @@ def parse_resume_api():
             return jsonify({"error": str(e)}), 500
 
     return jsonify({"error": "Invalid file type"}), 400
+
+
+
+@auth_bp.route("/parse_medical_report", methods=["POST"])
+def parse_medical_report_api():
+    if "file" not in request.files:
+        return jsonify({"error": "No file part"}), 400
+
+    file = request.files["file"]
+    if file.filename == "":
+        return jsonify({"error": "No selected file"}), 400
+
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file_path = os.path.join(UPLOAD_FOLDER, filename)
+        file.save(file_path)
+
+        try:
+            parsed_data = parse_medical_report(file_path)
+            parsed_data["filename"] = filename
+            return jsonify(parsed_data), 200
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+    return jsonify({"error": "Invalid file type"}), 400
+

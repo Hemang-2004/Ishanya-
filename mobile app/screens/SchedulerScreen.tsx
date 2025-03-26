@@ -224,20 +224,22 @@ export default function SchedulerScreen() {
       <Text style={[styles.dateText, (item.isToday || (item.date === selectedDate && item.month === selectedMonth)) && styles.selectedDayText]}>
         {item.date}
       </Text>
+      
     </TouchableOpacity>
   )
 
   const renderEventItem = ({ item }: { item: Event }) => (
-    <View style={[styles.eventItem, { borderLeftColor: item.color }]}>
+    <TouchableOpacity 
+      style={[styles.eventItem, { borderLeftColor: item.color }]}
+      onPress={() => handleEventExpand(item.id)}
+    >
       <View style={styles.eventHeader}>
         <Text style={styles.eventTitle}>{item.title}</Text>
-        <TouchableOpacity onPress={() => handleEventExpand(item.id)}>
-          <MaterialIcons 
-            name={expandedEventId === item.id ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
-            size={24} 
-            color="#666" 
-          />
-        </TouchableOpacity>
+        <MaterialIcons 
+          name={expandedEventId === item.id ? "keyboard-arrow-up" : "keyboard-arrow-down"} 
+          size={24} 
+          color="#666" 
+        />
       </View>
       <View style={styles.eventDetails}>
         <View style={styles.eventDetail}>
@@ -278,97 +280,99 @@ export default function SchedulerScreen() {
           </View>
         </View>
       )}
-    </View>
+    </TouchableOpacity>
   )
 
   return (
     <ImageBackground source={require("../assets/images/1.jpg")} style={styles.background} resizeMode="cover">
-      <SafeAreaView style={styles.container}>
+      <View style={styles.container}>
         <View style={styles.header}>
           <Text style={styles.headerTitle}>
             {CURRENT_DATE.toLocaleString("default", { month: "long", day: "numeric", year: "numeric" })}
           </Text>
           <View style={styles.headerIcons}>
             <TouchableOpacity style={styles.iconButton} onPress={handleTodayPress}>
-              <MaterialIcons name="today" size={24} color="#408c4c" />
+              <MaterialIcons name="today" size={28} color="#408c4c" />
             </TouchableOpacity>
           </View>
         </View>
 
-        <Modal
-          visible={showDropdown}
-          transparent={true}
-          animationType="fade"
-          onRequestClose={() => setShowDropdown(false)}
-        >
-          <TouchableOpacity 
-            style={styles.modalOverlay} 
-            activeOpacity={1} 
-            onPress={() => setShowDropdown(false)}
+        <SafeAreaView style={{ flex: 1 }}>
+          <Modal
+            visible={showDropdown}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setShowDropdown(false)}
           >
-            <View style={styles.dropdownCalendar} {...panResponder.panHandlers}>
-              <View style={styles.dropdownHeader}>
-                <TouchableOpacity onPress={() => {
-                  if (currentMonth === 0) {
-                    setCurrentMonth(11)
-                    setCurrentYear(currentYear - 1)
-                  } else {
-                    setCurrentMonth(currentMonth - 1)
-                  }
-                }}>
-                  <MaterialIcons name="chevron-left" size={24} color="#408c4c" />
-                </TouchableOpacity>
-                <Text style={styles.dropdownTitle}>
-                  {new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })} {currentYear}
-                </Text>
-                <TouchableOpacity onPress={() => {
-                  if (currentMonth === 11) {
-                    setCurrentMonth(0)
-                    setCurrentYear(currentYear + 1)
-                  } else {
-                    setCurrentMonth(currentMonth + 1)
-                  }
-                }}>
-                  <MaterialIcons name="chevron-right" size={24} color="#408c4c" />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.dropdownDays}>
-                {DAYS.map(day => (
-                  <Text key={day} style={styles.dropdownDayHeader}>{day}</Text>
-                ))}
-              </View>
-              <ScrollView style={styles.dropdownScrollView} showsVerticalScrollIndicator={false}>
-                <View style={styles.dropdownDates}>
-                  {renderCalendarDays()}
+            <TouchableOpacity 
+              style={styles.modalOverlay} 
+              activeOpacity={1} 
+              onPress={() => setShowDropdown(false)}
+            >
+              <View style={styles.dropdownCalendar} {...panResponder.panHandlers}>
+                <View style={styles.dropdownHeader}>
+                  <TouchableOpacity onPress={() => {
+                    if (currentMonth === 0) {
+                      setCurrentMonth(11)
+                      setCurrentYear(currentYear - 1)
+                    } else {
+                      setCurrentMonth(currentMonth - 1)
+                    }
+                  }}>
+                    <MaterialIcons name="chevron-left" size={24} color="#408c4c" />
+                  </TouchableOpacity>
+                  <Text style={styles.dropdownTitle}>
+                    {new Date(currentYear, currentMonth).toLocaleString("default", { month: "long" })} {currentYear}
+                  </Text>
+                  <TouchableOpacity onPress={() => {
+                    if (currentMonth === 11) {
+                      setCurrentMonth(0)
+                      setCurrentYear(currentYear + 1)
+                    } else {
+                      setCurrentMonth(currentMonth + 1)
+                    }
+                  }}>
+                    <MaterialIcons name="chevron-right" size={24} color="#408c4c" />
+                  </TouchableOpacity>
                 </View>
-              </ScrollView>
-            </View>
-          </TouchableOpacity>
-        </Modal>
+                <View style={styles.dropdownDays}>
+                  {DAYS.map(day => (
+                    <Text key={day} style={styles.dropdownDayHeader}>{day}</Text>
+                  ))}
+                </View>
+                <ScrollView style={styles.dropdownScrollView} showsVerticalScrollIndicator={false}>
+                  <View style={styles.dropdownDates}>
+                    {renderCalendarDays()}
+                  </View>
+                </ScrollView>
+              </View>
+            </TouchableOpacity>
+          </Modal>
 
-        <View style={styles.calendarContainer}>
-          <FlatList
-            data={weekDates}
-            renderItem={renderDateItem}
-            keyExtractor={(item) => item.id}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dateList}
-          />
-        </View>
+          <View style={styles.calendarContainer}>
+            <FlatList
+              data={weekDates}
+              renderItem={renderDateItem}
+              keyExtractor={(item) => item.id}
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.dateList}
+            />
+          </View>
 
-        <View style={styles.eventsContainer}>
-          <Text style={styles.eventsTitle}>
-            Schedule for {new Date(selectedYear, selectedMonth).toLocaleString("default", { month: "long" })} {selectedDate}
-          </Text>
-          <FlatList
-            data={EVENTS}
-            renderItem={renderEventItem}
-            keyExtractor={(item) => item.id}
-            contentContainerStyle={styles.eventsList}
-          />
-        </View>
-      </SafeAreaView>
+          <View style={styles.eventsContainer}>
+            <Text style={styles.eventsTitle}>
+              Schedule for {new Date(selectedYear, selectedMonth).toLocaleString("default", { month: "long" })} {selectedDate}
+            </Text>
+            <FlatList
+              data={EVENTS}
+              renderItem={renderEventItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.eventsList}
+            />
+          </View>
+        </SafeAreaView>
+      </View>
     </ImageBackground>
   )
 }
@@ -381,27 +385,36 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
+    paddingTop: 0,
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 15,
+    padding: 20,
+    paddingTop: 45,
     backgroundColor: "rgba(255, 216, 112, 0.9)",
     borderBottomWidth: 1,
     borderBottomColor: "#D2B48C",
+    marginTop: -50,
+    paddingBottom: 15,
+    minHeight: 120,
   },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: "bold",
     color: "#333",
     fontFamily: "JosefinSans-Regular",
+    marginTop: 20,
   },
   headerIcons: {
     flexDirection: "row",
+    alignItems: "center",
+    marginTop: 20,
   },
   iconButton: {
     marginLeft: 15,
+    padding: 5,
   },
   calendarContainer: {
     backgroundColor: "#FFF8DC",

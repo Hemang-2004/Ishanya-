@@ -4,7 +4,17 @@ import { useState } from "react"
 // import { Alert } from "react-native";
 // import * as DocumentPicker from "expo-document-picker";
 import { useNavigation } from "@react-navigation/native"
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, ImageBackground, Alert } from "react-native"
+import {
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  ImageBackground,
+  Alert,
+  ActivityIndicator,
+} from "react-native"
 import DateTimePicker from "@react-native-community/datetimepicker"
 import { Picker } from "@react-native-picker/picker"
 import * as DocumentPicker from "expo-document-picker"
@@ -50,6 +60,8 @@ export default function RegistrationForm() {
   const [showAppointmentDatePicker, setShowAppointmentDatePicker] = useState(false)
   const [showTimePicker, setShowTimePicker] = useState(false)
   const [parsedDocumentData, setParsedDocumentData] = useState(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [field, setField] = useState("")
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => ({ ...prev, [field]: value }))
@@ -62,76 +74,143 @@ export default function RegistrationForm() {
   // Document parser function
   const parseDocument = async (uri, type) => {
     try {
-      // This is a placeholder for actual document parsing logic
-      // In a real app, you would use OCR libraries or API services
+      setIsLoading(true)
       console.log(`Parsing document: ${uri}, type: ${type}`)
 
-      // Simulate parsing with a delay
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Example of extracted data (in a real app, this would come from OCR)
-      let extractedData = {}
-
+      // For Aadhar card parsing, use the API
       if (type === "aadhar") {
-        extractedData = {
-          name: "John Doe",
-          aadharNumber: "1234 5678 9012",
-          dob: "01/01/1990",
-          address: "123 Main St, City, State, PIN",
+        // Create a FormData object to send the file
+        const formData = new FormData()
+
+        // Get the file name from URI
+        const fileName = uri.split("/").pop() || "aadhar.jpg"
+
+        // Determine file type (mime type)
+        const fileType = fileName.endsWith(".pdf")
+          ? "application/pdf"
+          : fileName.endsWith(".png")
+            ? "image/png"
+            : fileName.endsWith(".jpg") || fileName.endsWith(".jpeg")
+              ? "image/jpeg"
+              : "application/octet-stream"
+
+        // Append the file to FormData
+        formData.append("file", {
+          uri: uri,
+          name: fileName,
+          type: fileType,
+        })
+
+        // Send the request to the API
+        const response = await fetch("http://192.168.109.54:5000/auth/parse_aadhar", {
+          method: "POST",
+          body: formData,
+          headers: {
+            "Content-Type": "multipart/form-data",
+            Accept: "application/json",
+          },
+        })
+
+        // Check if the request was successful
+        if (!response.ok) {
+          throw new Error(`Error parsing Aadhar: ${response.statusText}`)
         }
 
-        // Auto-fill form fields with extracted data
-        setFormData((prev) => ({
-          ...prev,
-          firstName: extractedData.name.split(" ")[0],
-          lastName: extractedData.name.split(" ")[1] || "",
-          address: extractedData.address,
-          // Convert string date to Date object
-          dob: new Date(extractedData.dob),
-        }))
-      } else if (type === "udid") {
-        extractedData = {
-          disabilityType: "Visual Impairment",
-          percentage: "40%",
-          udidNumber: "UD12345678",
-        }
+        // Parse the response
+        const extractedData = await response.json()
+        console.log("Parsed Aadhar data:", extractedData)
 
-        // Auto-fill form fields with extracted data
+        // Update the form with extracted data
         setFormData((prev) => ({
           ...prev,
-          primaryDiagnosis: extractedData.disabilityType,
+          firstName: extractedData.first_name || prev.firstName,
+          lastName: extractedData.last_name || prev.lastName,
+          address: extractedData.address || prev.address,
+          // Convert string date to Date object if available
+          dob: extractedData.date_of_birth ? new Date(extractedData.date_of_birth) : prev.dob,
+          gender:
+            extractedData.gender === "Male"
+              ? "M"
+              : extractedData.gender === "Female"
+                ? "F"
+                : extractedData.gender === "Other"
+                  ? "O"
+                  : prev.gender,
         }))
-      } else if (type === "medical") {
-        extractedData = {
-          diagnosis: "Autism Spectrum Disorder",
-          doctorName: "Dr. Jane Smith",
-          hospitalName: "City Medical Center",
-          date: "15/03/2023",
-        }
 
-        // Auto-fill form fields with extracted data
-        setFormData((prev) => ({
-          ...prev,
-          primaryDiagnosis: extractedData.diagnosis,
-        }))
+        setParsedDocumentData(extractedData)
+        Alert.alert("Aadhar Parsed", "Information has been extracted and filled in the form.")
+
+        return extractedData
+      }
+      // Placeholder for UDID document parsing (to be implemented)
+      else if (type === "udid") {
+        // This is just a placeholder for future implementation
+        console.log("UDID document parsing will be implemented in the future")
+
+        // Simulate parsing with a delay
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        Alert.alert("UDID Document", "UDID document uploaded successfully. Parsing will be implemented soon.")
+
+        return null
+      }
+      // Placeholder for medical certificate parsing (to be implemented)
+      else if (type === "medical") {
+        // This is just a placeholder for future implementation
+        console.log("Medical certificate parsing will be implemented in the future")
+
+        // Simulate parsing with a delay
+        await new Promise((resolve) => setTimeout(resolve, 1000))
+
+        Alert.alert(
+          "Medical Certificate",
+          "Medical certificate uploaded successfully. Parsing will be implemented soon.",
+        )
+
+        return null
       }
 
-      setParsedDocumentData(extractedData)
-      Alert.alert("Document Parsed", "Information has been extracted and filled in the form.")
-
-      return extractedData
+      return null
     } catch (error) {
       console.error("Error parsing document:", error)
       Alert.alert("Error", "Failed to parse document. Please try again or fill the form manually.")
       return null
+    } finally {
+      setIsLoading(false)
     }
   }
 
   const pickDocument = async (field) => {
     try {
-      // Allow both images and PDFs
+      let documentType = ""
+      let fileTypes = []
+
+      // Set document type and allowed file types based on field
+      switch (field) {
+        case "aadharCard":
+          documentType = "Aadhar Card"
+          fileTypes = ["image/*"] // Only images for Aadhar
+          break
+        case "udidDocument":
+          documentType = "UDID Document"
+          fileTypes = ["application/pdf"] // Only PDF for UDID
+          break
+        case "medicalCertificate":
+          documentType = "Medical Certificate"
+          fileTypes = ["application/pdf"] // Only PDF for Medical Certificate
+          break
+        case "photo":
+          documentType = "Photo"
+          fileTypes = ["image/*"] // Only images for Photo
+          break
+        default:
+          fileTypes = ["image/*", "application/pdf"]
+      }
+
+      // Allow only specified file types
       const result = await DocumentPicker.getDocumentAsync({
-        type: ["image/*", "application/pdf"],
+        type: fileTypes,
         copyToCacheDirectory: true,
       })
 
@@ -141,21 +220,33 @@ export default function RegistrationForm() {
 
         setFormData((prev) => ({ ...prev, [field]: uri }))
 
-        // If it's an image or PDF, try to parse it
-        if (fileType.startsWith("image/") || fileType === "application/pdf") {
-          // Determine document type based on field
-          const docType =
-            field === "aadharCard"
-              ? "aadhar"
-              : field === "udidDocument"
-                ? "udid"
-                : field === "medicalCertificate"
-                  ? "medical"
-                  : "other"
+        // Check if the file type is correct
+        const isCorrectType = fileTypes.some((type) => {
+          if (type === "image/*") return fileType.startsWith("image/")
+          return type === fileType
+        })
 
-          // Parse the document
-          await parseDocument(uri, docType)
+        if (!isCorrectType) {
+          Alert.alert(
+            "Invalid File Type",
+            `Please upload a ${field === "photo" || field === "aadharCard" ? "valid image file" : "PDF file"} for ${documentType}`,
+          )
+          return
         }
+
+        // Determine document type based on field for parsing
+        const docType =
+          field === "aadharCard"
+            ? "aadhar"
+            : field === "udidDocument"
+              ? "udid"
+              : field === "medicalCertificate"
+                ? "medical"
+                : "other"
+
+        // Parse the document
+        setField(field)
+        await parseDocument(uri, docType)
       }
     } catch (error) {
       console.error("Error picking document:", error)
@@ -193,20 +284,21 @@ export default function RegistrationForm() {
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-  const navigation = useNavigation();
+  const navigation = useNavigation()
+
   const handleSubmit = async () => {
     if (validateForm()) {
       try {
         // Create FormData object for form-data submission (not multipart/form-data)
         const formDataToSend = new FormData()
-  
+
         // Add required fields with EXACT field names expected by the backend
         formDataToSend.append("FirstName", formData.firstName)
         formDataToSend.append("LastName", formData.lastName)
         formDataToSend.append("Gender", formData.gender)
         formDataToSend.append("EmailID", formData.email)
         formDataToSend.append("Password", formData.password)
-  
+
         // Add optional fields if they exist
         if (formData.dob) formDataToSend.append("DateOfBirth", formatDate(formData.dob))
         if (formData.contact) formDataToSend.append("ContactNumber", formData.contact)
@@ -222,40 +314,40 @@ export default function RegistrationForm() {
         if (formData.communicationStyle)
           formDataToSend.append("PreferredCommunicationStyle", formData.communicationStyle)
         if (formData.parentIncome) formDataToSend.append("ParentAnnualIncome", formData.parentIncome)
-  
+
         // Add appointment details
         if (formData.appointmentDate) formDataToSend.append("AppointmentDate", formatDate(formData.appointmentDate))
         if (formData.appointmentTime)
           formDataToSend.append("AppointmentTime", formatTime(formData.appointmentTime, true))
-  
+
         // Add file uploads if they exist
         if (formData.udidDocument) {
           const fileName = formData.udidDocument.split("/").pop() || "udid_document"
           formDataToSend.append("UDID", {
             uri: formData.udidDocument,
-            type: "application/octet-stream",
+            type: "application/pdf",
             name: fileName,
           })
         }
-  
+
         if (formData.aadharCard) {
           const fileName = formData.aadharCard.split("/").pop() || "aadhar_card"
           formDataToSend.append("idProof", {
             uri: formData.aadharCard,
-            type: "application/octet-stream",
+            type: "image/jpeg",
             name: fileName,
           })
         }
-  
+
         if (formData.medicalCertificate) {
           const fileName = formData.medicalCertificate.split("/").pop() || "medical_certificate"
           formDataToSend.append("MedicalCertificate", {
             uri: formData.medicalCertificate,
-            type: "application/octet-stream",
+            type: "application/pdf",
             name: fileName,
           })
         }
-  
+
         if (formData.photo) {
           const fileName = formData.photo.split("/").pop() || "photo.jpg"
           formDataToSend.append("Photo", {
@@ -264,23 +356,23 @@ export default function RegistrationForm() {
             name: fileName,
           })
         }
-  
+
         // Log the form data for debugging
         console.log("Sending form data to backend:", JSON.stringify(formDataToSend))
-  
+
         // Make the API request to your Flask backend
         const response = await fetch("http://192.168.109.54:5000/auth/register/student", {
           method: "POST",
           body: formDataToSend,
         })
-  
+
         // Parse the response
         const responseData = await response.json()
-  
+
         if (response.ok) {
           Alert.alert("Success", "Registration successful!")
           console.log("API Response:", responseData)
-  
+
           // ✅ Navigate to Home after successful registration
           navigation.navigate("RegistrationSuccess")
         } else {
@@ -295,7 +387,7 @@ export default function RegistrationForm() {
       Alert.alert("Form Error", "Please fill all required fields correctly.")
     }
   }
-  
+
   // Helper function to format DateOfBirth as YYYY-MM-DD
   const formatDate = (date) => {
     const d = new Date(date)
@@ -353,10 +445,14 @@ export default function RegistrationForm() {
             {t.uploadDocuments}
           </Text>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("udidDocument")}>
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={() => pickDocument("udidDocument")}
+            disabled={isLoading}
+          >
             <FontAwesome5 name="id-card" size={24} color="#333" />
             <Text style={[styles.uploadButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              {t.uploadUDID}{" "}
+              {t.uploadUDID} (PDF only){" "}
               <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
             </Text>
             {formData.udidDocument && (
@@ -364,21 +460,28 @@ export default function RegistrationForm() {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("aadharCard")}>
+          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("aadharCard")} disabled={isLoading}>
             <FontAwesome5 name="id-card" size={24} color="#333" />
             <Text style={[styles.uploadButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              {t.uploadAadhar}{" "}
+              {t.uploadAadhar} (Image only - JPG, PNG){" "}
               <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
             </Text>
             {formData.aadharCard && (
               <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />
             )}
+            {isLoading && field === "aadharCard" && (
+              <ActivityIndicator size="small" color="#0000ff" style={styles.loadingIcon} />
+            )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("medicalCertificate")}>
+          <TouchableOpacity
+            style={styles.uploadButton}
+            onPress={() => pickDocument("medicalCertificate")}
+            disabled={isLoading}
+          >
             <FontAwesome5 name="file-medical" size={24} color="#333" />
             <Text style={[styles.uploadButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              Upload Medical Certificate{" "}
+              Upload Medical Certificate (PDF only){" "}
               <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
             </Text>
             {formData.medicalCertificate && (
@@ -386,10 +489,10 @@ export default function RegistrationForm() {
             )}
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("photo")}>
+          <TouchableOpacity style={styles.uploadButton} onPress={() => pickDocument("photo")} disabled={isLoading}>
             <FontAwesome5 name="camera" size={24} color="#333" />
             <Text style={[styles.uploadButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              {t.uploadPhoto}{" "}
+              {t.uploadPhoto} (Image only - JPG, PNG){" "}
               <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
             </Text>
             {formData.photo && <MaterialIcons name="check-circle" size={20} color="green" style={styles.checkIcon} />}
@@ -565,7 +668,7 @@ export default function RegistrationForm() {
               <View style={styles.radioButton}>
                 <RadioButton
                   value="other"
-                  status={formData.gender === "other" ? "checked" : "unchecked"}
+                  status={formData.gender === "O" ? "checked" : "unchecked"}
                   onPress={() => handleInputChange("gender", "O")}
                   color="#8B4513" // Dark brown color
                 />
@@ -794,55 +897,6 @@ export default function RegistrationForm() {
           </View>
         </View>
 
-        {/* Appointment Time */}
-        {/* <View style={styles.section}>
-          <Text style={[styles.sectionTitle, { fontFamily: "JosefinSans-Regular", fontSize: 20 }]}>{t.details}</Text>
-
-          <View style={styles.inputContainer}>
-            <Text style={[styles.label, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              Select Date <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
-            </Text>
-            <TouchableOpacity style={styles.dateButton} onPress={() => setShowAppointmentDatePicker(true)}>
-              <Text style={{ fontFamily: "JosefinSans-Regular", fontSize: 15 }}>
-                {formatDate(formData.appointmentDate)}
-              </Text>
-              <MaterialIcons name="calendar-today" size={20} color="#333" />
-            </TouchableOpacity>
-            {errors.appointmentDate && (
-              <Text style={[styles.errorText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-                {errors.appointmentDate}
-              </Text>
-            )}
-          </View> */}
-
-          {/* <View style={styles.inputContainer}>
-            <Text style={[styles.label, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-              Select Time <Text style={[styles.required, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>*</Text>
-            </Text>
-            <TouchableOpacity style={styles.dateButton} onPress={() => setShowTimePicker(true)}>
-              <Text style={{ fontFamily: "JosefinSans-Regular", fontSize: 15 }}>
-                {formatTime(formData.appointmentTime)}
-              </Text>
-              <MaterialIcons name="access-time" size={20} color="#333" />
-            </TouchableOpacity>
-            {errors.appointmentTime && (
-              <Text style={[styles.errorText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-                {errors.appointmentTime}
-              </Text>
-            )}
-          </View> */}
-          {/* <View style={styles.loginContainer}>
-      <Text style={[styles.loginText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-        {t.alreadyHaveAccount || "Already have an account?"}
-      </Text>
-      <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={[styles.loginLink, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>
-          {t.goToLogin || "Go to Login"}
-        </Text>
-      </TouchableOpacity>
-    </View> */}
-        {/* </View> */}
-
         {/* Submit Button */}
         <TouchableOpacity style={styles.submitButton} onPress={handleSubmit}>
           <Text style={[styles.submitButtonText, { fontFamily: "JosefinSans-Regular", fontSize: 15 }]}>{t.submit}</Text>
@@ -1021,6 +1075,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   checkIcon: {
+    marginLeft: "auto",
+  },
+  loadingIcon: {
     marginLeft: "auto",
   },
   currencyInput: {

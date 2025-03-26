@@ -53,6 +53,7 @@ export default function CreateReportPage() {
     behavioralIssues: "",
     assistance: "Minimal verbal assistance required",
     parentalSupport: "The home environment is supportive",
+    tps: "",
 
     // Communication skills
     followingInstructions: 5,
@@ -116,16 +117,16 @@ export default function CreateReportPage() {
     }
   }, [studentId])
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: { target: { name: any; value: any } }) => {
     const { name, value } = e.target
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
-  const handleSliderChange = (name, value) => {
+  const handleSliderChange = (name: string, value: any[]) => {
     setFormData((prev) => ({ ...prev, [name]: value[0] }))
   }
 
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }))
   }
 
@@ -150,7 +151,7 @@ export default function CreateReportPage() {
   //   }, 1500)
   // }
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: { preventDefault: () => void }) => {
     e.preventDefault();
     setIsSubmitting(true);
   
@@ -159,7 +160,7 @@ export default function CreateReportPage() {
       StudentID: studentId, // Ensure this is provided
       EducatorID: user?.userId, // Replace with actual logged-in educator's ID
       Comments: formData.learningEnvironment, // Or any relevant field
-      TPS: 5, // Example logic
+      TPS: formData.tps, // Example logic
       Attendance: parseInt(formData.attendance) || 0,
       Term: parseInt(formData.term) || 1,
       FeedbackMetrics: {
@@ -418,8 +419,24 @@ export default function CreateReportPage() {
                         required
                       />
                       <span>working days</span>
+                      
                     </div>
+
                   </div>
+                  <div className="space-y-2">
+                  <Label htmlFor="tps">TPS</Label>
+                  <Input
+                        id="tps"
+                        name="tps"
+                        value={formData.tps}
+                        onChange={handleInputChange}
+                        placeholder="e.g., 3"
+                        className="w-20"
+                        required
+                      />
+                      
+                  </div>
+                  
                   <div className="space-y-2">
                     <Label htmlFor="punctuality">Punctuality and regularity</Label>
                     <Input
