@@ -50,7 +50,8 @@ export default function Home() {
       {/* Main navigation */}
       <header className="container mx-auto py-6 px-4 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <IshanyaLogo className="h-12 w-12" />
+          {/* <IshanyaLogo className="h-12 w-12" /> */}
+          <IshanyaLogo className="h-8 w-8" showTagline={false} />
           <h1 className="text-2xl font-bold text-primary">Ishanya Connect</h1>
         </div>
         <div className="flex gap-4">
@@ -136,8 +137,9 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
-              <div className="bg-[url('/placeholder.svg?height=600&width=800')] bg-cover bg-center min-h-[300px]"></div>
-            </div>
+              {/*  */}
+              <div className="bg-[url('/images/ishanya-logo.png')] bg-contain bg-no-repeat bg-center min-h-[200px]"></div>
+              </div>
           </div>
         </section>
 
