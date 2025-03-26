@@ -136,7 +136,8 @@ def get_all_students():
         }
 
         result.append(student_info)
-
+        
+    print(result)
     return jsonify(result)
 
 @admin_bp.route('/dashboard', methods=['GET'])
