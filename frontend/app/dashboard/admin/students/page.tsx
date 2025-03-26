@@ -46,6 +46,7 @@ export default function StudentsPage() {
           throw new Error("Failed to fetch students");
         }
         const data: Student[] = await response.json(); 
+        console.log(data)
         setStudents(data);
       } catch (error) {
         console.error("Error fetching students:", error);
@@ -177,8 +178,8 @@ export default function StudentsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredStudents.length > 0 ? (
-                      filteredStudents.map((student) => (
+                    {students.length > 0 ? (
+                      students.map((student) => (
                         <TableRow key={student.id}>
                           <TableCell>
                             <div className="flex items-center gap-3">

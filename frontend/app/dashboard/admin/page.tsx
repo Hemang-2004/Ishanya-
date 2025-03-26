@@ -47,6 +47,8 @@ import {
 } from "recharts"
 import { ChartTooltip } from "@/components/ui/chart"
 
+import { useRef } from "react"
+
 // Sample data for charts
 const studentGrowthData = [
   { name: "Jan", students: 120 },
@@ -55,12 +57,6 @@ const studentGrowthData = [
   { name: "Apr", students: 210 },
   { name: "May", students: 250 },
   { name: "Jun", students: 280 },
-]
-
-const programDistributionData = [
-  { name: "Digital Literacy", value: 45 },
-  { name: "Vocational", value: 30 },
-  { name: "Leadership", value: 25 },
 ]
 
 const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042", "#0088FE"]
@@ -75,31 +71,60 @@ const attendanceData = [
 ]
 
 export default function AdminDashboardPage() {
-  const router = useRouter()
-  const { t } = useLanguage()
-  const [timeRange, setTimeRange] = useState("month")
-  const [programFilter, setProgramFilter] = useState("all")
+  const router = useRouter();
+  const { t } = useLanguage();
+  const [timeRange, setTimeRange] = useState("month");
+  const [programFilter, setProgramFilter] = useState("all");
   const [dashboardData, setDashboardData] = useState<any>(null);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("http://localhost:5000/admins/dashboard")
-        const data = await response.json()
-        setDashboardData(data)
-      } catch (error) {
-        console.error("API fetch error:", error)
-      }
-    }
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-    fetchData()
-  }, [])
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  const fetchDashboardData = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/admins/dashboard");
+      const data = await response.json();
+      setDashboardData(data);
+    } catch (error) {
+      console.error("API fetch error:", error);
+    }
+  };
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    console.log("Uploading file...");
+    if (!event.target.files) return;
+
+    const file = event.target.files[0];
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const response = await fetch("http://localhost:5000/admins/upload_students", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        console.log("File uploaded successfully");
+        fetchDashboardData(); // Fetch updated data after upload
+      } else {
+        console.error("File upload failed");
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+    }
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Admin Dashboard</h2>
-          <p className="text-muted-foreground">Welcome back! Here's what's happening at Ishanya Connect</p>
+          <p className="text-muted-foreground">
+            Welcome back! Here's what's happening at Ishanya Connect
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline">
@@ -110,10 +135,23 @@ export default function AdminDashboardPage() {
             <UserPlus className="mr-2 h-4 w-4" />
             Add Student
           </Button>
+          {/* New Upload Button */}
+          <Button
+            variant="outline"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            Bulk Upload
+          </Button>
+          <input
+            type="file"
+            ref={fileInputRef}
+            className="hidden"
+            onChange={handleFileUpload}
+          />
         </div>
       </div>
-
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+    {/* </div> */}
+     <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
         <Tabs defaultValue="overview" className="w-full">
           <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="overview">Overview</TabsTrigger>
@@ -177,7 +215,9 @@ export default function AdminDashboardPage() {
         />
         <MetricCard
           title="Completion Rate"
-          value={dashboardData?.completion_rate?.toString() + "%"}
+          value={dashboardData?.completion_rate !== undefined 
+            ? dashboardData.completion_rate.toFixed(2) + "%" 
+            : ""}          
           change="+5%"
           trend="up"
           description="vs. previous period"
@@ -189,38 +229,35 @@ export default function AdminDashboardPage() {
         <Card className="md:col-span-4">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle>Student Growth</CardTitle>
-              <CardDescription>Monthly student acquisition and retention</CardDescription>
+              <CardTitle>Student Enrolment</CardTitle>
+              <CardDescription>Number of students enrolled monthwise</CardDescription>
             </div>
-            <Select defaultValue="6months">
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select period" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="30days">Last 30 Days</SelectItem>
-                <SelectItem value="6months">Last 6 Months</SelectItem>
-                <SelectItem value="1year">Last Year</SelectItem>
-              </SelectContent>
-            </Select>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
-              <ResponsiveContainer width="100%" height="100%">
-                <RechartsLineChart data={studentGrowthData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="name" />
-                  <YAxis />
-                  <Tooltip content={<ChartTooltip />} />
-                  <Line
-                    type="monotone"
-                    dataKey="students"
-                    stroke="hsl(var(--primary))"
-                    strokeWidth={2}
-                    activeDot={{ r: 8 }}
-                    name="Students"
-                  />
-                </RechartsLineChart>
-              </ResponsiveContainer>
+            {dashboardData?.monthwise_enrolment && dashboardData.monthwise_enrolment.length > 0 ? (
+            <ResponsiveContainer width="100%" height="100%">
+              <RechartsLineChart 
+                data={dashboardData.monthwise_enrolment} 
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip content={<ChartTooltip />} />
+                <Line
+                  type="monotone"
+                  dataKey="students"
+                  stroke="hsl(var(--primary))"
+                  strokeWidth={2}
+                  activeDot={{ r: 8 }}
+                  name="Students"
+                />
+              </RechartsLineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p>Loading chart data...</p>
+          )}
             </div>
           </CardContent>
         </Card>
@@ -235,24 +272,29 @@ export default function AdminDashboardPage() {
           <CardContent>
             <div className="h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
-                <RechartsPieChart>
-                  <Pie
-                    data={programDistributionData}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="value"
-                    label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  >
-                    {programDistributionData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip content={<ChartTooltip />} />
-                  <Legend />
-                </RechartsPieChart>
+              {dashboardData?.students_enrolled_programwise && dashboardData.students_enrolled_programwise.length > 0 ? (
+              <RechartsPieChart>
+                <Pie
+                  data={dashboardData.students_enrolled_programwise}
+                  cx="50%"
+                  cy="50%"
+                  labelLine={false}
+                  outerRadius={80}
+                  fill="#8884d8"
+                  dataKey="value"
+                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                >
+                  {dashboardData?.students_enrolled_programwise?.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip content={<ChartTooltip />} />
+                <Legend />
+              </RechartsPieChart>
+            ) : (
+              <p>Loading chart data...</p>
+            )}
+
               </ResponsiveContainer>
             </div>
           </CardContent>
@@ -313,31 +355,28 @@ export default function AdminDashboardPage() {
         <Card className="md:col-span-4">
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <div>
-              <CardTitle>Monthly Attendance</CardTitle>
-              <CardDescription>Average attendance rates by program</CardDescription>
+              <CardTitle>Impact by Program</CardTitle>
+              <CardDescription>Students graduated programwise</CardDescription>
             </div>
-            <Select defaultValue="3months">
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="Select period" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="1month">Last Month</SelectItem>
-                <SelectItem value="3months">Last 3 Months</SelectItem>
-                <SelectItem value="6months">Last 6 Months</SelectItem>
-              </SelectContent>
-            </Select>
           </CardHeader>
           <CardContent>
             <div className="h-[300px] w-full">
+              {dashboardData?.students_graduated_programwise && dashboardData.students_graduated_programwise.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={attendanceData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                <BarChart
+                  data={dashboardData.students_graduated_programwise}
+                  margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                >
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" />
                   <YAxis domain={[0, 100]} />
                   <Tooltip content={<ChartTooltip />} />
-                  <Bar dataKey="attendance" fill="hsl(var(--primary))" name="Attendance %" />
+                  <Bar dataKey="value" fill="hsl(var(--primary))" name="Students" />
                 </BarChart>
               </ResponsiveContainer>
+            ) : (
+              <p>Loading chart data...</p>
+            )}
             </div>
           </CardContent>
         </Card>

@@ -88,3 +88,10 @@ def get_monthly_feedback(student_id):
     except Exception as e:
         return jsonify({"error": "Internal server error", "details": str(e)}), 500
 
+
+@student_bp.route('/<int:student_id>/program', methods=['GET'])
+def get_student_program(student_id):
+    student = Student.query.get(student_id)
+    if student and student.program:
+        return jsonify({"ProgramName": student.program.ProgramName})
+    return jsonify({"error": "Student not found or not enrolled in a program"}), 404

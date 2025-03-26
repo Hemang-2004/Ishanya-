@@ -296,6 +296,8 @@ export default function AdminStudentReportPage() {
   const studentid = params?.id; // Extract parameters from URL
   console.log(studentid);
   const [educatorId, setEducatorId] = useState("");
+  const [programName, setProgramName] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   // In a real app, you would fetch the report data from your API
   // useEffect(() => {
@@ -365,11 +367,28 @@ export default function AdminStudentReportPage() {
         setLoading(false);
       }
     };
+
+    const fetchProgramName = async () => {
+      try {
+        const response = await fetch(`http://127.0.0.1:5000/students/${studentid}/program`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch program name");
+        }
+        const data = await response.json();
+        setProgramName(data.ProgramName);
+      } catch (err) {
+        // setError(err.message);
+      }
+    };
+
     console.log(studentid);
     if (studentid) {
       fetchFeedbackReport();
+      fetchProgramName();
     }
   }, [studentid]);
+
+  console.log(programName);
   useEffect(() => {
     if (report && report.EducatorID) {
       setEducatorId(report.EducatorID);
@@ -447,7 +466,8 @@ export default function AdminStudentReportPage() {
               Student Assessment Report
             </h2>
             <p className="text-muted-foreground">
-              Sameti - A Pre-academic Skills Program
+              {/* Sameti - A Pre-academic Skills Program */}
+             {programName}
             </p>
           </div>
         </div>
@@ -473,7 +493,8 @@ export default function AdminStudentReportPage() {
 
       <div className="text-center mb-8 print:mb-6">
         <h1 className="text-2xl font-bold mb-2">
-          Sameti - A Pre-academic Skills Program
+          {/* Sameti - A Pre-academic Skills Program */}
+          <span> Program: {programName}</span>
         </h1>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto mt-6">
           <div className="flex justify-between">

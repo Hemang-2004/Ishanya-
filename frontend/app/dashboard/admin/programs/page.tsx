@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -42,39 +42,84 @@ export default function ProgramsPage() {
     startDate: "",
     endDate: "",
     status: "active",
-    capacity: "",
+    capacity: "10",
   })
+  const [programs, setPrograms] = useState([])
 
   // Filter function for programs
-  const filteredPrograms = programs.filter((program) => {
-    // Filter by search term
-    const matchesSearch =
-      program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.category.toLowerCase().includes(searchTerm.toLowerCase())
+  // const filteredPrograms = programs.filter((program) => {
+  //   // Filter by search term
+  //   const matchesSearch =
+  //     program.ProgramName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     program.Category.toLowerCase().includes(searchTerm.toLowerCase())
 
-    // Filter by status
-    const matchesStatus = selectedStatus === "all" || program.status.toLowerCase() === selectedStatus.toLowerCase()
+  //   // Filter by status
+  //   const matchesStatus = selectedStatus === "all" || program.Status.toLowerCase() === selectedStatus.toLowerCase()
 
-    return matchesSearch && matchesStatus
-  })
+  //   return matchesSearch && matchesStatus
+  // })
+  useEffect(() => {
+    fetchPrograms();
+  }, []);
 
-  const handleAddProgram = (e: React.FormEvent) => {
-    e.preventDefault()
-    // In a real app, you would send this to an API
-    console.log("Adding new program:", newProgramData)
+  const fetchPrograms = async () => {
+  try {
+    const response = await fetch("http://localhost:5000/admins/get_all_programs", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const result = await response.json();
 
-    // Reset form and close dialog
-    setNewProgramData({
-      name: "",
-      description: "",
-      category: "education",
-      startDate: "",
-      endDate: "",
-      status: "active",
-      capacity: "",
-    })
-    setIsAddProgramDialogOpen(false)
+
+    if (response.ok) {
+      console.log("Programs fetched successfully:", result.programs);
+      
+      setPrograms(result.programs); // Assuming you have a state for programs
+    } else {
+      console.error("Error fetching programs:", result.error);
+    }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
   }
+};
+
+  const handleAddProgram = async (e: React.FormEvent) => {
+    e.preventDefault();
+  
+    const programData = {
+      ProgramName: newProgramData.name,
+      Description: newProgramData.description,
+      Category: newProgramData.category,
+      StartDate: newProgramData.startDate,
+      EndDate: newProgramData.endDate,
+      Status: newProgramData.status,
+      Capacity: newProgramData.capacity,
+    };
+  
+    try {
+      const response = await fetch("http://localhost:5000/admins/add_program", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(programData),
+      });
+  
+      const result = await response.json();
+  
+      if (response.ok) {
+        console.log("Program added successfully:", result);
+        setIsAddProgramDialogOpen(false);
+        fetchPrograms(); // Refresh the list after adding
+      } else {
+        console.error("Error adding program:", result.error);
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -146,17 +191,18 @@ export default function ProgramsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPrograms.length > 0 ? (
-                      filteredPrograms.map((program) => (
-                        <TableRow key={program.id}>
+                    {/* console.log("Programs:", programs); */}
+                    {programs.length > 0 ? (
+                      programs.map((program) => (
+                        <TableRow key={program.ProgramID}>
                           <TableCell>
-                            <div className="font-medium">{program.name}</div>
+                            <div className="font-medium">{program.ProgramName}</div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{program.category}</Badge>
+                            <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={getStatusBadgeVariant(program.status)}>{program.status}</Badge>
+                            <Badge variant={getStatusBadgeVariant(program.Status)}>{program.Status}</Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -167,13 +213,13 @@ export default function ProgramsPage() {
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.duration}</span>
+                              <span className="text-sm">{program.StartDate}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.participants}</span>
+                              <span className="text-sm">{program.Capacity}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -217,7 +263,7 @@ export default function ProgramsPage() {
               </div>
               <div className="flex items-center justify-end space-x-2 py-4">
                 <div className="text-sm text-muted-foreground">
-                  Showing <span className="font-medium">{filteredPrograms.length}</span> of{" "}
+                  Showing <span className="font-medium">{programs.length}</span> of{" "}
                   <span className="font-medium">{programs.length}</span> programs
                 </div>
                 <Button variant="outline" size="sm">
@@ -243,15 +289,15 @@ export default function ProgramsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPrograms
-                      .filter((program) => program.status === "Active")
+                    {programs
+                      .filter((program) => program.Status === "Active")
                       .map((program) => (
                         <TableRow key={program.id}>
                           <TableCell>
-                            <div className="font-medium">{program.name}</div>
+                            <div className="font-medium">{program.ProgramName}</div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{program.category}</Badge>
+                            <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-2">
@@ -262,13 +308,13 @@ export default function ProgramsPage() {
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.duration}</span>
+                              <span className="text-sm">{program.StartDate}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.participants}</span>
+                              <span className="text-sm">{program.Capacity}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">
@@ -297,21 +343,21 @@ export default function ProgramsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPrograms
-                      .filter((program) => program.status === "Upcoming")
+                    {programs
+                      .filter((program) => program.Status === "Upcoming")
                       .map((program) => (
                         <TableRow key={program.id}>
                           <TableCell>
-                            <div className="font-medium">{program.name}</div>
+                            <div className="font-medium">{program.ProgramName}</div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{program.category}</Badge>
+                            <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
-                          <TableCell>{program.startDate}</TableCell>
+                          <TableCell>{program.StartDate}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.duration}</span>
+                              <span className="text-sm">{program.StartDate}</span>
                             </div>
                           </TableCell>
                           <TableCell>
@@ -346,27 +392,27 @@ export default function ProgramsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPrograms
-                      .filter((program) => program.status === "Completed")
+                    {programs
+                      .filter((program) => program.Status === "Completed")
                       .map((program) => (
                         <TableRow key={program.id}>
                           <TableCell>
-                            <div className="font-medium">{program.name}</div>
+                            <div className="font-medium">{program.ProgramName}</div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">{program.category}</Badge>
+                            <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
                           <TableCell>{program.endDate}</TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Calendar className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.duration}</span>
+                              <span className="text-sm">{program.StartDate}</span>
                             </div>
                           </TableCell>
                           <TableCell>
                             <div className="flex items-center gap-1">
                               <Users className="h-3 w-3 text-muted-foreground" />
-                              <span className="text-sm">{program.participants}</span>
+                              <span className="text-sm">{program.Capacity}</span>
                             </div>
                           </TableCell>
                           <TableCell className="text-right">

@@ -10,6 +10,81 @@ import bcrypt
 
 admin_bp = Blueprint("admin", __name__)
 
+from flask import Blueprint, request, jsonify
+from models import db, Program
+from datetime import datetime
+
+program_bp = Blueprint("program_bp", __name__)
+
+# ✅ Add a New Program
+@admin_bp.route("/add_program", methods=["POST"])
+def add_program():
+    """API to add a new Program"""
+    try:
+        data = request.get_json()
+
+        # Required fields
+        required_fields = ["ProgramName", "Category", "Status"]
+        missing_fields = [field for field in required_fields if field not in data or not str(data[field]).strip()]
+        if missing_fields:
+            return jsonify({"error": f"Missing required fields: {', '.join(missing_fields)}"}), 400
+
+        # Check if the program already exists
+        existing_program = Program.query.filter_by(ProgramName=data["ProgramName"].strip()).first()
+        if existing_program:
+            return jsonify({"error": "Program with this name already exists"}), 409
+
+        # Convert date strings to date objects
+        start_date = datetime.strptime(data["StartDate"], "%Y-%m-%d").date() if "StartDate" in data and data["StartDate"] else None
+        end_date = datetime.strptime(data["EndDate"], "%Y-%m-%d").date() if "EndDate" in data and data["EndDate"] else None
+
+        # Create new Program instance
+        new_program = Program(
+            ProgramName=data["ProgramName"].strip(),
+            Description=data.get("Description"),
+            Category=data.get("Category", "education"),
+            StartDate=start_date,
+            EndDate=end_date,
+            Status=data.get("Status", "active"),
+            Capacity=int(data["Capacity"]) if "Capacity" in data and data["Capacity"].isdigit() else None
+        )
+
+        # Add to database
+        db.session.add(new_program)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Program added successfully!",
+            "ProgramID": new_program.ProgramID
+        }), 201
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
+
+
+# ✅ Fetch All Programs
+@admin_bp.route("/get_all_programs", methods=["GET"])
+def get_all_programs():
+    """API to get all programs"""
+    try:
+        programs = Program.query.all()
+        program_list = [
+            {
+                "ProgramID": program.ProgramID,
+                "ProgramName": program.ProgramName,
+                "Description": program.Description,
+                "Category": program.Category,
+                "StartDate": program.StartDate.strftime("%Y-%m-%d") if program.StartDate else None,
+                "EndDate": program.EndDate.strftime("%Y-%m-%d") if program.EndDate else None,
+                "Status": program.Status,
+                "Capacity": program.Capacity
+            }
+            for program in programs
+        ]
+        return jsonify({"programs": program_list}), 200
+
+    except Exception as e:
+        return jsonify({"error": f"An error occurred: {str(e)}"}), 500
 
 ALLOWED_COLUMNS = {
     'FirstName', 'LastName', 'DateOfBirth', 'Gender', 'EmailID', 'ProgramID',
@@ -71,7 +146,9 @@ def upload_students():
                 ContactNumber=row.get('ContactNumber'),
                 ParentsEmail=row.get('ParentsEmail'),
                 Address=row.get('Address'),
-                Password=hash_password("Default@123")
+                Password=hash_password("Default@123"),
+                IsRegistered=1,
+                Status="Active"
             )
             students.append(student)
 
@@ -81,6 +158,7 @@ def upload_students():
             return jsonify({'message': 'Students added successfully'}), 200
         except Exception as e:
             db.session.rollback()
+            print(str(e))
             return jsonify({'error': str(e)}), 500
 
     return jsonify({'error': 'Invalid file format. Only .xlsx and .csv allowed'}), 400
@@ -96,13 +174,13 @@ def get_report(studentid, term):
 
     return jsonify(feedback.to_dict()), 200
 
-@admin_bp.route('/get-all-programs', methods=['GET'])
-def get_all_programs():
-    programs = Program.query.all()
-    return jsonify([{
-        "ProgramName": program.ProgramName, 
-        "ProgramID": program.ProgramID} 
-        for program in programs])
+# @admin_bp.route('/get-all-programs', methods=['GET'])
+# def get_all_programs():
+#     programs = Program.query.all()
+#     return jsonify([{
+#         "ProgramName": program.ProgramName, 
+#         "ProgramID": program.ProgramID} 
+#         for program in programs])
 
 @admin_bp.route('/get-all-students', methods=['GET'])
 def get_all_students():
@@ -133,7 +211,8 @@ def get_all_students():
         }
 
         result.append(student_info)
-
+        
+    print(result)
     return jsonify(result)
 
 @admin_bp.route('/dashboard', methods=['GET'])
@@ -141,11 +220,12 @@ def dashboard():
     return jsonify({
         "num_registered_students": num_registered_students(),
         "num_dropouts": num_dropouts(),
+        "monthwise_enrolment": monthwise_enrolment(),
         "students_enrolled_programwise": [
-            {"program": name, "count": count} for name, count in students_enrolled_programwise()
+            {"name": name, "value": count} for name, count in students_enrolled_programwise()
         ],
         "students_graduated_programwise": [
-            {"program": name, "count": count} for name, count in students_graduated_programwise()
+            {"name": name, "value": count} for name, count in students_graduated_programwise()
         ],
         "num_educators_programwise": [
             {"program": name, "count": count} for name, count in num_educators_programwise()
