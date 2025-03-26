@@ -304,50 +304,32 @@ export default function AdminDashboardPage() {
       <div className="grid gap-4 md:grid-cols-7">
         <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>Completion Rates</CardTitle>
-            <CardDescription>Program completion statistics</CardDescription>
+            <CardTitle>Student Performance</CardTitle>
+            <CardDescription>Improvement in TPS scores</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Digital Literacy</span>
-                  <span className="text-sm text-muted-foreground">85%</span>
-                </div>
-                <Progress value={85} className="h-2" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Vocational Training</span>
-                  <span className="text-sm text-muted-foreground">72%</span>
-                </div>
-                <Progress value={72} className="h-2" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Community Leadership</span>
-                  <span className="text-sm text-muted-foreground">68%</span>
-                </div>
-                <Progress value={68} className="h-2" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Health & Wellness</span>
-                  <span className="text-sm text-muted-foreground">79%</span>
-                </div>
-                <Progress value={79} className="h-2" />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium">Financial Literacy</span>
-                  <span className="text-sm text-muted-foreground">62%</span>
-                </div>
-                <Progress value={62} className="h-2" />
-              </div>
+            <div className="h-[300px]">
+            <ResponsiveContainer width="100%" height="100%">
+              {dashboardData?.student_performance && dashboardData.student_performance.length > 0 ? (
+                <BarChart data={dashboardData.student_performance} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis type="number" />
+                  <YAxis dataKey="name" type="category" width={120} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "rgba(255, 255, 255, 0.9)",
+                      borderRadius: "6px",
+                      border: "1px solid #e2e8f0",
+                    }}
+                  />
+                  <Legend />
+                  <Bar dataKey="term1" name="Term 1" fill="#8884d8" />
+                  <Bar dataKey="term2" name="Term 2" fill="#82ca9d" />
+                </BarChart>
+              ) : (
+                <p>Loading chart data...</p>
+              )}
+            </ResponsiveContainer>
             </div>
           </CardContent>
         </Card>

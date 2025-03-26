@@ -217,6 +217,7 @@ def get_all_students():
 @admin_bp.route('/dashboard', methods=['GET'])
 def dashboard():
     return jsonify({
+        "student_performance": student_performance(),
         "num_registered_students": num_registered_students(),
         "num_dropouts": num_dropouts(),
         "monthwise_enrolment": monthwise_enrolment(),
