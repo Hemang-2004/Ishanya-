@@ -55,17 +55,33 @@ with app.app_context():
 
     # --- Add Students ---
     students = []
+
+    FirstNames = [
+        "Aarav", "Vihaan", "Ishaan", "Rohan", "Arjun", "Reyansh", "Advait", "Dhruv", "Kabir", "Neil",
+        "Anaya", "Myra", "Siya", "Ira", "Aadhya", "Kiara", "Tara", "Riya", "Saanvi", "Meera"
+    ]
+
+    LastNames = [
+        "Kumar", "Sharma", "Verma", "Singh", "Gupta", "Mishra", "Reddy", "Nair", "Bose", "Mehta",
+        "Iyer", "Chopra", "Menon", "Banerjee", "Joshi", "Patel", "Das", "Pillai", "Malhotra", "Desai"
+    ]
+
+    Genders = [
+        "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male", "Male",
+        "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female", "Female"
+    ]
+
     for i in range(20):
         program = random.choice(programs)
         primary_educator = random.choice(educators)
         secondary_educator = random.choice(educators)
         student = Student(
-            FirstName=f"Student{i+1}",
-            LastName="Kumar",
-            Gender=random.choice(['M', 'F']),
+            FirstName=FirstNames[i],
+            LastName=LastNames[i],
+            Gender=Genders[i],
             DateOfBirth=date.today() - timedelta(days=random.randint(2000, 6000)),
             DateOfJoining=date.today() - timedelta(days=random.randint(100, 365)),
-            EmailID=f"student{i+1}@school.edu",
+            EmailID=f"{FirstNames[i].lower()}.{LastNames[i].lower()}@school.edu",
             ProgramID=program.ProgramID,
             PrimaryEducatorID=primary_educator.EducatorID,
             SecondaryEducatorID=secondary_educator.EducatorID if secondary_educator != primary_educator else None,
