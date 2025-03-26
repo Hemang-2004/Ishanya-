@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -22,6 +22,8 @@ export default function AddTeacherPage() {
   const { toast } = useToast()
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [activeTab, setActiveTab] = useState("manual")
+  const [programs, setPrograms] = useState<{ id: string; name: string }[]>([]);
+  const [selectedProgram, setSelectedProgram] = useState<string>("");
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -32,7 +34,7 @@ export default function AddTeacherPage() {
     address: "",
     qualification: "",
     specialization: "",
-    experience: "",
+    program: "",
     resume: null as File | null,
     photo: null as File | null,
     idProof: null as File | null,
@@ -41,6 +43,26 @@ export default function AddTeacherPage() {
     sendCredentials: true,
     notes: "",
   })
+
+  useEffect(() => {
+      const fetchPrograms = async () => {
+        try {
+          const response = await fetch(
+            "http://localhost:5000/admins/get-programs"
+          );
+          const data = await response.json();
+          if (data.success) {
+            setPrograms(data.programs);
+          } else {
+            console.error("Failed to fetch programs:", data.message);
+          }
+        } catch (error) {
+          console.error("Error fetching programs:", error);
+        }
+      };
+  
+      fetchPrograms();
+    }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -81,7 +103,8 @@ export default function AddTeacherPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  
+    const today = new Date().toISOString().split("T")[0];  
+
     const formDataToSend = new FormData();
     formDataToSend.append("FirstName", formData.firstName);
     formDataToSend.append("LastName", formData.lastName);
@@ -93,6 +116,8 @@ export default function AddTeacherPage() {
     formDataToSend.append("IsRegistered", "1"); // Always set to "1"
     formDataToSend.append("Password", "1234"); // You might want to use actual user input
     formDataToSend.append("Status", "Active");
+    formDataToSend.append("ProgramID", selectedProgram);
+    formDataToSend.append("DateOfJoining", today);
   
     if (formData.photo) {
       formDataToSend.append("photo", formData.photo);
@@ -139,7 +164,7 @@ export default function AddTeacherPage() {
           address: "456 Park Avenue, Delhi, Delhi",
           qualification: "masters",
           specialization: "Computer Science",
-          experience: "5-10",
+          program: "",
           idProof: file,
         })
         toast({
@@ -187,7 +212,7 @@ export default function AddTeacherPage() {
                     onFileChange={handleDocumentUpload}
                     accept=".jpg,.jpeg,.png,.pdf"
                     maxSize={5}
-                    className="h-64"
+                    // className="h-64"
                   />
                   <p className="text-xs text-muted-foreground">
                     Upload Aadhar Card, PAN Card, or Professional ID to automatically extract teacher information.
@@ -316,20 +341,20 @@ export default function AddTeacherPage() {
                       </Select>
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="experience">Years of Experience*</Label>
+                      <Label>Assign to Program</Label>
                       <Select
-                        value={formData.experience}
-                        onValueChange={(value) => handleSelectChange("experience", value)}
+                        onValueChange={(value) => setSelectedProgram(value)}
+                        defaultValue=""
                       >
-                        <SelectTrigger id="experience">
-                          <SelectValue placeholder="Select experience" />
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Select program" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="0-1">Less than 1 year</SelectItem>
-                          <SelectItem value="1-3">1-3 years</SelectItem>
-                          <SelectItem value="3-5">3-5 years</SelectItem>
-                          <SelectItem value="5-10">5-10 years</SelectItem>
-                          <SelectItem value="10+">More than 10 years</SelectItem>
+                          {programs.map((program) => (
+                            <SelectItem key={program.id} value={program.id.toString()}>
+                              {program.name}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>

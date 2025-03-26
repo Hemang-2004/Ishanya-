@@ -22,6 +22,8 @@ import RadialProgress from "../components/RadialProgress"
 import AttendanceGraph from "../components/AttendanceGraph"
 import AIChat from "../components/AIChat"
 import AsyncStorage from "@react-native-async-storage/async-storage"
+import { Alert } from "react-native"
+import FeedbackReport from "./feedback-report"
 
 // FAQ data
 /*
@@ -62,6 +64,7 @@ export default function Dashboard() {
   const [showAIChatModal, setShowAIChatModal] = useState(false)
   const [currentTeacher, setCurrentTeacher] = useState("")
   const [message, setMessage] = useState("")
+  const [feedback, setFeedback] = useState<any>(null)
   const [showCoursesModal, setShowCoursesModal] = useState(false)
   const [showAssignmentsModal, setShowAssignmentsModal] = useState(false)
   const [showSessionsModal, setShowSessionsModal] = useState(false)
@@ -70,6 +73,7 @@ export default function Dashboard() {
   const [hasUnreadNotifications, setHasUnreadNotifications] = useState(true)
   const [hasUnreadAssignments, setHasUnreadAssignments] = useState(true)
   const [isGeneratingReport, setIsGeneratingReport] = useState(false)
+  const [showFeedbackReport, setShowFeedbackReport] = useState(false)
   // const [expandedFaq, setExpandedFaq] = useState<string | null>(null)
 
   // Sample data
@@ -101,17 +105,17 @@ export default function Dashboard() {
     { month: "Aug", percentage: 75 },
     { month: "Sep", percentage: 78 },
   ]
-  let data;
+  let data
+
   const fetchStudentId = async () => {
     try {
-       data = await AsyncStorage.getItem("studentData")
-       
-  
+      data = await AsyncStorage.getItem("studentData")
+
       if (data) {
         const parsedData = JSON.parse(data)
-        const studentId = parsedData?.id 
-        setStudentName(parsedData?.name);
-  
+        const studentId = parsedData?.id
+        setStudentName(parsedData?.name)
+
         if (studentId) {
           console.log("Student ID:", studentId)
           return studentId
@@ -130,31 +134,29 @@ export default function Dashboard() {
   }
   const fetchFeedbackReport = async (term) => {
     try {
-      const studentId = await fetchStudentId() // Fetch studentId from AsyncStorage
-  
+      const studentId = await fetchStudentId()
+
       if (!studentId) {
         console.log("No valid student ID found.")
         return
       }
-  
-      const response = await fetch(
-        `http://192.168.109.54:5000/admins/get-feedback-report/${studentId}/${term}`,
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
-  
+
+      const response = await fetch(`http://172.16.156.52:5000/admins/get-feedback-report/${studentId}/${term}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+
       if (!response.ok) {
         throw new Error("Failed to fetch feedback report.")
       }
-  
+
       const data = await response.json()
       console.log("Feedback Report:", data)
-  
-      // Handle report data (e.g., display or store for further use)
+
+      // Store the data properly
+      setFeedback(data)
       return data
     } catch (error) {
       console.error("Error fetching feedback report:", error)
@@ -165,18 +167,16 @@ export default function Dashboard() {
     const getFeedbackReport = async () => {
       const term = 1 // Replace with actual term or dynamic value
       const report = await fetchFeedbackReport(term)
-  
+
       if (report) {
         console.log("Feedback report fetched successfully:", report)
         // Handle or display the report data here
       }
     }
-  
+
     getFeedbackReport()
   }, [])
-    
-  
-  
+
   useEffect(() => {
     const getStudentDetails = async () => {
       const studentId = await fetchStudentId()
@@ -187,7 +187,6 @@ export default function Dashboard() {
     }
     getStudentDetails()
   }, [])
-  
 
   useEffect(() => {
     scrollY.addListener(({ value }) => {
@@ -259,6 +258,43 @@ export default function Dashboard() {
       setShowChatModal(false)
     }
   }
+  const generatePDF = async () => {
+    const showData = (data: any) => {
+      Alert.alert("JSON Data", JSON.stringify(data, null, 2))
+    }
+
+    showData(feedback)
+
+    // try {
+    //   // Convert JSON to HTML format for PDF
+    //   const jsonContent = `
+    //     <h2>Feedback Report</h2>
+    //     <pre>${JSON.stringify(feedback, null, 2)}</pre>
+    //   `
+
+    //   // Define PDF options
+    //   const options = {
+    //     html: jsonContent,
+    //     fileName: `Feedback_Report`,
+    //     directory: "Documents",
+    //   }
+
+    //   // Create the PDF
+    //   const file = await RNHTMLtoPDF.convert(options)
+
+    //   if (file.filePath) {
+    //     Alert.alert("Success", `PDF saved to ${file.filePath}`)
+    //     console.log("PDF Path:", file.filePath)
+    //   } else {
+    //     throw new Error("PDF creation failed.")
+    //   }
+    // } catch (error) {
+    //   Alert.alert("Error", "Failed to generate PDF.")
+    //   console.error("Error generating PDF:", error)
+    // } finally {
+    //   setLoading(false)
+    // }
+  }
 
   const handleBellPress = () => {
     setShowAssignmentsModal(true)
@@ -271,6 +307,10 @@ export default function Dashboard() {
 
   const handleAIChatPress = () => {
     setShowAIChatModal(true)
+  }
+
+  const handleOpenFeedbackReport = () => {
+    setShowFeedbackReport(true)
   }
 
   return (
@@ -383,7 +423,7 @@ export default function Dashboard() {
                 onReply={() => handleReply(msg.teacher)}
                 onPress={() => setSelectedCard(selectedCard === `message-${msg.id}` ? null : `message-${msg.id}`)}
                 isSelected={selectedCard === `message-${msg.id}`}
-                onReport={() => handleReportGeneration(msg.teacher, msg.message, msg.time)}
+                onReport={handleOpenFeedbackReport}
               />
             ))}
           </View>
@@ -415,6 +455,11 @@ export default function Dashboard() {
           {/* Add padding at the bottom for tab bar */}
           <View style={{ height: 80 }} />
         </Animated.ScrollView>
+        <FeedbackReport
+          feedbackData={feedback}
+          visible={showFeedbackReport}
+          onClose={() => setShowFeedbackReport(false)}
+        />
 
         {/* Chat Modal */}
         <Modal

@@ -8,6 +8,8 @@ import { useEffect } from "react";
 
 export default function ProfileScreen() {
     const [studentName, setStudentName] = useState("gdfgd")
+    const [StudentEmail, setStudentEmail] = useState("gdfgd")
+
   const handleShareProfile = async () => {
     try {
       await Share.share({
@@ -29,6 +31,7 @@ export default function ProfileScreen() {
          parsedData = JSON.parse(data)
         const studentId = parsedData?.id 
         setStudentName(parsedData?.name);
+        setStudentEmail(parsedData?.email);
   
         if (studentId) {
           console.log("Student ID:", studentId)
@@ -108,7 +111,7 @@ export default function ProfileScreen() {
 
               {studentName}
 </Text>
-              <Text style={styles.profileEmail}>arjun.patel@example.com</Text>
+              <Text style={styles.profileEmail}>{StudentEmail}</Text>
               <View style={styles.profileStats}>
                 <View style={styles.statItem}>
                   <Text style={styles.statValue}>3</Text>
@@ -331,6 +334,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 216, 112, 0.9)",
     borderBottomWidth: 1,
     borderBottomColor: "#D2B48C",
+    marginTop: -29,
   },
   headerTitle: {
     fontSize: 20,

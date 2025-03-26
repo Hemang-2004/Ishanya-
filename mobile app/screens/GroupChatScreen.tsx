@@ -16,13 +16,53 @@ import {
   Pressable,
   Vibration,
   Clipboard,
+  Animated,
 } from "react-native"
 import { SafeAreaView } from "react-native-safe-area-context"
 import { MaterialIcons } from "@expo/vector-icons"
 import * as DocumentPicker from "expo-document-picker"
 
+// Types
+interface ChatMessage {
+  id: string
+  sender: string
+  message: string
+  time: string
+  isCurrentUser: boolean
+  seen: string[]
+  avatar: string
+  reactions: { user: string; emoji: string }[]
+  isImage?: boolean
+  imageUrl?: string
+  caption?: string
+}
+
+interface ChatData {
+  [key: string]: ChatMessage[]
+}
+
+interface ChatOption {
+  id: string
+  name: string
+  role?: string
+  unread: number
+  avatar: string
+}
+
+interface ChatOptions {
+  groups: ChatOption[]
+  personal: ChatOption[]
+}
+
+interface CurrentChat {
+  id: string
+  name: string
+  isGroup: boolean
+  avatar: string
+}
+
 // Sample data for different chats
-const CHAT_DATA_MAP = {
+const CHAT_DATA_MAP: ChatData = {
   // Digital Literacy Group Chat
   g1: [
     {
@@ -343,7 +383,7 @@ const CHAT_DATA_MAP = {
 }
 
 // Chat options
-const CHAT_OPTIONS = {
+const CHAT_OPTIONS: ChatOptions = {
   groups: [
     { id: "g1", name: "Digital Literacy ", unread: 2, avatar: "DL" },
     { id: "g2", name: "MS PPT Group", unread: 0, avatar: "MP" },
@@ -357,29 +397,83 @@ const CHAT_OPTIONS = {
 export default function GroupChatScreen() {
   const [message, setMessage] = useState("")
   const [showSidebar, setShowSidebar] = useState(false)
-  const [currentChat, setCurrentChat] = useState({
+  const [currentChat, setCurrentChat] = useState<CurrentChat>({
     id: "g1",
     name: "Digital Literacy ",
     isGroup: true,
     avatar: "DL",
   })
-  const [chatData, setChatData] = useState(CHAT_DATA_MAP[currentChat.id])
+  const [chatData, setChatData] = useState<ChatMessage[]>(CHAT_DATA_MAP[currentChat.id])
   const [showOptionsModal, setShowOptionsModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
   const [showMessageOptions, setShowMessageOptions] = useState(false)
-  const [selectedMessage, setSelectedMessage] = useState(null)
+  const [selectedMessage, setSelectedMessage] = useState<ChatMessage | null>(null)
   const [showReactions, setShowReactions] = useState(false)
   const [showForwardModal, setShowForwardModal] = useState(false)
   const [contactSaved, setContactSaved] = useState(false)
+  const [isTyping, setIsTyping] = useState(false)
 
-  const flatListRef = useRef(null)
-  const longPressTimeout = useRef(null)
-  const doubleTapTimeout = useRef(null)
-  const lastTap = useRef(0)
+  const flatListRef = useRef<FlatList>(null)
+  const longPressTimeout = useRef<NodeJS.Timeout | null>(null)
+  const doubleTapTimeout = useRef<NodeJS.Timeout | null>(null)
+  const lastTap = useRef<number>(0)
+  const fadeAnim = useRef(new Animated.Value(0)).current
+  const slideAnim = useRef(new Animated.Value(-300)).current
+  const scaleAnim = useRef(new Animated.Value(0.95)).current
 
   useEffect(() => {
     setChatData(CHAT_DATA_MAP[currentChat.id])
   }, [currentChat.id])
+
+  useEffect(() => {
+    if (showSidebar) {
+      // Opening animation
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 1,
+          duration: 250,
+          useNativeDriver: true,
+        }),
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 90,
+          mass: 1,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 90,
+          mass: 1,
+        }),
+      ]).start()
+    } else {
+      // Closing animation
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: -300,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 90,
+          mass: 1,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 0.95,
+          useNativeDriver: true,
+          damping: 20,
+          stiffness: 90,
+          mass: 1,
+        }),
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start()
+    }
+  }, [showSidebar])
 
   const renderChatItem = ({ item }) => {
     const handleMessagePress = () => {
@@ -388,7 +482,9 @@ export default function GroupChatScreen() {
     
       if (lastTap.current && now - lastTap.current < DOUBLE_TAP_DELAY) {
         // Double tap detected
-        clearTimeout(doubleTapTimeout.current) // Clear single tap timeout
+        if (doubleTapTimeout.current) {
+          clearTimeout(doubleTapTimeout.current)
+        }
         lastTap.current = 0
         handleDoubleTap(item)
       } else {
@@ -516,13 +612,15 @@ export default function GroupChatScreen() {
         copyToCacheDirectory: true,
       })
 
-      if (result.type === "success") {
-        Alert.alert("File Selected", `File "${result.name}" ready to attach`)
+      if (result.assets && result.assets.length > 0) {
+        const asset = result.assets[0]
+        Alert.alert("File Selected", `File "${asset.name}" ready to attach`)
 
         // For demo purposes, we'll add a placeholder image message
-        const newMessage = {
+        const newMessage: ChatMessage = {
           id: `${currentChat.id}_${Date.now()}`,
           sender: "You",
+          message: "", // Required by ChatMessage type
           time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           isCurrentUser: true,
           seen: [],
@@ -530,7 +628,7 @@ export default function GroupChatScreen() {
           reactions: [],
           isImage: true,
           imageUrl: "/placeholder.svg?height=200&width=300",
-          caption: result.name,
+          caption: asset.name,
         }
 
         const updatedChatData = [...chatData, newMessage]
@@ -547,7 +645,7 @@ export default function GroupChatScreen() {
     }
   }
 
-  const handleChatSelect = (chatId, isGroup) => {
+  const handleChatSelect = (chatId: string, isGroup: boolean) => {
     const selectedChat = isGroup
       ? CHAT_OPTIONS.groups.find((g) => g.id === chatId)
       : CHAT_OPTIONS.personal.find((p) => p.id === chatId)
@@ -603,7 +701,7 @@ export default function GroupChatScreen() {
     Alert.alert("Contact Saved", `${currentChat.name} has been saved to your contacts.`)
   }
 
-  const handleDeleteMessage = (forEveryone) => {
+  const handleDeleteMessage = (forEveryone: boolean) => {
     if (!selectedMessage) return
 
     const updatedChatData = chatData.filter((msg) => {
@@ -633,7 +731,7 @@ export default function GroupChatScreen() {
     Alert.alert("Copied", "Message copied to clipboard")
   }
 
-  const handleAddReaction = (emoji) => {
+  const handleAddReaction = (emoji: string) => {
     if (!selectedMessage) return
 
     const updatedChatData = chatData.map((msg) => {
@@ -662,11 +760,11 @@ export default function GroupChatScreen() {
     setShowReactions(false)
   }
 
-  const handleForwardMessage = (chatId) => {
+  const handleForwardMessage = (chatId: string) => {
     if (!selectedMessage) return
 
     // Add the forwarded message to the selected chat
-    const forwardedMessage = {
+    const forwardedMessage: ChatMessage = {
       ...selectedMessage,
       id: `${chatId}_${Date.now()}`,
       time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
@@ -692,25 +790,52 @@ export default function GroupChatScreen() {
     <ImageBackground source={require("../assets/images/1.jpg")} style={styles.background} resizeMode="cover">
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <TouchableOpacity style={styles.menuButton} onPress={() => setShowSidebar(true)}>
+          <TouchableOpacity 
+            style={styles.menuButton} 
+            onPress={() => setShowSidebar(true)}
+            activeOpacity={0.7}
+          >
             <MaterialIcons name="menu" size={24} color="#408c4c" />
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.headerProfile} onPress={() => {}}>
+          <TouchableOpacity 
+            style={styles.headerProfile} 
+            onPress={() => {}}
+            activeOpacity={0.7}
+          >
             <View style={styles.headerAvatar}>
               <Text style={styles.headerAvatarText}>{currentChat.avatar}</Text>
             </View>
-            <Text style={styles.headerTitle}>{currentChat.name}</Text>
+            <View style={styles.headerInfo}>
+              <Text style={styles.headerTitle} numberOfLines={1} ellipsizeMode="tail">
+                {currentChat.name}
+              </Text>
+              <Text style={styles.headerSubtitle} numberOfLines={1} ellipsizeMode="tail">
+                {isTyping ? "Typing..." : currentChat.isGroup ? "Group" : "Online"}
+              </Text>
+            </View>
           </TouchableOpacity>
 
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton} onPress={handleCall}>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              onPress={handleCall}
+              activeOpacity={0.7}
+            >
               <MaterialIcons name="call" size={24} color="#408c4c" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton} onPress={handleVideoCall}>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              onPress={handleVideoCall}
+              activeOpacity={0.7}
+            >
               <MaterialIcons name="videocam" size={24} color="#408c4c" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton} onPress={() => setShowOptionsModal(true)}>
+            <TouchableOpacity 
+              style={styles.iconButton} 
+              onPress={() => setShowOptionsModal(true)}
+              activeOpacity={0.7}
+            >
               <MaterialIcons name="more-vert" size={24} color="#408c4c" />
             </TouchableOpacity>
           </View>
@@ -725,88 +850,127 @@ export default function GroupChatScreen() {
           onLayout={() => {
             flatListRef.current?.scrollToEnd({ animated: false })
           }}
+          showsVerticalScrollIndicator={false}
         />
 
         <View style={styles.inputContainer}>
-          <TouchableOpacity style={styles.attachButton} onPress={handleAttachFile}>
+          <TouchableOpacity 
+            style={styles.attachButton} 
+            onPress={handleAttachFile}
+            activeOpacity={0.7}
+          >
             <MaterialIcons name="attach-file" size={24} color="#666" />
           </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            placeholder="Type a message..."
-            placeholderTextColor="#666"
-            value={message}
-            onChangeText={setMessage}
-            fontFamily="JosefinSans-Regular"
-          />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
-            <MaterialIcons name="send" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={styles.inputWrapper}>
+            <TextInput
+              style={styles.input}
+              placeholder="Type a message..."
+              placeholderTextColor="#666"
+              value={message}
+              onChangeText={(text) => {
+                setMessage(text)
+                setIsTyping(true)
+                setTimeout(() => setIsTyping(false), 2000)
+              }}
+              multiline
+            />
+            <TouchableOpacity 
+              style={[styles.sendButton, !message.trim() && styles.sendButtonDisabled]} 
+              onPress={handleSend}
+              disabled={!message.trim()}
+              activeOpacity={0.7}
+            >
+              <MaterialIcons name="send" size={24} color="#fff" />
+            </TouchableOpacity>
+          </View>
         </View>
 
         {/* Chat Sidebar */}
-        <Modal
-          visible={showSidebar}
-          transparent={true}
-          animationType="slide"
-          onRequestClose={() => setShowSidebar(false)}
-        >
-          <View style={styles.sidebarOverlay}>
-            <View style={styles.sidebar}>
-              <View style={styles.sidebarHeader}>
-                <Text style={styles.sidebarTitle}>Chats</Text>
-                <TouchableOpacity onPress={() => setShowSidebar(false)}>
-                  <MaterialIcons name="close" size={24} color="#333" />
-                </TouchableOpacity>
-              </View>
-
-              <ScrollView style={styles.sidebarContent}>
-                <Text style={styles.sidebarSectionTitle}>Group Chats</Text>
-                {CHAT_OPTIONS.groups.map((group) => (
-                  <TouchableOpacity
-                    key={group.id}
-                    style={[styles.chatOption, currentChat.id === group.id && styles.activeChatOption]}
-                    onPress={() => handleChatSelect(group.id, true)}
+        {showSidebar && (
+          <Animated.View 
+            style={[
+              styles.sidebarOverlay,
+              {
+                opacity: fadeAnim,
+              }
+            ]}
+          >
+            <TouchableOpacity 
+              style={styles.sidebarOverlay} 
+              activeOpacity={1} 
+              onPress={() => setShowSidebar(false)}
+            >
+              <Animated.View 
+                style={[
+                  styles.sidebar,
+                  {
+                    transform: [
+                      { translateX: slideAnim },
+                      { scale: scaleAnim }
+                    ],
+                  }
+                ]}
+              >
+                <View style={styles.sidebarHeader}>
+                  <Text style={styles.sidebarTitle}>Chats</Text>
+                  <TouchableOpacity 
+                    onPress={() => setShowSidebar(false)}
+                    activeOpacity={0.7}
                   >
-                    <View style={styles.chatOptionIcon}>
-                      <Text style={styles.avatarText}>{group.avatar}</Text>
-                    </View>
-                    <View style={styles.chatOptionContent}>
-                      <Text style={styles.chatOptionTitle}>{group.name}</Text>
-                    </View>
-                    {group.unread > 0 && (
-                      <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadText}>{group.unread}</Text>
-                      </View>
-                    )}
+                    <MaterialIcons name="close" size={24} color="#333" />
                   </TouchableOpacity>
-                ))}
+                </View>
 
-                <Text style={styles.sidebarSectionTitle}>Personal Chats</Text>
-                {CHAT_OPTIONS.personal.map((person) => (
-                  <TouchableOpacity
-                    key={person.id}
-                    style={[styles.chatOption, currentChat.id === person.id && styles.activeChatOption]}
-                    onPress={() => handleChatSelect(person.id, false)}
-                  >
-                    <View style={styles.chatOptionIcon}>
-                      <Text style={styles.avatarText}>{person.avatar}</Text>
-                    </View>
-                    <View style={styles.chatOptionContent}>
-                      <Text style={styles.chatOptionTitle}>{person.name}</Text>
-                      <Text style={styles.chatOptionSubtitle}>{person.role}</Text>
-                    </View>
-                    {person.unread > 0 && (
-                      <View style={styles.unreadBadge}>
-                        <Text style={styles.unreadText}>{person.unread}</Text>
+                <ScrollView style={styles.sidebarContent}>
+                  <Text style={styles.sidebarSectionTitle}>Group Chats</Text>
+                  {CHAT_OPTIONS.groups.map((group) => (
+                    <TouchableOpacity
+                      key={group.id}
+                      style={[styles.chatOption, currentChat.id === group.id && styles.activeChatOption]}
+                      onPress={() => handleChatSelect(group.id, true)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.chatOptionIcon}>
+                        <Text style={styles.avatarText}>{group.avatar}</Text>
                       </View>
-                    )}
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </View>
-          </View>
-        </Modal>
+                      <View style={styles.chatOptionContent}>
+                        <Text style={styles.chatOptionTitle}>{group.name}</Text>
+                      </View>
+                      {group.unread > 0 && (
+                        <View style={styles.unreadBadge}>
+                          <Text style={styles.unreadText}>{group.unread}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+
+                  <Text style={styles.sidebarSectionTitle}>Personal Chats</Text>
+                  {CHAT_OPTIONS.personal.map((person) => (
+                    <TouchableOpacity
+                      key={person.id}
+                      style={[styles.chatOption, currentChat.id === person.id && styles.activeChatOption]}
+                      onPress={() => handleChatSelect(person.id, false)}
+                      activeOpacity={0.7}
+                    >
+                      <View style={styles.chatOptionIcon}>
+                        <Text style={styles.avatarText}>{person.avatar}</Text>
+                      </View>
+                      <View style={styles.chatOptionContent}>
+                        <Text style={styles.chatOptionTitle}>{person.name}</Text>
+                        <Text style={styles.chatOptionSubtitle}>{person.role}</Text>
+                      </View>
+                      {person.unread > 0 && (
+                        <View style={styles.unreadBadge}>
+                          <Text style={styles.unreadText}>{person.unread}</Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+              </Animated.View>
+            </TouchableOpacity>
+          </Animated.View>
+        )}
 
         {/* Options Modal */}
         <Modal
@@ -1072,45 +1236,71 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     padding: 15,
-    backgroundColor: "rgba(255, 216, 112, 0.9)",
+    backgroundColor: "rgba(255, 216, 112, 0.95)",
     borderBottomWidth: 1,
     borderBottomColor: "#D2B48C",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   menuButton: {
-    padding: 5,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   headerProfile: {
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
     marginLeft: 10,
+    marginRight: 10,
   },
   headerAvatar: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: "#408c4c",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 10,
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 3,
+    elevation: 3,
   },
   headerAvatarText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "bold",
     fontFamily: "JosefinSans-Bold",
   },
+  headerInfo: {
+    flex: 1,
+    marginRight: 10,
+  },
   headerTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
     color: "#333",
     fontFamily: "JosefinSans-Bold",
   },
+  headerSubtitle: {
+    fontSize: 12,
+    color: "#666",
+    fontFamily: "JosefinSans-Regular",
+  },
   headerIcons: {
     flexDirection: "row",
+    alignItems: "center",
   },
   iconButton: {
     marginLeft: 15,
+    padding: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.2)",
   },
   chatList: {
     padding: 15,
@@ -1118,14 +1308,14 @@ const styles = StyleSheet.create({
   },
   chatBubble: {
     maxWidth: "80%",
-    padding: 10,
-    borderRadius: 16,
+    padding: 12,
+    borderRadius: 20,
     marginBottom: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.08,
-    shadowRadius: 1,
-    elevation: 1,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   userBubble: {
     alignSelf: "flex-end",
@@ -1136,30 +1326,34 @@ const styles = StyleSheet.create({
     alignSelf: "flex-start",
     backgroundColor: "#fff",
     borderBottomLeftRadius: 4,
-    borderWidth: 0,
   },
   senderContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 2,
+    marginBottom: 4,
   },
   avatarContainer: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
     backgroundColor: "#408c4c",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 4,
+    marginRight: 6,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.2,
+    shadowRadius: 2,
+    elevation: 2,
   },
   avatarText: {
     color: "#fff",
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: "500",
     fontFamily: "JosefinSans-Medium",
   },
   senderName: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "500",
     color: "#666",
     fontFamily: "JosefinSans-Medium",
@@ -1180,7 +1374,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    marginTop: 2,
+    marginTop: 4,
     opacity: 0.7,
   },
   timeText: {
@@ -1196,22 +1390,29 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     width: "100%",
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
     marginBottom: 4,
     backgroundColor: "#f5f5f5",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   messageImage: {
     width: "100%",
     height: 200,
-    borderRadius: 12,
+    borderRadius: 16,
   },
   imageCaption: {
     fontSize: 12,
     color: "#666",
     marginTop: 4,
-    paddingHorizontal: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
     fontFamily: "JosefinSans-Regular",
+    backgroundColor: "rgba(255, 255, 255, 0.9)",
   },
   reactionsContainer: {
     position: "absolute",
@@ -1219,18 +1420,18 @@ const styles = StyleSheet.create({
     right: 8,
     flexDirection: "row",
     backgroundColor: "#fff",
-    borderRadius: 12,
-    paddingVertical: 2,
-    paddingHorizontal: 4,
+    borderRadius: 16,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
-    shadowRadius: 1,
-    elevation: 1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   reactionEmoji: {
-    fontSize: 14,
-    marginHorizontal: 1,
+    fontSize: 16,
+    marginHorizontal: 2,
   },
   inputContainer: {
     position: "absolute",
@@ -1243,36 +1444,64 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF8DC",
     borderTopWidth: 1,
     borderTopColor: "#D2B48C",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
   },
   attachButton: {
     padding: 10,
+    borderRadius: 20,
+    backgroundColor: "rgba(255, 255, 255, 0.5)",
+  },
+  inputWrapper: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFFAF0",
+    borderRadius: 25,
+    borderWidth: 1,
+    borderColor: "#D2B48C",
+    marginHorizontal: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 5,
   },
   input: {
     flex: 1,
-    backgroundColor: "#FFFAF0",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    paddingVertical: 10,
-    marginHorizontal: 10,
-    borderWidth: 1,
-    borderColor: "#D2B48C",
+    fontSize: 16,
+    color: "#333",
     fontFamily: "JosefinSans-Regular",
+    maxHeight: 100,
+    paddingVertical: 8,
   },
   sendButton: {
     backgroundColor: "#408c4c",
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+    marginLeft: 5,
+  },
+  sendButtonDisabled: {
+    backgroundColor: "#ccc",
   },
   sidebarOverlay: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     backgroundColor: "rgba(0,0,0,0.5)",
+    zIndex: 1000,
   },
   sidebar: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    bottom: 0,
     width: "75%",
-    height: "100%",
     backgroundColor: "#fff",
     shadowColor: "#000",
     shadowOffset: { width: 2, height: 0 },
