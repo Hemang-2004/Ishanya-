@@ -77,6 +77,7 @@ export default function StudentMessagesPage() {
       },
     ],
   })
+  
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
 

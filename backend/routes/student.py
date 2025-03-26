@@ -3,8 +3,37 @@ from models import Feedback, db, Student
 from sqlalchemy import extract, func
 import calendar
 from datetime import datetime, timezone
+from models import Chat
 
 student_bp = Blueprint("student", __name__)
+
+
+
+@student_bp.route('/api/chat/<int:student_id>/<string:educator_id>', methods=['GET'])
+def get_chat(student_id, educator_id):
+    messages = Chat.query.filter_by(StudentID=student_id, EducatorID=educator_id).order_by(Chat.DateTime).all()
+    return jsonify([{
+        'ChatID': msg.ChatID,
+        'StudentID': msg.StudentID,
+        'EducatorID': msg.EducatorID,
+        'DateTime': msg.DateTime.isoformat(),
+        'SenderType': msg.SenderType,
+        'Message': msg.Message
+    } for msg in messages])
+
+# API to send a message
+@student_bp.route('/api/chat', methods=['POST'])
+def send_message():
+    data = request.get_json()
+    new_message = Chat(
+        StudentID=data['StudentID'],
+        EducatorID=data['EducatorID'],
+        SenderType=data['SenderType'],
+        Message=data['Message']
+    )
+    db.session.add(new_message)
+    db.session.commit()
+    return jsonify({'message': 'Message sent successfully!'}), 201
 
 @student_bp.route("/", methods=["GET"])
 def get_students():
@@ -93,5 +122,25 @@ def get_monthly_feedback(student_id):
 def get_student_program(student_id):
     student = Student.query.get(student_id)
     if student and student.program:
-        return jsonify({"ProgramName": student.program.ProgramName})
+        return jsonify({
+            "ProgramName": student.program.ProgramName,
+            "ProgramID": student.program.ProgramID,
+            "ProgramDescription": student.program.Description,
+            "StartDate": student.program.StartDate.isoformat(),
+            "EndDate": student.program.EndDate.isoformat(),
+            "Category": student.program.Category,
+            "Status": student.program.Status,
+                        })
     return jsonify({"error": "Student not found or not enrolled in a program"}), 404
+
+
+@student_bp.route('/<int:student_id>/educators', methods=['GET'])
+def get_educators_for_student(student_id):
+    student = Student.query.get(student_id)
+    if student:
+        return jsonify([{
+            "id": e.EducatorID,
+            "name": e.Name,
+            "designation": e.Designation
+        } for e in student.educators])
+    return jsonify({"error": "Student not found"}), 404

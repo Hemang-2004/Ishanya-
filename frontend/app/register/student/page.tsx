@@ -117,8 +117,6 @@ export default function StudentRegistrationPage() {
     }));
   }, [searchParams]);
 
-  console.log("DOB ", formData.DateOfBirth);
-  console.log("gender ", formData.Gender);
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
