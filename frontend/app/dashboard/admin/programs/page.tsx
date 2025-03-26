@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,77 +19,100 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Plus, Search, Filter, MoreHorizontal, Edit, Trash, Eye, Calendar, Users } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { DialogDescription } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 
 export default function ProgramsPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedStatus, setSelectedStatus] = useState("all")
-  const [programs, setPrograms] = useState([])
   const [isAddProgramDialogOpen, setIsAddProgramDialogOpen] = useState(false)
-
   const [newProgramData, setNewProgramData] = useState({
     name: "",
     description: "",
     category: "education",
-    start_date: "",
-    end_date: "",
+    startDate: "",
+    endDate: "",
     status: "active",
-    capacity: "",
+    capacity: "10",
   })
+  const [programs, setPrograms] = useState([])
 
-  // Fetch programs on mount
+  // Filter function for programs
+  // const filteredPrograms = programs.filter((program) => {
+  //   // Filter by search term
+  //   const matchesSearch =
+  //     program.ProgramName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+  //     program.Category.toLowerCase().includes(searchTerm.toLowerCase())
+
+  //   // Filter by status
+  //   const matchesStatus = selectedStatus === "all" || program.Status.toLowerCase() === selectedStatus.toLowerCase()
+
+  //   return matchesSearch && matchesStatus
+  // })
   useEffect(() => {
-    fetchPrograms()
-  }, [])
+    fetchPrograms();
+  }, []);
 
-  // Fetch programs from backend
   const fetchPrograms = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/admins/get_all_programs")
-      const result = await response.json()
+  try {
+    const response = await fetch("http://localhost:5000/admins/get_all_programs", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const result = await response.json();
 
-      if (response.ok) {
-        console.log("Programs fetched successfully:", result.programs)
-        setPrograms(result.programs) // Ensure result contains `programs` array
-      } else {
-        console.error("Error fetching programs:", result.error)
-      }
-    } catch (error) {
-      console.error("Error fetching programs:", error)
+
+    if (response.ok) {
+      console.log("Programs fetched successfully:", result.programs);
+      
+      setPrograms(result.programs); // Assuming you have a state for programs
+    } else {
+      console.error("Error fetching programs:", result.error);
     }
+  } catch (error) {
+    console.error("Error fetching programs:", error);
   }
+};
 
-  // Add new program
   const handleAddProgram = async (e: React.FormEvent) => {
     e.preventDefault();
   
     const programData = {
-      program_name: newProgramData.name, // Match the backend field names
-      description: newProgramData.description,
-      category: newProgramData.category,
-      // start_date: newProgramData.startDate,
-      // end_date: newProgramData.endDate,
-      status: newProgramData.status,
-      capacity: newProgramData.capacity,
+      ProgramName: newProgramData.name,
+      Description: newProgramData.description,
+      Category: newProgramData.category,
+      StartDate: newProgramData.startDate,
+      EndDate: newProgramData.endDate,
+      Status: newProgramData.status,
+      Capacity: newProgramData.capacity,
     };
-  
-    console.log("Sending Program Data:", programData); // Debugging log
   
     try {
       const response = await fetch("http://localhost:5000/admins/add_program", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(programData),
       });
   
       const result = await response.json();
+  
       if (response.ok) {
         console.log("Program added successfully:", result);
-        fetchPrograms(); // Refresh the program list
+        setIsAddProgramDialogOpen(false);
+        fetchPrograms(); // Refresh the list after adding
       } else {
         console.error("Error adding program:", result.error);
       }
@@ -95,40 +120,14 @@ export default function ProgramsPage() {
       console.error("Error submitting form:", error);
     }
   };
-  // Handle input changes
-  const handleInputChange = (e) => {
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
     setNewProgramData((prev) => ({ ...prev, [name]: value }))
   }
 
-  // Handle category/status changes
-  const handleSelectChange = (name, value) => {
+  const handleSelectChange = (name: string, value: string) => {
     setNewProgramData((prev) => ({ ...prev, [name]: value }))
-  }
-
-  // Filter programs by search term & status
-  const filteredPrograms = programs.filter((program) => {
-    const matchesSearch =
-      program.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      program.category.toLowerCase().includes(searchTerm.toLowerCase())
-
-    const matchesStatus = selectedStatus === "all" || program.status.toLowerCase() === selectedStatus.toLowerCase()
-
-    return matchesSearch && matchesStatus
-  })
-
-  // Assign badge color based on status
-  const getStatusBadgeVariant = (status) => {
-    switch (status.toLowerCase()) {
-      case "active":
-        return "green"
-      case "upcoming":
-        return "blue"
-      case "completed":
-        return "gray"
-      default:
-        return "default"
-    }
   }
 
   return (
@@ -138,10 +137,12 @@ export default function ProgramsPage() {
           <h2 className="text-2xl font-bold tracking-tight">Programs</h2>
           <p className="text-muted-foreground">Manage educational programs and courses</p>
         </div>
-        <Button onClick={() => setIsAddProgramDialogOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
-          Add Program
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setIsAddProgramDialogOpen(true)}>
+            <Plus className="mr-2 h-4 w-4" />
+            Add Program
+          </Button>
+        </div>
       </div>
 
       <Card>
@@ -190,40 +191,60 @@ export default function ProgramsPage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredPrograms.length > 0 ? (
-                      filteredPrograms.map((program) => (
-                        <TableRow key={program.id}>
-                          <TableCell>{program.name}</TableCell>
+                    {/* console.log("Programs:", programs); */}
+                    {programs.length > 0 ? (
+                      programs.map((program) => (
+                        <TableRow key={program.ProgramID}>
                           <TableCell>
-                            <Badge variant="outline">{program.category}</Badge>
+                            <div className="font-medium">{program.ProgramName}</div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={getStatusBadgeVariant(program.status)}>{program.status}</Badge>
+                            <Badge variant="outline">{program.Category}</Badge>
                           </TableCell>
                           <TableCell>
-                            <Progress value={program.progress} className="h-2 w-[60px]" />
+                            <Badge variant={getStatusBadgeVariant(program.Status)}>{program.Status}</Badge>
                           </TableCell>
-                          <TableCell>{program.duration}</TableCell>
-                          <TableCell>{program.participants}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={program.progress} className="h-2 w-[60px]" />
+                              <span className="text-sm">{program.progress}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.StartDate}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.Capacity}</span>
+                            </div>
+                          </TableCell>
                           <TableCell className="text-right">
                             <DropdownMenu>
                               <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="icon">
                                   <MoreHorizontal className="h-4 w-4" />
+                                  <span className="sr-only">Actions</span>
                                 </Button>
                               </DropdownMenuTrigger>
                               <DropdownMenuContent align="end">
                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem>
-                                  <Eye className="mr-2 h-4 w-4" /> View Details
+                                  <Eye className="mr-2 h-4 w-4" />
+                                  View Details
                                 </DropdownMenuItem>
                                 <DropdownMenuItem>
-                                  <Edit className="mr-2 h-4 w-4" /> Edit
+                                  <Edit className="mr-2 h-4 w-4" />
+                                  Edit Program
                                 </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem className="text-destructive">
-                                  <Trash className="mr-2 h-4 w-4" /> Delete
+                                  <Trash className="mr-2 h-4 w-4" />
+                                  Delete
                                 </DropdownMenuItem>
                               </DropdownMenuContent>
                             </DropdownMenu>
@@ -232,9 +253,175 @@ export default function ProgramsPage() {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="text-center py-6">No programs found.</TableCell>
+                        <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                          No programs found matching your filters.
+                        </TableCell>
                       </TableRow>
                     )}
+                  </TableBody>
+                </Table>
+              </div>
+              <div className="flex items-center justify-end space-x-2 py-4">
+                <div className="text-sm text-muted-foreground">
+                  Showing <span className="font-medium">{programs.length}</span> of{" "}
+                  <span className="font-medium">{programs.length}</span> programs
+                </div>
+                <Button variant="outline" size="sm">
+                  Previous
+                </Button>
+                <Button variant="outline" size="sm">
+                  Next
+                </Button>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="active">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Program Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Progress</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Participants</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {programs
+                      .filter((program) => program.Status === "Active")
+                      .map((program) => (
+                        <TableRow key={program.id}>
+                          <TableCell>
+                            <div className="font-medium">{program.ProgramName}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{program.Category}</Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={program.progress} className="h-2 w-[60px]" />
+                              <span className="text-sm">{program.progress}%</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.StartDate}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.Capacity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="upcoming">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Program Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Start Date</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Capacity</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {programs
+                      .filter((program) => program.Status === "Upcoming")
+                      .map((program) => (
+                        <TableRow key={program.id}>
+                          <TableCell>
+                            <div className="font-medium">{program.ProgramName}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{program.Category}</Badge>
+                          </TableCell>
+                          <TableCell>{program.StartDate}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.StartDate}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.capacity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="completed">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Program Name</TableHead>
+                      <TableHead>Category</TableHead>
+                      <TableHead>Completion Date</TableHead>
+                      <TableHead>Duration</TableHead>
+                      <TableHead>Participants</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {programs
+                      .filter((program) => program.Status === "Completed")
+                      .map((program) => (
+                        <TableRow key={program.id}>
+                          <TableCell>
+                            <div className="font-medium">{program.ProgramName}</div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">{program.Category}</Badge>
+                          </TableCell>
+                          <TableCell>{program.endDate}</TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Calendar className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.StartDate}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1">
+                              <Users className="h-3 w-3 text-muted-foreground" />
+                              <span className="text-sm">{program.Capacity}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="outline" size="sm">
+                              View Details
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
                   </TableBody>
                 </Table>
               </div>
