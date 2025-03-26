@@ -27,6 +27,7 @@ import {
 } from "recharts"
 import { ChartTooltip } from "@/components/ui/chart"
 
+
 // Sample progress data for charts
 const progressData = [
   { month: "Jan", score: 65 },
@@ -49,6 +50,11 @@ export default function StudentDashboardPage() {
   const [user, setUser] = useState<{ userId: string; userName: string; role: string } | null>(null)
   const [selectedTimeframe, setSelectedTimeframe] = useState("6months")
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("userID", user?.userId || ""); // Store user ID in localStorage
+    }
+  }, [user?.userId]);
   useEffect(() => {
     const storedUser = getUserData()
     if (storedUser) {
@@ -445,7 +451,8 @@ export default function StudentDashboardPage() {
                   </div>
                   <p className="text-sm">Don't forget to prepare for our group discussion in the next session.</p>
                   <Button variant="link" className="h-auto p-0 text-primary" asChild>
-                    <Link href="/dashboard/student/messages">Reply</Link>
+                    <Link href="/dashboard/student/messages/">Reply</Link>
+                    
                   </Button>
                 </div>
               </div>
