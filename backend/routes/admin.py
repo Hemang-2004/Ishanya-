@@ -144,11 +144,12 @@ def dashboard():
     return jsonify({
         "num_registered_students": num_registered_students(),
         "num_dropouts": num_dropouts(),
+        "monthwise_enrolment": monthwise_enrolment(),
         "students_enrolled_programwise": [
-            {"program": name, "count": count} for name, count in students_enrolled_programwise()
+            {"name": name, "value": count} for name, count in students_enrolled_programwise()
         ],
         "students_graduated_programwise": [
-            {"program": name, "count": count} for name, count in students_graduated_programwise()
+            {"name": name, "value": count} for name, count in students_graduated_programwise()
         ],
         "num_educators_programwise": [
             {"program": name, "count": count} for name, count in num_educators_programwise()

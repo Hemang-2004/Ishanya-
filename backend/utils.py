@@ -1,5 +1,7 @@
 from models import *
 from sqlalchemy import func, text
+from datetime import datetime, timedelta
+from dateutil.relativedelta import relativedelta
 
 def num_registered_students():
     return Student.query.filter_by(IsRegistered=True, Status='Active').count()
@@ -9,7 +11,6 @@ def students_pending():
 
 def educators_pending():
     return Educator.query.filter_by(IsRegistered=False).all()
-
 
 def num_dropouts():
     return Student.query.filter_by(IsRegistered=True, Status='Discontinued').count()
@@ -112,3 +113,34 @@ def completion_rate():
 
 def active_programs():
     return Program.query.count()
+
+def monthwise_enrolment():
+    today = datetime.today()
+
+    # Generate last 6 months correctly
+    last_six_months = [
+        ((today - relativedelta(months=i)).strftime('%Y-%m'),
+         (today - relativedelta(months=i)).strftime('%b'))
+        for i in range(5, -1, -1)  # Going from 5 months ago to this month
+    ]
+
+    # Query the database for student enrollments per month
+    results = db.session.query(
+        func.strftime('%Y-%m', Student.DateOfJoining).label('year_month'),
+        func.count(Student.StudentID).label('students')
+    ).filter(
+        Student.DateOfJoining >= today - relativedelta(months=5),  # Last 6 months
+        Student.IsRegistered == True,
+        Student.Status == 'Active'
+    ).group_by('year_month').order_by('year_month').all()
+
+    # Convert query results to dictionary { "YYYY-MM": student_count }
+    enrolled_data = {row.year_month: row.students for row in results}
+
+    # Ensure all months appear, even if they have 0 students
+    data = [
+        {"name": month_name, "students": enrolled_data.get(year_month, 0)}
+        for year_month, month_name in last_six_months
+    ]
+
+    return data
