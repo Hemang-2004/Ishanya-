@@ -73,8 +73,12 @@ async function handleLogin() {
 
 
 
+
+
     const data = await response.json()
     console.log(data);
+
+    
 
     if (response.ok) {
       await AsyncStorage.setItem("studentData", JSON.stringify(data))
