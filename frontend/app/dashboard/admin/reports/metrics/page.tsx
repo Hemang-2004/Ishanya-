@@ -548,7 +548,6 @@
 //                         </ResponsiveContainer>
 //                       )}
 
-<<<<<<< HEAD
 //                       {selectedMetricObj.chartType === "line" && (
 //                         <ResponsiveContainer width="100%" height="100%">
 //                           <ReLineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
@@ -579,38 +578,6 @@
 //             </div>
 //           </div>
 //         </TabsContent>
-=======
-                      {selectedMetricObj.chartType === "line" && (
-                        <ResponsiveContainer width="100%" height="100%">
-                          <ReLineChart data={chartData} margin={{ top: 20, right: 30, left: 20, bottom: 10 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" />
-                            <YAxis />
-                            <Tooltip />
-                            <Legend />
-                            <Line type="monotone" dataKey="value" name={selectedMetricObj.name} stroke="#8884d8" />
-                          <ReLineChart>
-                        </ResponsiveContainer>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              ) : (
-                <div className="flex items-center justify-center h-full border rounded-lg p-8">
-                  <div className="text-center">
-                    <h3 className="text-lg font-medium mb-2">No Metric Selected</h3>
-                    <p className="text-muted-foreground mb-4">Select a metric from the list to view its data</p>
-                    <Button variant="outline" onClick={() => setActiveTab("create")}>
-                      <Plus className="mr-2 h-4 w-4" />
-                      Create New Metric
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </TabsContent>
->>>>>>> 463e6b0ea2dd35ab915a1e4da99ad673f327918b
 
 //         <TabsContent value="create">
 //           <Card>
