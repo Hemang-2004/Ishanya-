@@ -14,3 +14,4 @@ flask_cors
 pdf2image
 gunicorn
 python-dateutil
+pandas

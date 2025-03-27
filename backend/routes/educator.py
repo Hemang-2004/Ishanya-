@@ -244,9 +244,9 @@ def submit_feedback():
         )
 
         report_dict = new_feedback.to_dict()
-        insights = get_insights(str(report_dict))
-        new_feedback.AIInsights = insights
-        print(new_feedback.AIInsights)
+        # insights = get_insights(str(report_dict))
+        # new_feedback.AIInsights = insights
+        # print(new_feedback.AIInsights)
         print(new_feedback.Term)
         db.session.add(new_feedback)
         db.session.commit()
