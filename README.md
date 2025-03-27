@@ -1,4 +1,4 @@
-# Ishanya - Special Education Management System
+# Ishanya Connect - Special Education Management System
 
 Ishanya is a comprehensive special education management system designed to streamline the administration, tracking, and delivery of special education programs. The system features both web and mobile interfaces, powered by AI capabilities for document processing and student assessment.
 
